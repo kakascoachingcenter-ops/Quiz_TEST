@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KCI Class III Mathematics Test</title>
+<style>
+  :root{
+    --navy:#0b1f4d;
+    --navy-dark:#071431;
+    --gold:#d4a72c;
+    --bg:#f4f6fb;
+    --green:#1e8e4f;
+    --red:#c0392b;
+    --gray:#5b6472;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Tahoma, Arial, sans-serif;
+    background:var(--bg);
+    color:#1c1f26;
+    padding:20px;
+  }
+  .header{
+    max-width:760px;
+    margin:0 auto 20px auto;
+    background:linear-gradient(135deg, var(--navy), var(--navy-dark));
+    color:#fff;
+    border-radius:14px;
+    padding:22px 26px;
+    text-align:center;
+    box-shadow:0 6px 18px rgba(11,31,77,0.25);
+  }
+  .header h1{margin:0 0 4px 0; font-size:1.5rem; letter-spacing:0.5px;}
+  .header p{margin:2px 0; color:var(--gold); font-weight:600; font-size:0.85rem;}
+  .header small{color:#cfd8ef; display:block; margin-top:6px;}
+
+  .container{max-width:760px; margin:0 auto;}
+
+  .info-box{
+    background:#fff;
+    border-radius:12px;
+    padding:16px 20px;
+    margin-bottom:18px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  }
+  .info-box input{
+    padding:8px 10px;
+    border:1px solid #d0d5e0;
+    border-radius:8px;
+    font-size:0.95rem;
+    flex:1;
+    min-width:160px;
+  }
+  .info-box label{font-size:0.85rem; color:var(--gray); font-weight:600;}
+
+  .timer-badge{
+    background:var(--navy);
+    color:#fff;
+    padding:8px 14px;
+    border-radius:20px;
+    font-weight:700;
+    font-size:0.95rem;
+    white-space:nowrap;
+  }
+
+  .question-card{
+    background:#fff;
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    border-left:5px solid var(--navy);
+    transition:border-color 0.2s;
+  }
+  .question-card.correct{border-left-color:var(--green); background:#f2fbf5;}
+  .question-card.incorrect{border-left-color:var(--red); background:#fdf3f2;}
+
+  .q-number{
+    display:inline-block;
+    background:var(--gold);
+    color:var(--navy-dark);
+    font-weight:700;
+    font-size:0.8rem;
+    padding:2px 10px;
+    border-radius:12px;
+    margin-bottom:8px;
+  }
+  .q-text{font-size:1.05rem; font-weight:600; margin:6px 0 12px 0; line-height:1.4;}
+
+  .options{display:flex; flex-direction:column; gap:8px;}
+  .option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border:2px solid #e2e6ee;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:0.98rem;
+    transition:all 0.15s;
+  }
+  .option:hover{border-color:var(--navy); background:#f7f9fd;}
+  .option input{accent-color:var(--navy); width:16px; height:16px;}
+  .option.picked{border-color:var(--navy); background:#eaeefb; font-weight:600;}
+  .option.reveal-correct{border-color:var(--green); background:#e7f7ec; font-weight:700;}
+  .option.reveal-wrong{border-color:var(--red); background:#fbeceb;}
+
+  .fill-answer input{
+    width:140px;
+    padding:9px 12px;
+    border:2px solid #e2e6ee;
+    border-radius:8px;
+    font-size:1rem;
+  }
+  .fill-answer input:focus{border-color:var(--navy); outline:none;}
+  .fill-answer.reveal-correct input{border-color:var(--green); background:#e7f7ec;}
+  .fill-answer.reveal-wrong input{border-color:var(--red); background:#fbeceb;}
+
+  .feedback-line{margin-top:10px; font-size:0.9rem; font-weight:600;}
+  .feedback-line.correct{color:var(--green);}
+  .feedback-line.incorrect{color:var(--red);}
+
+  .btn-row{max-width:760px; margin:10px auto 40px auto; text-align:center;}
+  .btn{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:14px 34px;
+    font-size:1.05rem;
+    font-weight:700;
+    border-radius:10px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(11,31,77,0.3);
+    transition:transform 0.1s, background 0.2s;
+  }
+  .btn:hover{background:var(--navy-dark); transform:translateY(-1px);}
+  .btn:disabled{background:#aab1c2; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn.secondary{background:#fff; color:var(--navy); border:2px solid var(--navy); margin-left:10px;}
+  .btn.secondary:hover{background:#f0f3fa;}
+
+  .result-card{
+    max-width:760px;
+    margin:0 auto 30px auto;
+    background:#fff;
+    border-radius:16px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 8px 24px rgba(0,0,0,0.1);
+    border-top:6px solid var(--gold);
+    display:none;
+  }
+  .result-card.show{display:block;}
+  .score-big{font-size:3rem; font-weight:800; color:var(--navy); margin:10px 0;}
+  .score-label{color:var(--gray); font-weight:600;}
+  .cert{
+    margin-top:18px;
+    padding:20px;
+    border:3px dashed var(--gold);
+    border-radius:12px;
+    background:#fffdf5;
+  }
+  .cert h2{color:var(--navy); margin:6px 0; font-family:'Georgia', serif;}
+  .cert p{margin:4px 0; color:var(--gray);}
+  .stamp{
+    display:inline-block;
+    margin-top:10px;
+    background:var(--navy);
+    color:var(--gold);
+    padding:6px 16px;
+    border-radius:8px;
+    font-weight:700;
+    letter-spacing:1px;
+    font-size:0.85rem;
+  }
+  .warning-msg{
+    color:var(--red);
+    font-weight:600;
+    text-align:center;
+    margin:10px auto;
+    max-width:760px;
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>KAKA'S COACHING INSTITUTE</h1>
+  <p>"Accessible Excellence — Shaping Pakistan's Future Leaders"</p>
+  <small>Class III &nbsp;•&nbsp; Mathematics Monthly Test &nbsp;•&nbsp; 10 Questions</small>
+</div>
+
+<div class="container">
+
+  <div class="info-box">
+    <div style="flex:1; min-width:180px;">
+      <label>Student Name</label><br>
+      <input type="text" id="studentName" placeholder="Enter your name">
+    </div>
+    <div class="timer-badge" id="timerBadge">⏱ 00:00</div>
+  </div>
+
+  <div id="warningMsg" class="warning-msg">⚠ Please answer all 10 questions before checking your result.</div>
+
+  <div id="quizArea"></div>
+
+  <div class="btn-row">
+    <button class="btn" id="checkBtn">✔ Check My Answers</button>
+    <button class="btn secondary" id="retryBtn" style="display:none;">↻ Try Again</button>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="score-label">YOUR SCORE</div>
+    <div class="score-big" id="scoreBig">0 / 10</div>
+    <div class="score-label" id="scorePercent"></div>
+    <div class="cert" id="certBox">
+      <h2 id="certTitle">Well Done!</h2>
+      <p id="certName">Student Name</p>
+      <p id="certMessage"></p>
+      <div class="stamp">KCI VERIFIED RESULT</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------- QUESTION BANK (BSEK Class III level) ----------
+const questions = [
+  {
+    type:"mcq",
+    text:"1. What is the place value of 7 in the number 4,732?",
+    options:["7", "70", "700", "7000"],
+    correct:2 // index -> 700
+  },
+  {
+    type:"mcq",
+    text:"2. Add: 2,354 + 1,428 = ?",
+    options:["3,782", "3,872", "3,672", "4,782"],
+    correct:0
+  },
+  {
+    type:"fill",
+    text:"3. Subtract: 6,215 − 2,349 = ?",
+    answer:"3866"
+  },
+  {
+    type:"mcq",
+    text:"4. What is 8 × 7?",
+    options:["54", "56", "64", "48"],
+    correct:1
+  },
+  {
+    type:"fill",
+    text:"5. Divide: 36 ÷ 6 = ?",
+    answer:"6"
+  },
+  {
+    type:"mcq",
+    text:"6. Which shape has 3 sides?",
+    options:["Square", "Triangle", "Rectangle", "Circle"],
+    correct:1
+  },
+  {
+    type:"word",
+    text:"7. Ayesha has 45 mangoes. She gives 18 mangoes to her friend. How many mangoes are left with Ayesha?",
+    answer:"27"
+  },
+  {
+    type:"mcq",
+    text:"8. How many minutes are there in 1 hour?",
+    options:["30", "50", "60", "100"],
+    correct:2
+  },
+  {
+    type:"word",
+    text:"9. A pencil costs Rs. 15. How much will 4 pencils cost?",
+    answer:"60"
+  },
+  {
+    type:"fill",
+    text:"10. Write the number that comes just after 8,999.",
+    answer:"9000"
+  }
+];
+
+// ---------- STATE ----------
+let userAnswers = new Array(questions.length).fill(null);
+let checked = false;
+let seconds = 0;
+let timerInterval = null;
+
+// ---------- RENDER ----------
+const quizArea = document.getElementById('quizArea');
+
+function renderQuestions(){
+  quizArea.innerHTML = "";
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = "question-card";
+    card.id = "qcard-" + i;
+
+    let inner = `<div class="q-number">Question ${i+1}</div><div class="q-text">${q.text}</div>`;
+
+    if(q.type === "mcq"){
+      inner += `<div class="options" id="options-${i}">`;
+      q.options.forEach((opt, oi) => {
+        inner += `
+          <label class="option" id="opt-${i}-${oi}">
+            <input type="radio" name="q${i}" value="${oi}" onchange="selectOption(${i}, ${oi})">
+            <span>${opt}</span>
+          </label>`;
+      });
+      inner += `</div>`;
+    } else {
+      inner += `
+        <div class="fill-answer" id="fill-${i}">
+          <input type="number" inputmode="numeric" placeholder="Your answer" oninput="selectFill(${i}, this.value)">
+        </div>`;
+    }
+
+    inner += `<div class="feedback-line" id="feedback-${i}"></div>`;
+    card.innerHTML = inner;
+    quizArea.appendChild(card);
+  });
+}
+
+function selectOption(qIndex, optIndex){
+  if(checked) return;
+  userAnswers[qIndex] = optIndex;
+  document.querySelectorAll(`#options-${qIndex} .option`).forEach((el,i)=>{
+    el.classList.toggle('picked', i === optIndex);
+  });
+}
+
+function selectFill(qIndex, value){
+  if(checked) return;
+  userAnswers[qIndex] = value.trim();
+}
+
+// ---------- TIMER ----------
+function startTimer(){
+  timerInterval = setInterval(()=>{
+    seconds++;
+    const m = String(Math.floor(seconds/60)).padStart(2,'0');
+    const s = String(seconds%60).padStart(2,'0');
+    document.getElementById('timerBadge').textContent = `⏱ ${m}:${s}`;
+  }, 1000);
+}
+function stopTimer(){
+  clearInterval(timerInterval);
+}
+
+// ---------- CHECK ANSWERS ----------
+document.getElementById('checkBtn').addEventListener('click', function(){
+  const unanswered = userAnswers.some(a => a === null || a === "");
+  const warning = document.getElementById('warningMsg');
+  if(unanswered){
+    warning.style.display = "block";
+    return;
+  }
+  warning.style.display = "none";
+
+  checked = true;
+  stopTimer();
+  let score = 0;
+
+  questions.forEach((q, i) => {
+    const card = document.getElementById('qcard-' + i);
+    const feedback = document.getElementById('feedback-' + i);
+    let isCorrect = false;
+
+    if(q.type === "mcq"){
+      isCorrect = (Number(userAnswers[i]) === q.correct);
+      document.querySelectorAll(`#options-${i} .option`).forEach((el, oi) => {
+        el.querySelector('input').disabled = true;
+        if(oi === q.correct){
+          el.classList.add('reveal-correct');
+        } else if(oi === Number(userAnswers[i]) && oi !== q.correct){
+          el.classList.add('reveal-wrong');
+        }
+      });
+    } else {
+      const given = String(userAnswers[i]).trim();
+      isCorrect = (given === String(q.answer).trim());
+      const fillBox = document.getElementById('fill-' + i);
+      fillBox.querySelector('input').disabled = true;
+      fillBox.classList.add(isCorrect ? 'reveal-correct' : 'reveal-wrong');
+      if(!isCorrect){
+        feedback.innerHTML += `<br><span style="color:#5b6472;">Correct answer: ${q.answer}</span>`;
+      }
+    }
+
+    card.classList.add(isCorrect ? 'correct' : 'incorrect');
+    feedback.classList.add(isCorrect ? 'correct' : 'incorrect');
+    feedback.innerHTML = (isCorrect ? "✔ Correct!" : "✘ Incorrect.") + feedback.innerHTML;
+
+    if(isCorrect) score++;
+  });
+
+  showResult(score);
+  document.getElementById('checkBtn').style.display = "none";
+  document.getElementById('retryBtn').style.display = "inline-block";
+});
+
+// ---------- SHOW RESULT ----------
+function showResult(score){
+  const total = questions.length;
+  const percent = Math.round((score/total)*100);
+  const name = document.getElementById('studentName').value.trim() || "Student";
+
+  document.getElementById('scoreBig').textContent = `${score} / ${total}`;
+  document.getElementById('scorePercent').textContent = `${percent}% Score`;
+  document.getElementById('certName').textContent = name;
+
+  let title, message, color;
+  if(percent >= 80){
+    title = "🏆 Excellent Work!";
+    message = "You have shown a strong understanding of Class III Mathematics.";
+    color = "#1e8e4f";
+  } else if(percent >= 50){
+    title = "👍 Good Effort!";
+    message = "You are doing well — a little more practice will make you perfect.";
+    color = "#d4a72c";
+  } else {
+    title = "💪 Keep Practicing!";
+    message = "Review today's mistakes with your teacher and try again.";
+    color = "#c0392b";
+  }
+  document.getElementById('certTitle').textContent = title;
+  document.getElementById('certTitle').style.color = color;
+  document.getElementById('certMessage').textContent = message;
+
+  const resultCard = document.getElementById('resultCard');
+  resultCard.classList.add('show');
+  resultCard.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+// ---------- RETRY ----------
+document.getElementById('retryBtn').addEventListener('click', function(){
+  userAnswers = new Array(questions.length).fill(null);
+  checked = false;
+  seconds = 0;
+  document.getElementById('timerBadge').textContent = "⏱ 00:00";
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('checkBtn').style.display = "inline-block";
+  document.getElementById('retryBtn').style.display = "none";
+  document.getElementById('warningMsg').style.display = "none";
+  renderQuestions();
+  startTimer();
+});
+
+// ---------- INIT ----------
+renderQuestions();
+startTimer();
+</script>
+
+</body>
+</html>
