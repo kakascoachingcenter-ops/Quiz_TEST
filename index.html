@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAKA'S COACHING INSTITUTE - Table of 2 Worksheet</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#1e3a5f',
+                        gold: '#f0b429',
+                        lightBlue: '#eaf1fb'
+                    },
+                    fontFamily: {
+                        baloo: ['"Baloo 2"', 'cursive'],
+                        poppins: ['"Poppins"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* Base Styles */
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+        
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; color: #1e3a5f; overflow-x: hidden;}
+        h1, h2, h3, h4, .font-baloo { font-family: 'Baloo 2', cursive; }
+        
+        /* Hide Number Arrows */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        
+        /* UI Components */
+        .section-card { background-color: #eaf1fb; border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 2px solid #dbeafe; opacity: 0; transform: translateY(20px); }
+        .badge { width: 2.5rem; height: 2.5rem; border-radius: 9999px; background-color: #1e3a5f; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        
+        .input-box { width: 3.5rem; height: 3.5rem; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 0.75rem; border: 3px solid #1e3a5f; color: #1e3a5f; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); background-color: white;}
+        .input-box:focus { border-color: #f0b429; outline: none; box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.3); }
+        .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+        
+        .btn { background-color: #1e3a5f; color: white; font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 700; padding: 0.75rem 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px;}
+        .btn-gold { background-color: #f0b429; color: #1e3a5f; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .btn:not(:disabled):active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); }
+        
+        .pill { padding: 0.5rem 1.5rem; border-radius: 9999px; border: 3px solid #1e3a5f; color: #1e3a5f; font-weight: 700; font-size: 1.25rem; cursor: pointer; transition: all 0.2s; background-color: white; user-select: none; text-align: center; min-width: 4rem;}
+        .pill.selected { background-color: #1e3a5f; color: white; transform: scale(1.05); }
+        .pill-error { border-color: #ef4444; }
+        
+        .number-tile { width: 3.5rem; height: 3.5rem; border-radius: 0.75rem; border: 3px solid #1e3a5f; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background-color: white; user-select: none; }
+        .number-tile.selected { background-color: #f0b429; border-color: #f0b429; color: #1e3a5f; transform: scale(1.1) rotate(5deg); }
+        .grid-error { outline: 3px solid #ef4444; outline-offset: 4px; border-radius: 0.75rem;}
+        
+        .screen { display: none; opacity: 0; }
+        .screen.active { display: block; opacity: 1;}
+        
+        /* Confetti */
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none;}
+        
+        /* Capture Mode */
+        .pdf-mode { width: 800px !important; max-width: 800px !important; margin: 0 auto !important; }
+        .pdf-mode .no-print { display: none !important; }
+        .pdf-mode .section-card { break-inside: avoid; page-break-inside: avoid; }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+    <div id="confetti"></div>
+
+    <div class="max-w-3xl mx-auto px-4 pt-8" id="app-container">
+        
+        <!-- Header -->
+        <header class="text-center mb-10 flex flex-col items-center">
+            <div class="w-24 h-24 mb-4 bg-navy rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden" id="logo-container">
+                <!-- Logo Placeholder -->
+                <img id="logo" src="Logo.jpg" alt="KCI Logo" class="w-full h-full object-cover z-10 bg-white">
+            </div>
+            <h1 class="text-4xl md:text-5xl font-baloo font-bold text-navy mb-2">KAKA'S COACHING INSTITUTE</h1>
+            <h2 class="text-2xl text-gold font-bold bg-navy px-6 py-2 rounded-full inline-block shadow-md">Table of 2 Worksheet (KG Level)</h2>
+        </header>
+
+        <!-- SCREEN 1: Student Info -->
+        <main id="screen-1" class="screen active max-w-md mx-auto">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-3 bg-gold"></div>
+                <h3 class="text-3xl font-baloo font-bold text-center mb-6">Let's Get Started! 🚀</h3>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label class="block font-bold text-lg mb-2 pl-2">Student Name</label>
+                        <input type="text" id="studentName" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-navy focus:outline-none text-lg bg-gray-50 focus:bg-white transition-colors" placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-bold text-lg mb-2 pl-2">Student ID</label>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="studentId" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-navy focus:outline-none text-lg bg-gray-50 focus:bg-white transition-colors" placeholder="e.g. 12345" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-bold text-lg mb-2 pl-2">Date</label>
+                        <input type="date" id="studentDate" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-navy focus:outline-none text-lg bg-gray-50 focus:bg-white transition-colors" required>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button id="btn-start" class="btn btn-gold w-full flex items-center justify-center gap-2" disabled>
+                        Start Worksheet <span class="text-2xl">→</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- SCREEN 2: The Worksheet -->
+        <main id="screen-2" class="screen">
+            <!-- Section 1 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">1</div>
+                    <h3 class="text-2xl font-baloo font-bold">Say and Trace 🗣️</h3>
+                </div>
+                <p class="text-lg mb-6 font-medium">Read the table of 2 out loud!</p>
+                
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4 max-w-lg mx-auto text-center font-baloo text-3xl font-bold bg-white p-6 rounded-2xl border-2 border-dashed border-navy">
+                    <div>2 × 1 = 2</div>
+                    <div>2 × 6 = 12</div>
+                    <div>2 × 2 = 4</div>
+                    <div>2 × 7 = 14</div>
+                    <div>2 × 3 = 6</div>
+                    <div>2 × 8 = 16</div>
+                    <div>2 × 4 = 8</div>
+                    <div>2 × 9 = 18</div>
+                    <div>2 × 5 = 10</div>
+                    <div>2 × 10 = 20</div>
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">2</div>
+                    <h3 class="text-2xl font-baloo font-bold">Complete the Number Pattern 🧩</h3>
+                </div>
+                
+                <div class="space-y-8">
+                    <!-- Row A -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="text-2xl font-bold w-10 text-center">2</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-1" data-ans="4">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">6</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-2" data-ans="8">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">10</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-3" data-ans="12">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">14</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-4" data-ans="16">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">18</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-5" data-ans="20">
+                    </div>
+                    
+                    <!-- Row B -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-6" data-ans="2">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">4</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-7" data-ans="6">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">8</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-8" data-ans="10">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">12</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-9" data-ans="14">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">16</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-10" data-ans="18">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">20</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">3</div>
+                    <h3 class="text-2xl font-baloo font-bold">Fill in the Blanks ✏️</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl">
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 1 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-1" data-ans="2"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 6 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-6" data-ans="12"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 2 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-2" data-ans="4"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 7 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-7" data-ans="14"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 3 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-3" data-ans="6"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 8 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-8" data-ans="16"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 4 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-4" data-ans="8"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 9 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-9" data-ans="18"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 5 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-5" data-ans="10"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 10 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-10" data-ans="20"></div>
+                </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">4</div>
+                    <h3 class="text-2xl font-baloo font-bold">Circle the Correct Answer 🎯</h3>
+                </div>
+                
+                <div class="space-y-6" id="s4-container">
+                    <!-- Q1 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-1" data-ans="4">
+                        <div class="text-3xl font-bold font-baloo">1. <span class="ml-2">2 × 2 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">3</div>
+                            <div class="pill s4-opt">4</div>
+                            <div class="pill s4-opt">5</div>
+                        </div>
+                    </div>
+                    <!-- Q2 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-2" data-ans="8">
+                        <div class="text-3xl font-bold font-baloo">2. <span class="ml-2">2 × 4 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">6</div>
+                            <div class="pill s4-opt">8</div>
+                            <div class="pill s4-opt">10</div>
+                        </div>
+                    </div>
+                    <!-- Q3 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-3" data-ans="10">
+                        <div class="text-3xl font-bold font-baloo">3. <span class="ml-2">2 × 5 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">8</div>
+                            <div class="pill s4-opt">10</div>
+                            <div class="pill s4-opt">12</div>
+                        </div>
+                    </div>
+                    <!-- Q4 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-4" data-ans="14">
+                        <div class="text-3xl font-bold font-baloo">4. <span class="ml-2">2 × 7 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">12</div>
+                            <div class="pill s4-opt">14</div>
+                            <div class="pill s4-opt">16</div>
+                        </div>
+                    </div>
+                    <!-- Q5 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-5" data-ans="18">
+                        <div class="text-3xl font-bold font-baloo">5. <span class="ml-2">2 × 9 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">16</div>
+                            <div class="pill s4-opt">18</div>
+                            <div class="pill s4-opt">20</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">5</div>
+                    <h3 class="text-2xl font-baloo font-bold">Count the Pairs 👀</h3>
+                </div>
+                
+                <div class="space-y-6 bg-white p-6 rounded-2xl text-2xl md:text-3xl">
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div class="tracking-[0.2em]">🍎🍎</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-1" data-ans="2"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div class="tracking-[0.2em]">🍎🍎 🍎🍎</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-2" data-ans="4"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div class="tracking-[0.2em]">⭐⭐ ⭐⭐ ⭐⭐</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-3" data-ans="6"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4 text-2xl">
+                        <div class="tracking-[0.1em] md:tracking-[0.2em]">🐟🐟 🐟🐟 🐟🐟 🐟🐟</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-4" data-ans="8"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 text-xl md:text-3xl">
+                        <div class="tracking-normal md:tracking-[0.1em]">🌸🌸 🌸🌸 🌸🌸 🌸🌸 🌸🌸</div>
+                        <div class="flex items-center gap-2 md:gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-5" data-ans="10"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="badge">6</div>
+                    <h3 class="text-2xl font-baloo font-bold">Find the Table of 2 🔍</h3>
+                </div>
+                <p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">Tap ONLY the numbers that belong in the table of 2.</p>
+                
+                <div class="grid grid-cols-4 sm:grid-cols-5 gap-3 md:gap-4 bg-white p-6 rounded-2xl" id="s6-grid">
+                    <!-- JS will populate tiles 1-20 here -->
+                </div>
+            </div>
+
+            <!-- Section 7 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="badge">7</div>
+                    <h3 class="text-2xl font-baloo font-bold">Mini Test 🏆</h3>
+                </div>
+                <p class="text-lg mb-6 font-medium italic opacity-80">Don't look at the table above — you've got this!</p>
+                
+                <div class="bg-white p-6 rounded-2xl space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 1 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-1" data-ans="2"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 3 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-2" data-ans="6"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 5 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-3" data-ans="10"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 8 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-4" data-ans="16"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center sm:col-span-2"><span class="w-24 text-right">2 × 10 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-5" data-ans="20"></div>
+                    </div>
+                    
+                    <div class="bg-lightBlue p-6 rounded-xl border-2 border-gold relative">
+                        <div class="absolute -top-4 -right-4 text-4xl">🌟</div>
+                        <h4 class="font-baloo font-bold text-xl mb-4 text-navy">Bonus: What comes next?</h4>
+                        <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xl sm:text-2xl font-bold">
+                            <div>2,</div><div>4,</div><div>6,</div><div>8,</div>
+                            <input type="text" inputmode="numeric" class="input-box q-s7b" data-q="s7b-1" data-ans="10"><div class="text-gray-400">,</div>
+                            <input type="text" inputmode="numeric" class="input-box q-s7b" data-q="s7b-2" data-ans="12"><div class="text-gray-400">,</div>
+                            <input type="text" inputmode="numeric" class="input-box q-s7b" data-q="s7b-3" data-ans="14">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button id="btn-verify" class="btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 3: Results -->
+        <main id="screen-3" class="screen">
+            <div id="results-card" class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-4 border-lightBlue relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-4 bg-navy"></div>
+                
+                <!-- Results Header -->
+                <div class="text-center mb-8 pb-8 border-b-2 border-gray-100 pt-4">
+                    <img src="Logo.jpg" class="w-20 h-20 mx-auto mb-4 rounded-xl object-contain shadow-sm bg-white" alt="KCI Logo">
+                    <h2 class="text-3xl font-baloo font-bold text-navy mb-2">KAKA'S COACHING INSTITUTE</h2>
+                    <h3 class="text-xl text-gray-500 font-bold">Table of 2 — Results Summary</h3>
+                </div>
+                
+                <!-- Student Info -->
+                <div class="flex flex-wrap justify-between gap-4 bg-lightBlue p-4 rounded-xl mb-8 font-medium">
+                    <div><span class="text-gray-500 text-sm block">Student</span><span id="res-name" class="text-lg font-bold"></span></div>
+                    <div><span class="text-gray-500 text-sm block">ID</span><span id="res-id" class="text-lg font-bold"></span></div>
+                    <div><span class="text-gray-500 text-sm block">Date</span><span id="res-date" class="text-lg font-bold"></span></div>
+                </div>
+                
+                <!-- Score Block -->
+                <div class="text-center mb-10 py-6">
+                    <div class="inline-block relative">
+                        <svg class="w-48 h-48 mx-auto transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-gray-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="score-ring" class="text-gold transition-all duration-1000 ease-out" stroke-width="3" stroke-dasharray="0, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-5xl font-baloo font-bold text-navy"><span id="score-num">0</span></div>
+                            <div class="text-lg text-gray-500 font-bold">out of 39</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div id="res-percent" class="text-2xl font-bold text-navy mb-2">0%</div>
+                        <div id="res-message" class="text-xl font-medium px-4 py-2 bg-yellow-50 text-yellow-800 rounded-lg inline-block border border-yellow-200"></div>
+                    </div>
+                </div>
+                
+                <!-- Breakdown -->
+                <div class="mt-8">
+                    <h3 class="text-2xl font-baloo font-bold text-navy mb-4 border-b-2 border-gray-100 pb-2">What to Review</h3>
+                    <div id="review-list" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Actions -->
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center no-print">
+                <button id="btn-pdf" class="btn bg-red-500 hover:bg-red-600 border-red-600">📥 Download PDF</button>
+                <button id="btn-img" class="btn bg-green-500 hover:bg-green-600 border-green-600">🖼️ Download Image</button>
+                <button id="btn-retry" class="btn btn-gold">🔄 Try Again</button>
+            </div>
+        </main>
+        
+    </div>
+
+    <script>
+        // --- GRADING LOGIC EXPLANATION ---
+        // The state object holds the current user's session data.
+        // Total points = 39 (calculated exactly from the requirements:
+        // S2=10, S3=10, S4=5, S5=5, S6=1 (exact match), S7=8 (5 normal + 3 bonus))
+        
+        const state = {
+            student: { name: '', id: '', date: '' },
+            results: [], 
+            totalCorrect: 0,
+            totalPossible: 39 
+        };
+
+        // Initialize Lenis for smooth scrolling
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true
+        });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // Date init (default today)
+        document.getElementById('studentDate').valueAsDate = new Date();
+
+        // ----------------------------------------------------
+        // SCREEN 1: Validation and Transitions
+        // ----------------------------------------------------
+        const s1Inputs = [document.getElementById('studentName'), document.getElementById('studentId'), document.getElementById('studentDate')];
+        const btnStart = document.getElementById('btn-start');
+
+        // Allow only numeric in studentId dynamically
+        document.getElementById('studentId').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkS1Validity();
+        });
+
+        s1Inputs.forEach(input => input.addEventListener('input', checkS1Validity));
+        s1Inputs.forEach(input => input.addEventListener('change', checkS1Validity));
+
+        function checkS1Validity() {
+            const isValid = s1Inputs.every(input => input.value.trim() !== '');
+            btnStart.disabled = !isValid;
+        }
+
+        btnStart.addEventListener('click', () => {
+            state.student.name = document.getElementById('studentName').value.trim();
+            state.student.id = document.getElementById('studentId').value.trim();
+            state.student.date = document.getElementById('studentDate').value;
+            
+            // GSAP Transition from S1 -> S2
+            gsap.to('#screen-1', {
+                opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                    document.getElementById('screen-1').classList.remove('active');
+                    document.getElementById('screen-2').classList.add('active');
+                    window.scrollTo(0, 0);
+                    
+                    // Reveal Worksheet Sections Staggered
+                    gsap.to('#screen-2', { opacity: 1, duration: 0.1 });
+                    gsap.to('.gs-reveal', {
+                        opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "back.out(1.2)"
+                    });
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // SCREEN 2: Input Handling & Interactivity
+        // ----------------------------------------------------
+        // Restrict all number inputs to only numbers (strips text if pasted)
+        document.querySelectorAll('input[inputmode="numeric"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                this.classList.remove('input-error'); 
+            });
+        });
+
+        // Setup Section 4 (Pills / Radio Button Logic)
+        document.querySelectorAll('.s4-question').forEach(q => {
+            const pills = q.querySelectorAll('.s4-opt');
+            pills.forEach(pill => {
+                pill.addEventListener('click', () => {
+                    pills.forEach(p => p.classList.remove('selected')); // Deselect others
+                    pill.classList.add('selected'); // Select current
+                    q.classList.remove('pill-error'); 
+                    
+                    // Pop animation on tap
+                    gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
+                });
+            });
+        });
+
+        // Setup Section 6 (Grid Generation)
+        const s6Grid = document.getElementById('s6-grid');
+        for (let i = 1; i <= 20; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'number-tile';
+            tile.textContent = i;
+            tile.dataset.val = i;
+            tile.addEventListener('click', () => {
+                tile.classList.toggle('selected');
+                s6Grid.classList.remove('grid-error');
+                if(tile.classList.contains('selected')) {
+                    // Tap on animation
+                    gsap.fromTo(tile, {scale: 0.9, rotation: 0}, {scale: 1.1, rotation: 5, duration: 0.3, ease: "back.out(2)"});
+                } else {
+                    // Tap off animation
+                    gsap.to(tile, {scale: 1, rotation: 0, duration: 0.2});
+                }
+            });
+            s6Grid.appendChild(tile);
+        }
+
+        // ----------------------------------------------------
+        // VALIDATION & SUBMISSION
+        // ----------------------------------------------------
+        const btnVerify = document.getElementById('btn-verify');
+        
+        btnVerify.addEventListener('click', () => {
+            // Pulse animation for button
+            gsap.to(btnVerify, {scale: 0.95, duration: 0.1, yoyo: true, repeat: 1});
+            
+            let isValid = true;
+            let firstInvalid = null;
+            
+            // Validate Text Inputs (S2, S3, S5, S7)
+            const textInputs = document.querySelectorAll('#screen-2 input[type="text"]');
+            textInputs.forEach(input => {
+                if(input.value.trim() === '') {
+                    isValid = false;
+                    input.classList.add('input-error');
+                    if(!firstInvalid) firstInvalid = input;
+                }
+            });
+            
+            // Validate S4 Pills (Must have one selected)
+            const s4Qs = document.querySelectorAll('.s4-question');
+            s4Qs.forEach(q => {
+                const selected = q.querySelector('.selected');
+                if(!selected) {
+                    isValid = false;
+                    q.classList.add('pill-error');
+                    if(!firstInvalid) firstInvalid = q;
+                }
+            });
+            
+            // Validate S6 Grid (Must select at least something, technically optional but good to ensure they interacted)
+            const s6Selected = document.querySelectorAll('#s6-grid .selected');
+            if(s6Selected.length === 0) {
+                isValid = false;
+                s6Grid.classList.add('grid-error');
+                if(!firstInvalid) firstInvalid = s6Grid;
+            }
+            
+            if(!isValid) {
+                // Smooth scroll to the first missing answer
+                lenis.scrollTo(firstInvalid, { offset: -100, duration: 1 });
+                // Shake it visually to draw attention
+                gsap.fromTo(firstInvalid, {x: -10}, {x: 10, duration: 0.1, yoyo: true, repeat: 5, onComplete: () => gsap.set(firstInvalid, {x: 0})});
+                return;
+            }
+            
+            // All valid, Grade the worksheet and transition
+            gradeWorksheet();
+            showResults();
+        });
+
+        // ----------------------------------------------------
+        // GRADING LOGIC
+        // ----------------------------------------------------
+        function gradeWorksheet() {
+            state.results = [];
+            state.totalCorrect = 0;
+            
+            // Helper function to grade text input sections easily
+            const gradeInputs = (selector, sectionName, getQText) => {
+                document.querySelectorAll(selector).forEach((input, index) => {
+                    const uAns = input.value.trim();
+                    const cAns = input.dataset.ans;
+                    const isCorrect = uAns === cAns;
+                    if(isCorrect) state.totalCorrect++;
+                    
+                    state.results.push({
+                        q: getQText ? getQText(input, index) : `Blank ${index+1}`,
+                        userAns: uAns,
+                        correctAns: cAns,
+                        isCorrect: isCorrect,
+                        section: sectionName
+                    });
+                });
+            };
+
+            // Section 2
+            gradeInputs('.q-s2', 'Section 2: Number Pattern', (el, i) => {
+                return i < 5 ? `Row A, blank ${i+1}` : `Row B, blank ${i-4}`;
+            });
+            
+            // Section 3
+            gradeInputs('.q-s3', 'Section 3: Fill in the Blanks', (el) => {
+                return el.parentElement.innerText.split('=')[0].trim() + ' = ?';
+            });
+            
+            // Section 4
+            document.querySelectorAll('.s4-question').forEach(q => {
+                const qText = q.querySelector('.font-baloo').innerText.trim() + ' ?';
+                const cAns = q.dataset.ans;
+                const uAns = q.querySelector('.selected').innerText.trim();
+                const isCorrect = uAns === cAns;
+                if(isCorrect) state.totalCorrect++;
+                
+                state.results.push({
+                    q: qText,
+                    userAns: uAns,
+                    correctAns: cAns,
+                    isCorrect: isCorrect,
+                    section: 'Section 4: Circle Answer'
+                });
+            });
+            
+            // Section 5
+            gradeInputs('.q-s5', 'Section 5: Count the Pairs', (el, i) => `Image group ${i+1}`);
+            
+            // Section 6 (Treated as ONE pass/fail item if exactly matched)
+            const s6Tiles = Array.from(document.querySelectorAll('#s6-grid .number-tile'));
+            const selectedVals = s6Tiles.filter(t => t.classList.contains('selected')).map(t => parseInt(t.dataset.val));
+            const correctSet = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20];
+            
+            let s6IsCorrect = false;
+            if(selectedVals.length === correctSet.length) {
+                selectedVals.sort((a,b)=>a-b); // sort numerically
+                s6IsCorrect = selectedVals.every((val, index) => val === correctSet[index]);
+            }
+            
+            if(s6IsCorrect) state.totalCorrect++;
+            state.results.push({
+                q: "Find the Table of 2 (Grid)",
+                userAns: selectedVals.length ? selectedVals.join(', ') : 'None',
+                correctAns: correctSet.join(', '),
+                isCorrect: s6IsCorrect,
+                section: 'Section 6: Multiples of 2'
+            });
+            
+            // Section 7
+            gradeInputs('.q-s7', 'Section 7: Mini Test', (el) => el.parentElement.innerText.split('=')[0].trim() + ' = ?');
+            gradeInputs('.q-s7b', 'Section 7: Bonus', (el, i) => `Bonus blank ${i+1}`);
+        }
+
+        // ----------------------------------------------------
+        // SCREEN 3: Results Display & Animations
+        // ----------------------------------------------------
+        function showResults() {
+            // Populate Student Data
+            document.getElementById('res-name').innerText = state.student.name;
+            document.getElementById('res-id').innerText = state.student.id;
+            
+            const d = new Date(state.student.date);
+            document.getElementById('res-date').innerText = d.toLocaleDateString();
+            
+            const pct = Math.round((state.totalCorrect / state.totalPossible) * 100);
+            
+            // Populate Error Breakdown
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            
+            const incorrects = state.results.filter(r => !r.isCorrect);
+            
+            if(incorrects.length === 0) {
+                reviewList.innerHTML = `
+                    <div class="bg-green-50 text-green-800 p-6 rounded-xl border border-green-200 text-center font-bold text-xl">
+                        🎉 Perfect score! Nothing to review! 🌟
+                    </div>
+                `;
+            } else {
+                let currentSection = '';
+                incorrects.forEach(item => {
+                    if(item.section !== currentSection) {
+                        currentSection = item.section;
+                        const secHeader = document.createElement('h4');
+                        secHeader.className = 'font-bold text-navy mt-4 mb-2 bg-gray-100 inline-block px-3 py-1 rounded';
+                        secHeader.innerText = currentSection;
+                        reviewList.appendChild(secHeader);
+                    }
+                    const row = document.createElement('div');
+                    row.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100 gap-2';
+                    row.innerHTML = `
+                        <div class="font-medium text-navy text-lg">${item.q}</div>
+                        <div class="flex items-center gap-4 text-lg">
+                            <span class="text-red-600 line-through decoration-2">You: ${item.userAns}</span>
+                            <span class="text-green-600 font-bold">Correct: ${item.correctAns}</span>
+                        </div>
+                    `;
+                    reviewList.appendChild(row);
+                });
+            }
+            
+            // Set Tier Message
+            let msg = "";
+            if(pct >= 90) msg = "🌟 Outstanding! You're a Table of 2 Superstar!";
+            else if(pct >= 70) msg = "👍 Great job! Just a little more practice!";
+            else if(pct >= 50) msg = "💪 Good effort! Let's practice a bit more together.";
+            else msg = "📚 Keep practicing — you'll get there!";
+            
+            document.getElementById('res-message').innerText = msg;
+            
+            // Transition S2 -> S3
+            gsap.to('#screen-2', {
+                opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                    document.getElementById('screen-2').classList.remove('active');
+                    document.getElementById('screen-3').classList.add('active');
+                    window.scrollTo(0, 0);
+                    
+                    // Reveal results card
+                    gsap.to('#screen-3', { opacity: 1, duration: 0.1 });
+                    gsap.from('#results-card', { y: 50, opacity: 0, duration: 0.6, ease: "back.out(1.2)" });
+                    
+                    // Animate Score Ring
+                    const ring = document.getElementById('score-ring');
+                    // dasharray is set up to have gap of 100
+                    gsap.fromTo(ring, {strokeDasharray: "0, 100"}, {strokeDasharray: `${pct}, 100`, duration: 2, ease: "power2.out", delay: 0.3});
+                    
+                    // Animate Score Number
+                    const scoreObj = { val: 0 };
+                    gsap.to(scoreObj, {
+                        val: state.totalCorrect,
+                        duration: 2,
+                        ease: "power2.out",
+                        delay: 0.3,
+                        onUpdate: () => {
+                            document.getElementById('score-num').innerText = Math.round(scoreObj.val);
+                        }
+                    });
+                    
+                    // Animate Percentage Number
+                    const pctObj = { val: 0 };
+                    gsap.to(pctObj, {
+                        val: pct,
+                        duration: 2,
+                        ease: "power2.out",
+                        delay: 0.3,
+                        onUpdate: () => {
+                            document.getElementById('res-percent').innerText = Math.round(pctObj.val) + "%";
+                        },
+                        onComplete: () => {
+                            fireConfetti(); // Trigger celebration at the end!
+                        }
+                    });
+                }
+            });
+        }
+
+        // ----------------------------------------------------
+        // CONFETTI ANIMATION
+        // ----------------------------------------------------
+        function fireConfetti() {
+            const container = document.getElementById('confetti');
+            container.style.display = 'block';
+            const colors = ['#f0b429', '#1e3a5f', '#ef4444', '#3b82f6', '#10b981'];
+            
+            for(let i=0; i<80; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti absolute rounded-full';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Mix of circles and squares
+                if(Math.random() > 0.5) conf.style.borderRadius = '0';
+                
+                // Random size variation
+                const size = Math.random() * 8 + 6;
+                conf.style.width = size + 'px';
+                conf.style.height = size + 'px';
+                
+                // Start from center of screen roughly
+                conf.style.left = '50%';
+                conf.style.top = '50%';
+                
+                container.appendChild(conf);
+                
+                // Burst Physics via GSAP
+                const angle = Math.random() * Math.PI * 2; 
+                const velocity = 100 + Math.random() * 300;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                gsap.to(conf, {
+                    x: vx * 1.5,
+                    y: (vy * 1.5) + 300, // +300 gravity pull
+                    rotation: Math.random() * 720 - 360,
+                    duration: 1.5 + Math.random() * 1.5,
+                    ease: "power1.out",
+                    opacity: 0,
+                    onComplete: () => conf.remove()
+                });
+            }
+            
+            setTimeout(() => { container.style.display = 'none'; }, 4000);
+        }
+
+        // ----------------------------------------------------
+        // TRY AGAIN
+        // ----------------------------------------------------
+        document.getElementById('btn-retry').addEventListener('click', () => {
+            gsap.to('#screen-3', {
+                opacity: 0, duration: 0.3, onComplete: () => {
+                    document.getElementById('screen-3').classList.remove('active');
+                    
+                    // Reset all inputs & state
+                    document.querySelectorAll('#screen-2 input').forEach(inp => inp.value = '');
+                    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                    
+                    document.getElementById('screen-1').classList.add('active');
+                    gsap.to('#screen-1', { opacity: 1, y: 0, duration: 0.4 });
+                    window.scrollTo(0, 0);
+                    
+                    // Reset visuals
+                    document.getElementById('score-ring').style.strokeDasharray = "0, 100";
+                    document.getElementById('score-num').innerText = "0";
+                    document.getElementById('res-percent').innerText = "0%";
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // EXPORT / DOWNLOAD LOGIC
+        // ----------------------------------------------------
+        function setupExportMode() {
+            const card = document.getElementById('results-card');
+            card.classList.add('pdf-mode'); // lock width for consistent snapshot
+            document.body.style.overflow = 'hidden'; 
+            return card;
+        }
+        
+        function cleanupExportMode() {
+            const card = document.getElementById('results-card');
+            card.classList.remove('pdf-mode');
+            document.body.style.overflow = '';
+        }
+
+        function getFileName(ext) {
+            const safeName = state.student.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
+            const date = state.student.date || new Date().toISOString().split('T')[0];
+            return `KCI_Table2_Result_${safeName}_${date}.${ext}`;
+        }
+
+        // Download Image (PNG)
+        document.getElementById('btn-img').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-img');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Generating...";
+            btn.disabled = true;
+            
+            const card = setupExportMode();
+            
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const link = document.createElement('a');
+                link.download = getFileName('png');
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch(e) {
+                console.error(e);
+                alert("Sorry, could not generate image.");
+            }
+            
+            cleanupExportMode();
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+
+        // Download PDF
+        document.getElementById('btn-pdf').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-pdf');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Generating...";
+            btn.disabled = true;
+            
+            const card = setupExportMode();
+            
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                // Create PDF, A4 standard, Portrait
+                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(getFileName('pdf'));
+            } catch(e) {
+                console.error(e);
+                alert("Sorry, could not generate PDF.");
+            }
+            
+            cleanupExportMode();
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+        
+    </script>
+</body>
+</html>
