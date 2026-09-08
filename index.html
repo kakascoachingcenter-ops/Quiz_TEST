@@ -1,465 +1,1318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KCI Class III Mathematics Test</title>
-<style>
-  :root{
-    --navy:#0b1f4d;
-    --navy-dark:#071431;
-    --gold:#d4a72c;
-    --bg:#f4f6fb;
-    --green:#1e8e4f;
-    --red:#c0392b;
-    --gray:#5b6472;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:'Segoe UI', Tahoma, Arial, sans-serif;
-    background:var(--bg);
-    color:#1c1f26;
-    padding:20px;
-  }
-  .header{
-    max-width:760px;
-    margin:0 auto 20px auto;
-    background:linear-gradient(135deg, var(--navy), var(--navy-dark));
-    color:#fff;
-    border-radius:14px;
-    padding:22px 26px;
-    text-align:center;
-    box-shadow:0 6px 18px rgba(11,31,77,0.25);
-  }
-  .header h1{margin:0 0 4px 0; font-size:1.5rem; letter-spacing:0.5px;}
-  .header p{margin:2px 0; color:var(--gold); font-weight:600; font-size:0.85rem;}
-  .header small{color:#cfd8ef; display:block; margin-top:6px;}
-
-  .container{max-width:760px; margin:0 auto;}
-
-  .info-box{
-    background:#fff;
-    border-radius:12px;
-    padding:16px 20px;
-    margin-bottom:18px;
-    display:flex;
-    gap:16px;
-    flex-wrap:wrap;
-    align-items:center;
-    justify-content:space-between;
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  }
-  .info-box input{
-    padding:8px 10px;
-    border:1px solid #d0d5e0;
-    border-radius:8px;
-    font-size:0.95rem;
-    flex:1;
-    min-width:160px;
-  }
-  .info-box label{font-size:0.85rem; color:var(--gray); font-weight:600;}
-
-  .timer-badge{
-    background:var(--navy);
-    color:#fff;
-    padding:8px 14px;
-    border-radius:20px;
-    font-weight:700;
-    font-size:0.95rem;
-    white-space:nowrap;
-  }
-
-  .question-card{
-    background:#fff;
-    border-radius:12px;
-    padding:18px 20px;
-    margin-bottom:14px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-    border-left:5px solid var(--navy);
-    transition:border-color 0.2s;
-  }
-  .question-card.correct{border-left-color:var(--green); background:#f2fbf5;}
-  .question-card.incorrect{border-left-color:var(--red); background:#fdf3f2;}
-
-  .q-number{
-    display:inline-block;
-    background:var(--gold);
-    color:var(--navy-dark);
-    font-weight:700;
-    font-size:0.8rem;
-    padding:2px 10px;
-    border-radius:12px;
-    margin-bottom:8px;
-  }
-  .q-text{font-size:1.05rem; font-weight:600; margin:6px 0 12px 0; line-height:1.4;}
-
-  .options{display:flex; flex-direction:column; gap:8px;}
-  .option{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 12px;
-    border:2px solid #e2e6ee;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:0.98rem;
-    transition:all 0.15s;
-  }
-  .option:hover{border-color:var(--navy); background:#f7f9fd;}
-  .option input{accent-color:var(--navy); width:16px; height:16px;}
-  .option.picked{border-color:var(--navy); background:#eaeefb; font-weight:600;}
-  .option.reveal-correct{border-color:var(--green); background:#e7f7ec; font-weight:700;}
-  .option.reveal-wrong{border-color:var(--red); background:#fbeceb;}
-
-  .fill-answer input{
-    width:140px;
-    padding:9px 12px;
-    border:2px solid #e2e6ee;
-    border-radius:8px;
-    font-size:1rem;
-  }
-  .fill-answer input:focus{border-color:var(--navy); outline:none;}
-  .fill-answer.reveal-correct input{border-color:var(--green); background:#e7f7ec;}
-  .fill-answer.reveal-wrong input{border-color:var(--red); background:#fbeceb;}
-
-  .feedback-line{margin-top:10px; font-size:0.9rem; font-weight:600;}
-  .feedback-line.correct{color:var(--green);}
-  .feedback-line.incorrect{color:var(--red);}
-
-  .btn-row{max-width:760px; margin:10px auto 40px auto; text-align:center;}
-  .btn{
-    background:var(--navy);
-    color:#fff;
-    border:none;
-    padding:14px 34px;
-    font-size:1.05rem;
-    font-weight:700;
-    border-radius:10px;
-    cursor:pointer;
-    box-shadow:0 4px 12px rgba(11,31,77,0.3);
-    transition:transform 0.1s, background 0.2s;
-  }
-  .btn:hover{background:var(--navy-dark); transform:translateY(-1px);}
-  .btn:disabled{background:#aab1c2; cursor:not-allowed; transform:none; box-shadow:none;}
-  .btn.secondary{background:#fff; color:var(--navy); border:2px solid var(--navy); margin-left:10px;}
-  .btn.secondary:hover{background:#f0f3fa;}
-
-  .result-card{
-    max-width:760px;
-    margin:0 auto 30px auto;
-    background:#fff;
-    border-radius:16px;
-    padding:30px;
-    text-align:center;
-    box-shadow:0 8px 24px rgba(0,0,0,0.1);
-    border-top:6px solid var(--gold);
-    display:none;
-  }
-  .result-card.show{display:block;}
-  .score-big{font-size:3rem; font-weight:800; color:var(--navy); margin:10px 0;}
-  .score-label{color:var(--gray); font-weight:600;}
-  .cert{
-    margin-top:18px;
-    padding:20px;
-    border:3px dashed var(--gold);
-    border-radius:12px;
-    background:#fffdf5;
-  }
-  .cert h2{color:var(--navy); margin:6px 0; font-family:'Georgia', serif;}
-  .cert p{margin:4px 0; color:var(--gray);}
-  .stamp{
-    display:inline-block;
-    margin-top:10px;
-    background:var(--navy);
-    color:var(--gold);
-    padding:6px 16px;
-    border-radius:8px;
-    font-weight:700;
-    letter-spacing:1px;
-    font-size:0.85rem;
-  }
-  .warning-msg{
-    color:var(--red);
-    font-weight:600;
-    text-align:center;
-    margin:10px auto;
-    max-width:760px;
-    display:none;
-  }
-</style>
-</head>
-<body>
-
-<div class="header">
-  <h1>KAKA'S COACHING INSTITUTE</h1>
-  <p>"Accessible Excellence — Shaping Pakistan's Future Leaders"</p>
-  <small>Class III &nbsp;•&nbsp; Mathematics Monthly Test &nbsp;•&nbsp; 10 Questions</small>
-</div>
-
-<div class="container">
-
-  <div class="info-box">
-    <div style="flex:1; min-width:180px;">
-      <label>Student Name</label><br>
-      <input type="text" id="studentName" placeholder="Enter your name">
-    </div>
-    <div class="timer-badge" id="timerBadge">⏱ 00:00</div>
-  </div>
-
-  <div id="warningMsg" class="warning-msg">⚠ Please answer all 10 questions before checking your result.</div>
-
-  <div id="quizArea"></div>
-
-  <div class="btn-row">
-    <button class="btn" id="checkBtn">✔ Check My Answers</button>
-    <button class="btn secondary" id="retryBtn" style="display:none;">↻ Try Again</button>
-  </div>
-
-  <div class="result-card" id="resultCard">
-    <div class="score-label">YOUR SCORE</div>
-    <div class="score-big" id="scoreBig">0 / 10</div>
-    <div class="score-label" id="scorePercent"></div>
-    <div class="cert" id="certBox">
-      <h2 id="certTitle">Well Done!</h2>
-      <p id="certName">Student Name</p>
-      <p id="certMessage"></p>
-      <div class="stamp">KCI VERIFIED RESULT</div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-// ---------- QUESTION BANK (BSEK Class III level) ----------
-const questions = [
-  {
-    type:"mcq",
-    text:"1. What is the place value of 7 in the number 4,732?",
-    options:["7", "70", "700", "7000"],
-    correct:2 // index -> 700
-  },
-  {
-    type:"mcq",
-    text:"2. Add: 2,354 + 1,428 = ?",
-    options:["3,782", "3,872", "3,672", "4,782"],
-    correct:0
-  },
-  {
-    type:"fill",
-    text:"3. Subtract: 6,215 − 2,349 = ?",
-    answer:"3866"
-  },
-  {
-    type:"mcq",
-    text:"4. What is 8 × 7?",
-    options:["54", "56", "64", "48"],
-    correct:1
-  },
-  {
-    type:"fill",
-    text:"5. Divide: 36 ÷ 6 = ?",
-    answer:"6"
-  },
-  {
-    type:"mcq",
-    text:"6. Which shape has 3 sides?",
-    options:["Square", "Triangle", "Rectangle", "Circle"],
-    correct:1
-  },
-  {
-    type:"word",
-    text:"7. Ayesha has 45 mangoes. She gives 18 mangoes to her friend. How many mangoes are left with Ayesha?",
-    answer:"27"
-  },
-  {
-    type:"mcq",
-    text:"8. How many minutes are there in 1 hour?",
-    options:["30", "50", "60", "100"],
-    correct:2
-  },
-  {
-    type:"word",
-    text:"9. A pencil costs Rs. 15. How much will 4 pencils cost?",
-    answer:"60"
-  },
-  {
-    type:"fill",
-    text:"10. Write the number that comes just after 8,999.",
-    answer:"9000"
-  }
-];
-
-// ---------- STATE ----------
-let userAnswers = new Array(questions.length).fill(null);
-let checked = false;
-let seconds = 0;
-let timerInterval = null;
-
-// ---------- RENDER ----------
-const quizArea = document.getElementById('quizArea');
-
-function renderQuestions(){
-  quizArea.innerHTML = "";
-  questions.forEach((q, i) => {
-    const card = document.createElement('div');
-    card.className = "question-card";
-    card.id = "qcard-" + i;
-
-    let inner = `<div class="q-number">Question ${i+1}</div><div class="q-text">${q.text}</div>`;
-
-    if(q.type === "mcq"){
-      inner += `<div class="options" id="options-${i}">`;
-      q.options.forEach((opt, oi) => {
-        inner += `
-          <label class="option" id="opt-${i}-${oi}">
-            <input type="radio" name="q${i}" value="${oi}" onchange="selectOption(${i}, ${oi})">
-            <span>${opt}</span>
-          </label>`;
-      });
-      inner += `</div>`;
-    } else {
-      inner += `
-        <div class="fill-answer" id="fill-${i}">
-          <input type="number" inputmode="numeric" placeholder="Your answer" oninput="selectFill(${i}, this.value)">
-        </div>`;
-    }
-
-    inner += `<div class="feedback-line" id="feedback-${i}"></div>`;
-    card.innerHTML = inner;
-    quizArea.appendChild(card);
-  });
-}
-
-function selectOption(qIndex, optIndex){
-  if(checked) return;
-  userAnswers[qIndex] = optIndex;
-  document.querySelectorAll(`#options-${qIndex} .option`).forEach((el,i)=>{
-    el.classList.toggle('picked', i === optIndex);
-  });
-}
-
-function selectFill(qIndex, value){
-  if(checked) return;
-  userAnswers[qIndex] = value.trim();
-}
-
-// ---------- TIMER ----------
-function startTimer(){
-  timerInterval = setInterval(()=>{
-    seconds++;
-    const m = String(Math.floor(seconds/60)).padStart(2,'0');
-    const s = String(seconds%60).padStart(2,'0');
-    document.getElementById('timerBadge').textContent = `⏱ ${m}:${s}`;
-  }, 1000);
-}
-function stopTimer(){
-  clearInterval(timerInterval);
-}
-
-// ---------- CHECK ANSWERS ----------
-document.getElementById('checkBtn').addEventListener('click', function(){
-  const unanswered = userAnswers.some(a => a === null || a === "");
-  const warning = document.getElementById('warningMsg');
-  if(unanswered){
-    warning.style.display = "block";
-    return;
-  }
-  warning.style.display = "none";
-
-  checked = true;
-  stopTimer();
-  let score = 0;
-
-  questions.forEach((q, i) => {
-    const card = document.getElementById('qcard-' + i);
-    const feedback = document.getElementById('feedback-' + i);
-    let isCorrect = false;
-
-    if(q.type === "mcq"){
-      isCorrect = (Number(userAnswers[i]) === q.correct);
-      document.querySelectorAll(`#options-${i} .option`).forEach((el, oi) => {
-        el.querySelector('input').disabled = true;
-        if(oi === q.correct){
-          el.classList.add('reveal-correct');
-        } else if(oi === Number(userAnswers[i]) && oi !== q.correct){
-          el.classList.add('reveal-wrong');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAKA'S COACHING INSTITUTE - Table of 2 Worksheet</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#1e3a5f',
+                        gold: '#f0b429',
+                        lightBlue: '#eaf1fb'
+                    },
+                    fontFamily: {
+                        baloo: ['"Baloo 2"', 'cursive'],
+                        poppins: ['"Poppins"', 'sans-serif']
+                    }
+                }
+            }
         }
-      });
-    } else {
-      const given = String(userAnswers[i]).trim();
-      isCorrect = (given === String(q.answer).trim());
-      const fillBox = document.getElementById('fill-' + i);
-      fillBox.querySelector('input').disabled = true;
-      fillBox.classList.add(isCorrect ? 'reveal-correct' : 'reveal-wrong');
-      if(!isCorrect){
-        feedback.innerHTML += `<br><span style="color:#5b6472;">Correct answer: ${q.answer}</span>`;
-      }
-    }
+    </script>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    card.classList.add(isCorrect ? 'correct' : 'incorrect');
-    feedback.classList.add(isCorrect ? 'correct' : 'incorrect');
-    feedback.innerHTML = (isCorrect ? "✔ Correct!" : "✘ Incorrect.") + feedback.innerHTML;
+    <style>
+        /* Base Styles */
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
+        
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; color: #1e3a5f; overflow-x: hidden;}
+        h1, h2, h3, h4, .font-baloo { font-family: 'Baloo 2', cursive; }
+        
+        /* Hide Number Arrows */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        
+        /* UI Components */
+        .section-card { background-color: #eaf1fb; border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 2px solid #dbeafe; opacity: 0; transform: translateY(20px); }
+        .badge { width: 2.5rem; height: 2.5rem; border-radius: 9999px; background-color: #1e3a5f; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        
+        .input-box { width: 3.5rem; height: 3.5rem; text-align: center; font-size: 1.25rem; font-weight: 700; border-radius: 0.75rem; border: 3px solid #1e3a5f; color: #1e3a5f; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); background-color: white;}
+        .input-box:focus { border-color: #f0b429; outline: none; box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.3); }
+        .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+        
+        .btn { background-color: #1e3a5f; color: white; font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 700; padding: 0.75rem 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px;}
+        .btn-gold { background-color: #f0b429; color: #1e3a5f; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .btn:not(:disabled):active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); }
+        
+        .pill { padding: 0.5rem 1.5rem; border-radius: 9999px; border: 3px solid #1e3a5f; color: #1e3a5f; font-weight: 700; font-size: 1.25rem; cursor: pointer; transition: all 0.2s; background-color: white; user-select: none; text-align: center; min-width: 4rem;}
+        .pill.selected { background-color: #1e3a5f; color: white; transform: scale(1.05); }
+        .pill-error { border-color: #ef4444; }
+        
+        .number-tile { width: 3.5rem; height: 3.5rem; border-radius: 0.75rem; border: 3px solid #1e3a5f; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background-color: white; user-select: none; }
+        .number-tile.selected { background-color: #f0b429; border-color: #f0b429; color: #1e3a5f; transform: scale(1.1) rotate(5deg); }
+        .grid-error { outline: 3px solid #ef4444; outline-offset: 4px; border-radius: 0.75rem;}
+        
+        .screen { display: none; opacity: 0; }
+        .screen.active { display: block; opacity: 1;}
+        
+        /* Confetti */
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none;}
+        
+        /* Capture Mode */
+        .pdf-mode { width: 800px !important; max-width: 800px !important; margin: 0 auto !important; }
+        .pdf-mode .no-print { display: none !important; }
+        .pdf-mode .section-card { break-inside: avoid; page-break-inside: avoid; }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+    <div id="confetti"></div>
 
-    if(isCorrect) score++;
-  });
+    <div class="max-w-3xl mx-auto px-4 pt-8" id="app-container">
+        
+        <!-- Header -->
+        <header class="text-center mb-10 flex flex-col items-center">
+            <div class="w-24 h-24 mb-4 bg-navy rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden" id="logo-container">
+                <!-- Logo Placeholder -->
+                <img id="logo" src="Logo.jpg" alt="KCI Logo" class="w-full h-full object-cover z-10 bg-white">
+            </div>
+            <h1 class="text-4xl md:text-5xl font-baloo font-bold text-navy mb-2">KAKA'S COACHING INSTITUTE</h1>
+            <h2 id="main-subtitle" class="text-2xl text-gold font-bold bg-navy px-6 py-2 rounded-full inline-block shadow-md">Welcome!</h2>
+        </header>
 
-  showResult(score);
-  document.getElementById('checkBtn').style.display = "none";
-  document.getElementById('retryBtn').style.display = "inline-block";
-});
+        <!-- SCREEN 1: Student Info -->
+        <main id="screen-1" class="screen active max-w-md mx-auto">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-3 bg-gold"></div>
+                <h3 class="text-3xl font-baloo font-bold text-center mb-6">Let's Get Started! 🚀</h3>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label class="block font-bold text-lg mb-2 pl-2">Student Name</label>
+                        <input type="text" id="studentName" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-navy focus:outline-none text-lg bg-gray-50 focus:bg-white transition-colors" placeholder="Enter your name" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-bold text-lg mb-2 pl-2">Student ID</label>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="studentId" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-navy focus:outline-none text-lg bg-gray-50 focus:bg-white transition-colors" placeholder="e.g. 12345" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-bold text-lg mb-2 pl-2">Date</label>
+                        <input type="date" id="studentDate" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-navy focus:outline-none text-lg bg-gray-50 focus:bg-white transition-colors" required>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button id="btn-start" class="btn btn-gold w-full flex items-center justify-center gap-2" disabled>
+                        Start Worksheet <span class="text-2xl">→</span>
+                    </button>
+                </div>
+            </div>
+        </main>
 
-// ---------- SHOW RESULT ----------
-function showResult(score){
-  const total = questions.length;
-  const percent = Math.round((score/total)*100);
-  const name = document.getElementById('studentName').value.trim() || "Student";
+        <!-- SCREEN 2: Worksheet Selection -->
+        <main id="screen-selection" class="screen max-w-4xl mx-auto">
+            <h3 id="selection-greeting" class="text-3xl font-baloo font-bold text-center mb-8">Hi! Which worksheet would you like to try today?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1 -->
+                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="table2">
+                    <div class="text-6xl mb-4">🧮</div>
+                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Maths Marvels — Table of 2</h4>
+                    <p class="text-gray-500 font-medium mb-6">Multiplication practice for KG learners</p>
+                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                </div>
+                <!-- Card 2 -->
+                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="class1">
+                    <div class="text-6xl mb-4">📖</div>
+                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Little Explorers — Class I English & EVS Worksheet</h4>
+                    <p class="text-gray-500 font-medium mb-6">Living things, naming words, sounds, grammar & more!</p>
+                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                </div>
+            </div>
+        </main>
 
-  document.getElementById('scoreBig').textContent = `${score} / ${total}`;
-  document.getElementById('scorePercent').textContent = `${percent}% Score`;
-  document.getElementById('certName').textContent = name;
+        <!-- SCREEN 3: Table of 2 Worksheet -->
+        <main id="screen-worksheet-table2" class="screen worksheet-container">
+            <!-- Section 1 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">1</div>
+                    <h3 class="text-2xl font-baloo font-bold">Say and Trace 🗣️</h3>
+                </div>
+                <p class="text-lg mb-6 font-medium">Read the table of 2 out loud!</p>
+                
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4 max-w-lg mx-auto text-center font-baloo text-3xl font-bold bg-white p-6 rounded-2xl border-2 border-dashed border-navy">
+                    <div>2 × 1 = 2</div>
+                    <div>2 × 6 = 12</div>
+                    <div>2 × 2 = 4</div>
+                    <div>2 × 7 = 14</div>
+                    <div>2 × 3 = 6</div>
+                    <div>2 × 8 = 16</div>
+                    <div>2 × 4 = 8</div>
+                    <div>2 × 9 = 18</div>
+                    <div>2 × 5 = 10</div>
+                    <div>2 × 10 = 20</div>
+                </div>
+            </div>
 
-  let title, message, color;
-  if(percent >= 80){
-    title = "🏆 Excellent Work!";
-    message = "You have shown a strong understanding of Class III Mathematics.";
-    color = "#1e8e4f";
-  } else if(percent >= 50){
-    title = "👍 Good Effort!";
-    message = "You are doing well — a little more practice will make you perfect.";
-    color = "#d4a72c";
-  } else {
-    title = "💪 Keep Practicing!";
-    message = "Review today's mistakes with your teacher and try again.";
-    color = "#c0392b";
-  }
-  document.getElementById('certTitle').textContent = title;
-  document.getElementById('certTitle').style.color = color;
-  document.getElementById('certMessage').textContent = message;
+            <!-- Section 2 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">2</div>
+                    <h3 class="text-2xl font-baloo font-bold">Complete the Number Pattern 🧩</h3>
+                </div>
+                
+                <div class="space-y-8">
+                    <!-- Row A -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="text-2xl font-bold w-10 text-center">2</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-1" data-ans="4">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">6</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-2" data-ans="8">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">10</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-3" data-ans="12">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">14</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-4" data-ans="16">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">18</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-5" data-ans="20">
+                    </div>
+                    
+                    <!-- Row B -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-6" data-ans="2">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">4</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-7" data-ans="6">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">8</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-8" data-ans="10">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">12</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-9" data-ans="14">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">16</div>
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" class="input-box q-s2" data-q="s2-10" data-ans="18">
+                        <div class="text-2xl font-bold text-gray-400">,</div>
+                        <div class="text-2xl font-bold w-10 text-center">20</div>
+                    </div>
+                </div>
+            </div>
 
-  const resultCard = document.getElementById('resultCard');
-  resultCard.classList.add('show');
-  resultCard.scrollIntoView({behavior:"smooth", block:"start"});
-}
+            <!-- Section 3 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">3</div>
+                    <h3 class="text-2xl font-baloo font-bold">Fill in the Blanks ✏️</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl">
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 1 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-1" data-ans="2"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 6 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-6" data-ans="12"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 2 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-2" data-ans="4"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 7 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-7" data-ans="14"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 3 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-3" data-ans="6"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 8 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-8" data-ans="16"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 4 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-4" data-ans="8"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 9 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-9" data-ans="18"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 5 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-5" data-ans="10"></div>
+                    <div class="flex items-center justify-between md:justify-center gap-4 text-2xl font-bold"><span class="w-24 text-right">2 × 10 =</span> <input type="text" inputmode="numeric" class="input-box q-s3" data-q="s3-10" data-ans="20"></div>
+                </div>
+            </div>
 
-// ---------- RETRY ----------
-document.getElementById('retryBtn').addEventListener('click', function(){
-  userAnswers = new Array(questions.length).fill(null);
-  checked = false;
-  seconds = 0;
-  document.getElementById('timerBadge').textContent = "⏱ 00:00";
-  document.getElementById('resultCard').classList.remove('show');
-  document.getElementById('checkBtn').style.display = "inline-block";
-  document.getElementById('retryBtn').style.display = "none";
-  document.getElementById('warningMsg').style.display = "none";
-  renderQuestions();
-  startTimer();
-});
+            <!-- Section 4 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">4</div>
+                    <h3 class="text-2xl font-baloo font-bold">Circle the Correct Answer 🎯</h3>
+                </div>
+                
+                <div class="space-y-6" id="s4-container">
+                    <!-- Q1 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-1" data-ans="4">
+                        <div class="text-3xl font-bold font-baloo">1. <span class="ml-2">2 × 2 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">3</div>
+                            <div class="pill s4-opt">4</div>
+                            <div class="pill s4-opt">5</div>
+                        </div>
+                    </div>
+                    <!-- Q2 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-2" data-ans="8">
+                        <div class="text-3xl font-bold font-baloo">2. <span class="ml-2">2 × 4 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">6</div>
+                            <div class="pill s4-opt">8</div>
+                            <div class="pill s4-opt">10</div>
+                        </div>
+                    </div>
+                    <!-- Q3 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-3" data-ans="10">
+                        <div class="text-3xl font-bold font-baloo">3. <span class="ml-2">2 × 5 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">8</div>
+                            <div class="pill s4-opt">10</div>
+                            <div class="pill s4-opt">12</div>
+                        </div>
+                    </div>
+                    <!-- Q4 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-4" data-ans="14">
+                        <div class="text-3xl font-bold font-baloo">4. <span class="ml-2">2 × 7 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">12</div>
+                            <div class="pill s4-opt">14</div>
+                            <div class="pill s4-opt">16</div>
+                        </div>
+                    </div>
+                    <!-- Q5 -->
+                    <div class="bg-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question" data-q="s4-5" data-ans="18">
+                        <div class="text-3xl font-bold font-baloo">5. <span class="ml-2">2 × 9 =</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">16</div>
+                            <div class="pill s4-opt">18</div>
+                            <div class="pill s4-opt">20</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-// ---------- INIT ----------
-renderQuestions();
-startTimer();
-</script>
+            <!-- Section 5 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
+                    <div class="badge">5</div>
+                    <h3 class="text-2xl font-baloo font-bold">Count the Pairs 👀</h3>
+                </div>
+                
+                <div class="space-y-6 bg-white p-6 rounded-2xl text-2xl md:text-3xl">
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div class="tracking-[0.2em]">🍎🍎</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-1" data-ans="2"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div class="tracking-[0.2em]">🍎🍎 🍎🍎</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-2" data-ans="4"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                        <div class="tracking-[0.2em]">⭐⭐ ⭐⭐ ⭐⭐</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-3" data-ans="6"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-4 text-2xl">
+                        <div class="tracking-[0.1em] md:tracking-[0.2em]">🐟🐟 🐟🐟 🐟🐟 🐟🐟</div>
+                        <div class="flex items-center gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-4" data-ans="8"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 text-xl md:text-3xl">
+                        <div class="tracking-normal md:tracking-[0.1em]">🌸🌸 🌸🌸 🌸🌸 🌸🌸 🌸🌸</div>
+                        <div class="flex items-center gap-2 md:gap-4">= <input type="text" inputmode="numeric" class="input-box q-s5" data-q="s5-5" data-ans="10"></div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Section 6 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="badge">6</div>
+                    <h3 class="text-2xl font-baloo font-bold">Find the Table of 2 🔍</h3>
+                </div>
+                <p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">Tap ONLY the numbers that belong in the table of 2.</p>
+                
+                <div class="grid grid-cols-4 sm:grid-cols-5 gap-3 md:gap-4 bg-white p-6 rounded-2xl" id="s6-grid">
+                    <!-- JS will populate tiles 1-20 here -->
+                </div>
+            </div>
+
+            <!-- Section 7 -->
+            <div class="section-card gs-reveal">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="badge">7</div>
+                    <h3 class="text-2xl font-baloo font-bold">Mini Test 🏆</h3>
+                </div>
+                <p class="text-lg mb-6 font-medium italic opacity-80">Don't look at the table above — you've got this!</p>
+                
+                <div class="bg-white p-6 rounded-2xl space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 1 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-1" data-ans="2"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 3 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-2" data-ans="6"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 5 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-3" data-ans="10"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center"><span class="w-20 text-right">2 × 8 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-4" data-ans="16"></div>
+                        <div class="flex items-center gap-4 text-2xl font-bold justify-center sm:col-span-2"><span class="w-24 text-right">2 × 10 =</span> <input type="text" inputmode="numeric" class="input-box q-s7" data-q="s7-5" data-ans="20"></div>
+                    </div>
+                    
+                    <div class="bg-lightBlue p-6 rounded-xl border-2 border-gold relative">
+                        <div class="absolute -top-4 -right-4 text-4xl">🌟</div>
+                        <h4 class="font-baloo font-bold text-xl mb-4 text-navy">Bonus: What comes next?</h4>
+                        <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xl sm:text-2xl font-bold">
+                            <div>2,</div><div>4,</div><div>6,</div><div>8,</div>
+                            <input type="text" inputmode="numeric" class="input-box q-s7b" data-q="s7b-1" data-ans="10"><div class="text-gray-400">,</div>
+                            <input type="text" inputmode="numeric" class="input-box q-s7b" data-q="s7b-2" data-ans="12"><div class="text-gray-400">,</div>
+                            <input type="text" inputmode="numeric" class="input-box q-s7b" data-q="s7b-3" data-ans="14">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Table of 2 -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 4: Class 1 English & EVS Worksheet -->
+        <main id="screen-worksheet-class1" class="screen worksheet-container">
+            <!-- Content will be added here -->
+            
+            <!-- Submit Class 1 -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 5: Results -->
+        <main id="screen-results" class="screen">
+            <div id="results-card" class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-4 border-lightBlue relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-4 bg-navy"></div>
+                
+                <!-- Results Header -->
+                <div class="text-center mb-8 pb-8 border-b-2 border-gray-100 pt-4">
+                    <img src="Logo.jpg" class="w-20 h-20 mx-auto mb-4 rounded-xl object-contain shadow-sm bg-white" alt="KCI Logo">
+                    <h2 class="text-3xl font-baloo font-bold text-navy mb-2">KAKA'S COACHING INSTITUTE</h2>
+                    <h3 id="res-subtitle" class="text-xl text-gray-500 font-bold">Results Summary</h3>
+                </div>
+                
+                <!-- Student Info -->
+                <div class="flex flex-wrap justify-between gap-4 bg-lightBlue p-4 rounded-xl mb-8 font-medium">
+                    <div><span class="text-gray-500 text-sm block">Student</span><span id="res-name" class="text-lg font-bold"></span></div>
+                    <div><span class="text-gray-500 text-sm block">ID</span><span id="res-id" class="text-lg font-bold"></span></div>
+                    <div><span class="text-gray-500 text-sm block">Date</span><span id="res-date" class="text-lg font-bold"></span></div>
+                </div>
+                
+                <!-- Score Block -->
+                <div class="text-center mb-10 py-6">
+                    <div class="inline-block relative">
+                        <svg class="w-48 h-48 mx-auto transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-gray-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="score-ring" class="text-gold transition-all duration-1000 ease-out" stroke-width="3" stroke-dasharray="0, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-5xl font-baloo font-bold text-navy"><span id="score-num">0</span></div>
+                            <div class="text-lg text-gray-500 font-bold">out of 39</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div id="res-percent" class="text-2xl font-bold text-navy mb-2">0%</div>
+                        <div id="res-message" class="text-xl font-medium px-4 py-2 bg-yellow-50 text-yellow-800 rounded-lg inline-block border border-yellow-200"></div>
+                    </div>
+                </div>
+                
+                <!-- Breakdown -->
+                <div class="mt-8">
+                    <h3 class="text-2xl font-baloo font-bold text-navy mb-4 border-b-2 border-gray-100 pb-2">What to Review</h3>
+                    <div id="review-list" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Actions -->
+            <div class="mt-8 flex flex-col sm:flex-row flex-wrap gap-4 justify-center no-print">
+                <button id="btn-pdf" class="btn bg-red-500 hover:bg-red-600 border-red-600 text-lg">📥 Download PDF</button>
+                <button id="btn-img" class="btn bg-green-500 hover:bg-green-600 border-green-600 text-lg">🖼️ Download Image</button>
+                <button id="btn-retry" class="btn btn-gold text-lg">🔄 Try Again</button>
+                <button id="btn-choose-another" class="btn bg-blue-500 hover:bg-blue-600 text-lg">📚 Choose Another</button>
+            </div>
+        </main>
+        
+    </div>
+
+    <script>
+        // --- GRADING LOGIC EXPLANATION ---
+        const state = {
+            student: { name: '', id: '', date: '' },
+            currentWorksheetId: null,
+            results: [], 
+            totalCorrect: 0,
+            totalPossible: 0 
+        };
+
+        const worksheetsConfig = {
+            table2: {
+                title: "Table of 2",
+                exportPrefix: "KCI_Table2_Result",
+                totalPossible: 39,
+                render: null // Already in HTML
+            },
+            class1: {
+                title: "Class I English & EVS Worksheet",
+                exportPrefix: "KCI_ClassI_Result",
+                totalPossible: 74,
+                render: renderClass1Worksheet
+            }
+        };
+
+        function renderClass1Worksheet() {
+            const container = document.getElementById('screen-worksheet-class1');
+            if (container.children.length > 2) return; // Already rendered
+
+            let html = '';
+            let sectionCount = 1;
+
+            // Helper to generate a section header
+            const secHeader = (title, subtitle) => `
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="badge">${sectionCount++}</div>
+                    <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+                </div>
+                ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+            `;
+
+            // Section 1: Living/Non-Living (Radio)
+            const s1Items = [
+                {q: "🐶 Dog", a: "Living"}, {q: "🌳 Tree", a: "Living"}, {q: "🪑 Chair", a: "Non-Living"}, {q: "🐟 Fish", a: "Living"}, {q: "🚗 Car", a: "Non-Living"},
+                {q: "🌸 Flower", a: "Living"}, {q: "📚 Book", a: "Non-Living"}, {q: "🐦 Bird", a: "Living"}, {q: "⛰️ Mountain", a: "Non-Living"}, {q: "🦋 Butterfly", a: "Living"}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Living vs Non-Living Things", "Tap the correct button for each.")}<div class="space-y-4">`;
+            s1Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s1" data-q="s1-${i}" data-ans="${item.a}">
+                        <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                        <div class="flex gap-4">
+                            <div class="pill s4-opt">🌱 Living</div>
+                            <div class="pill s4-opt">🪨 Non-Living</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 2A: Naming Words Graded
+            const s2aItems = [
+                {q: "Run | Happy | Table | Quickly", a: "Table", opts: ["Run", "Happy", "Table", "Quickly"]},
+                {q: "Jump | School | Loudly | Pretty", a: "School", opts: ["Jump", "School", "Loudly", "Pretty"]},
+                {q: "Sing | Elephant | Slowly | Tall", a: "Elephant", opts: ["Sing", "Elephant", "Slowly", "Tall"]},
+                {q: "Fly | Beautiful | Doctor | Fast", a: "Doctor", opts: ["Fly", "Beautiful", "Doctor", "Fast"]},
+                {q: "Eat | Garden | Soft | Quickly", a: "Garden", opts: ["Eat", "Garden", "Soft", "Quickly"]}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Naming Words (Nouns) - Part A", "Which word is a Naming Word (Noun)?")}<div class="space-y-4">`;
+            s2aItems.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question c1-s2a" data-q="s2a-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${i+1}.</div>
+                        <div class="flex flex-wrap gap-3">
+                            ${item.opts.map(opt => `<div class="pill s4-opt">${opt}</div>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 2B: Naming Words Creative
+            html += `<div class="section-card gs-reveal"><div class="flex items-center gap-4 mb-2"><div class="badge">*</div><h3 class="text-2xl font-baloo font-bold">Naming Words - Part B</h3></div><p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">Just for fun — not scored! Can you think of your own naming word for each?</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+            ["An Animal", "A Fruit", "A Vehicle", "A Place"].forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4">
+                        <div class="text-xl font-bold font-baloo">${item}:</div>
+                        <input type="text" class="input-box w-full max-w-[200px] text-lg px-3" style="width:100%;">
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 3: Beginning Sounds
+            const s3Items = [
+                {l:"A", q:"🍎 Apple", a:"A", opts:["A","E","O"]}, {l:"B", q:"⚽ Ball", a:"B", opts:["B","D","P"]}, {l:"C", q:"🐱 Cat", a:"C", opts:["C","K","S"]},
+                {l:"D", q:"🐶 Dog", a:"D", opts:["D","B","G"]}, {l:"E", q:"🥚 Egg", a:"E", opts:["E","A","I"]}, {l:"F", q:"🐟 Fish", a:"F", opts:["F","V","P"]},
+                {l:"G", q:"🐐 Goat", a:"G", opts:["G","J","C"]}, {l:"H", q:"🎩 Hat", a:"H", opts:["H","N","M"]}, {l:"I", q:"🍦 Ice-cream", a:"I", opts:["I","E","U"]},
+                {l:"J", q:"🏺 Jug", a:"J", opts:["J","G","Y"]}, {l:"K", q:"🪁 Kite", a:"K", opts:["K","C","G"]}, {l:"L", q:"🦁 Lion", a:"L", opts:["L","N","R"]},
+                {l:"M", q:"🐒 Monkey", a:"M", opts:["M","N","W"]}, {l:"N", q:"🪹 Nest", a:"N", opts:["N","M","H"]}, {l:"O", q:"🍊 Orange", a:"O", opts:["O","A","U"]},
+                {l:"P", q:"🐧 Penguin", a:"P", opts:["P","B","D"]}, {l:"Q", q:"👸 Queen", a:"Q", opts:["Q","K","C"]}, {l:"R", q:"🐰 Rabbit", a:"R", opts:["R","L","W"]},
+                {l:"S", q:"☀️ Sun", a:"S", opts:["S","C","Z"]}, {l:"T", q:"🐯 Tiger", a:"T", opts:["T","D","F"]}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Beginning Sounds A to T", "Choose the correct starting letter.")}<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">`;
+            s3Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s3" data-q="s3-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${item.l} - ${item.q}</div>
+                        <div class="flex gap-2">
+                            ${item.opts.map(opt => `<div class="pill s4-opt" style="min-width:3rem; padding: 0.5rem;">${opt}</div>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 4: Reading Comprehension
+            const s4Items = [
+                {q:"1. What is the girl's name?", a:"Sara", opts:["Sara","Ayesha","Mariam"]},
+                {q:"2. How old is she?", a:"Seven", opts:["Six","Seven","Eight"]},
+                {q:"3. Which class does she study in?", a:"Class I", opts:["Class I","Class II","Class III"]},
+                {q:"4. Which city does she live in?", a:"Karachi", opts:["Lahore","Karachi","Islamabad"]},
+                {q:"5. What is her favourite colour?", a:"Blue", opts:["Red","Blue","Green"]},
+                {q:"6. What is her dog's name?", a:"Rocky", opts:["Rocky","Tommy","Bruno"]}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Reading Comprehension — 'Myself'", "Read the passage and answer.")}
+                <div class="bg-lightBlue p-6 rounded-xl border-2 border-gold mb-6 font-medium text-lg leading-relaxed">
+                    "My name is Sara. I am seven years old. I study in Class I. I live in Karachi with my family. I have one brother and one sister. My favourite colour is blue. I like to read books and play with my dog, Rocky."
+                </div><div class="space-y-4">`;
+            s4Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s4" data-q="s4-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${item.q}</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 5: Vowels a/an
+            const s5Items = [
+                {q:"___ apple", a:"an"}, {q:"___ dog", a:"a"}, {q:"___ umbrella", a:"an"}, {q:"___ ball", a:"a"}, {q:"___ elephant", a:"an"},
+                {q:"___ cat", a:"a"}, {q:"___ orange", a:"an"}, {q:"___ banana", a:"a"}, {q:"___ egg", a:"an"}, {q:"___ igloo", a:"an"}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Vowels & Articles", "Choose 'a' or 'an'.")}<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+            s5Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4 s4-question c1-s5" data-q="s5-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
+                        <div class="flex gap-2">
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">a</div>
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">an</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 6: Singular / Plural
+            const s6Items = [
+                {q:"Cat", a:"Cats", opts:["Cats", "Cates", "Catses"]}, {q:"Box", a:"Boxes", opts:["Boxs", "Boxes", "Boxies"]},
+                {q:"Baby", a:"Babies", opts:["Babys", "Babies", "Babyes"]}, {q:"Dog", a:"Dogs", opts:["Dogs", "Doges", "Dogies"]},
+                {q:"Bus", a:"Buses", opts:["Buss", "Buses", "Busies"]}, {q:"Toy", a:"Toys", opts:["Toys", "Toyes", "Toies"]},
+                {q:"Leaf", a:"Leaves", opts:["Leafs", "Leaves", "Leafes"]}, {q:"Man", a:"Men", opts:["Mans", "Men", "Mens"]},
+                {q:"Child", a:"Children", opts:["Childs", "Children", "Childes"]}, {q:"Fox", a:"Foxes", opts:["Foxs", "Foxes", "Foxies"]}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Singular / Plural", "Choose the correct plural.")}<div class="space-y-4">`;
+            s6Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s6" data-q="s6-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${i+1}. ${item.q} → </div>
+                        <div class="flex gap-2">
+                            ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 7: This / That
+            const s7Items = [
+                {q:"______ is my pencil. (it's in your hand)", a:"This"}, {q:"______ is a tall building far away.", a:"That"},
+                {q:"______ is my school bag. (right next to you)", a:"This"}, {q:"______ is a bird flying high in the sky.", a:"That"},
+                {q:"______ is my mother. (standing beside you)", a:"This"}, {q:"______ is a mountain far in the distance.", a:"That"},
+                {q:"______ is my favourite toy. (in your hands)", a:"This"}, {q:"______ is a boat on the sea, far away.", a:"That"}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("This / That", "Choose 'This' or 'That'.")}<div class="space-y-4">`;
+            s7Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question c1-s7" data-q="s7-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
+                        <div class="flex gap-2 shrink-0">
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">This</div>
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">That</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 8: Final Mini Test
+            const s8Items = [
+                {q:"1. 🐘 Elephant is:", a:"Living", opts:["🌱 Living", "🪨 Non-Living"]},
+                {q:"2. Which is a Naming Word?", a:"River", opts:["Jump", "River", "Fast", "Loudly"]},
+                {q:"3. 🪟 Window begins with: (Bonus: beyond T!)", a:"W", opts:["W", "V", "U"]},
+                {q:"4. ___ orange (a/an)", a:"an", opts:["a", "an"]},
+                {q:"5. Plural of 'Woman'", a:"Women", opts:["Womans", "Women", "Womens"]}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Super Challenge — Mini Test", "Show what you learned!")}<div class="space-y-4">`;
+            s8Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question c1-s8" data-q="s8-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${item.q}</div>
+                        <div class="flex flex-wrap gap-2 shrink-0">
+                            ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;" data-val="${opt.replace(/[^a-zA-Z-]/g, '').trim()}">${opt}</div>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Prepend HTML before the submit button
+            const submitBtn = container.lastElementChild;
+            container.insertAdjacentHTML('afterbegin', html);
+            
+            // Setup interactivity for newly injected pills
+            setupPillsInteractivity('#screen-worksheet-class1 .s4-question');
+        }
+
+        // Helper for pill interactivity
+        function setupPillsInteractivity(selector) {
+            document.querySelectorAll(selector).forEach(q => {
+                const pills = q.querySelectorAll('.s4-opt');
+                pills.forEach(pill => {
+                    // Prevent multiple listeners if setup again
+                    if (pill.dataset.bound) return;
+                    pill.dataset.bound = "true";
+                    
+                    pill.addEventListener('click', () => {
+                        pills.forEach(p => p.classList.remove('selected'));
+                        pill.classList.add('selected');
+                        q.classList.remove('pill-error');
+                        gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
+                    });
+                });
+            });
+        }
+
+        // Initialize Lenis for smooth scrolling
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true
+        });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // Date init (default today)
+        document.getElementById('studentDate').valueAsDate = new Date();
+
+        // ----------------------------------------------------
+        // SCREEN 1: Validation and Transitions
+        // ----------------------------------------------------
+        const s1Inputs = [document.getElementById('studentName'), document.getElementById('studentId'), document.getElementById('studentDate')];
+        const btnStart = document.getElementById('btn-start');
+
+        // Allow only numeric in studentId dynamically
+        document.getElementById('studentId').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkS1Validity();
+        });
+
+        s1Inputs.forEach(input => input.addEventListener('input', checkS1Validity));
+        s1Inputs.forEach(input => input.addEventListener('change', checkS1Validity));
+
+        function checkS1Validity() {
+            const isValid = s1Inputs.every(input => input.value.trim() !== '');
+            btnStart.disabled = !isValid;
+        }
+
+        btnStart.addEventListener('click', () => {
+            state.student.name = document.getElementById('studentName').value.trim();
+            state.student.id = document.getElementById('studentId').value.trim();
+            state.student.date = document.getElementById('studentDate').value;
+            
+            // GSAP Transition from S1 -> Selection
+            gsap.to('#screen-1', {
+                opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                    document.getElementById('screen-1').classList.remove('active');
+                    document.getElementById('screen-selection').classList.add('active');
+                    window.scrollTo(0, 0);
+                    
+                    document.getElementById('selection-greeting').innerText = `Hi ${state.student.name.split(' ')[0]}! Which worksheet would you like to try today?`;
+                    
+                    gsap.to('#screen-selection', { opacity: 1, duration: 0.1 });
+                    gsap.fromTo('.ws-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.2, ease: "back.out(1.2)" });
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // SCREEN 2: Worksheet Selection Interactivity
+        // ----------------------------------------------------
+        document.querySelectorAll('.ws-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const wsId = card.dataset.worksheet;
+                state.currentWorksheetId = wsId;
+                state.totalPossible = worksheetsConfig[wsId].totalPossible;
+                
+                // Update Main Subtitle
+                document.getElementById('main-subtitle').innerText = worksheetsConfig[wsId].title;
+                
+                // Render if dynamic
+                if (worksheetsConfig[wsId].render) {
+                    worksheetsConfig[wsId].render();
+                }
+                
+                const targetScreen = wsId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                
+                // GSAP Transition from Selection -> Worksheet
+                gsap.to('#screen-selection', {
+                    opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                        document.getElementById('screen-selection').classList.remove('active');
+                        document.querySelector(targetScreen).classList.add('active');
+                        window.scrollTo(0, 0);
+                        
+                        gsap.to(targetScreen, { opacity: 1, duration: 0.1 });
+                        gsap.to(`${targetScreen} .gs-reveal`, {
+                            opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "back.out(1.2)"
+                        });
+                    }
+                });
+            });
+        });
+
+        // ----------------------------------------------------
+        // SCREEN 2: Input Handling & Interactivity
+        // ----------------------------------------------------
+        // Restrict all number inputs to only numbers (strips text if pasted)
+        document.querySelectorAll('input[inputmode="numeric"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                this.classList.remove('input-error'); 
+            });
+        });
+
+        // Setup Section 4 (Pills / Radio Button Logic)
+        document.querySelectorAll('.s4-question').forEach(q => {
+            const pills = q.querySelectorAll('.s4-opt');
+            pills.forEach(pill => {
+                pill.addEventListener('click', () => {
+                    pills.forEach(p => p.classList.remove('selected')); // Deselect others
+                    pill.classList.add('selected'); // Select current
+                    q.classList.remove('pill-error'); 
+                    
+                    // Pop animation on tap
+                    gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
+                });
+            });
+        });
+
+        // Setup Section 6 (Grid Generation)
+        const s6Grid = document.getElementById('s6-grid');
+        for (let i = 1; i <= 20; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'number-tile';
+            tile.textContent = i;
+            tile.dataset.val = i;
+            tile.addEventListener('click', () => {
+                tile.classList.toggle('selected');
+                s6Grid.classList.remove('grid-error');
+                if(tile.classList.contains('selected')) {
+                    // Tap on animation
+                    gsap.fromTo(tile, {scale: 0.9, rotation: 0}, {scale: 1.1, rotation: 5, duration: 0.3, ease: "back.out(2)"});
+                } else {
+                    // Tap off animation
+                    gsap.to(tile, {scale: 1, rotation: 0, duration: 0.2});
+                }
+            });
+            s6Grid.appendChild(tile);
+        }
+
+        // ----------------------------------------------------
+        // VALIDATION & SUBMISSION
+        // ----------------------------------------------------
+        document.querySelectorAll('.btn-verify').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Pulse animation for button
+                gsap.to(btn, {scale: 0.95, duration: 0.1, yoyo: true, repeat: 1});
+                
+                let isValid = true;
+                let firstInvalid = null;
+                
+                const activeContainer = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                
+                // Validate Text Inputs (ignore those that are not graded in Class1 Part B)
+                const textInputs = document.querySelectorAll(`${activeContainer} input[type="text"]`);
+                textInputs.forEach(input => {
+                    // Skip validation for Part B of Class 1 (fun section without dataset ans)
+                    if (!input.dataset.ans && state.currentWorksheetId === 'class1') return;
+                    
+                    if(input.value.trim() === '') {
+                        isValid = false;
+                        input.classList.add('input-error');
+                        if(!firstInvalid) firstInvalid = input;
+                    }
+                });
+                
+                // Validate Pills (Must have one selected)
+                const s4Qs = document.querySelectorAll(`${activeContainer} .s4-question`);
+                s4Qs.forEach(q => {
+                    const selected = q.querySelector('.selected');
+                    if(!selected) {
+                        isValid = false;
+                        q.classList.add('pill-error');
+                        if(!firstInvalid) firstInvalid = q;
+                    }
+                });
+                
+                // Validate Table 2 Grid if applicable
+                if (state.currentWorksheetId === 'table2') {
+                    const s6Grid = document.getElementById('s6-grid');
+                    const s6Selected = document.querySelectorAll('#s6-grid .selected');
+                    if(s6Selected.length === 0) {
+                        isValid = false;
+                        s6Grid.classList.add('grid-error');
+                        if(!firstInvalid) firstInvalid = s6Grid;
+                    }
+                }
+                
+                if(!isValid) {
+                    // Smooth scroll to the first missing answer
+                    lenis.scrollTo(firstInvalid, { offset: -100, duration: 1 });
+                    // Shake it visually to draw attention
+                    gsap.fromTo(firstInvalid, {x: -10}, {x: 10, duration: 0.1, yoyo: true, repeat: 5, onComplete: () => gsap.set(firstInvalid, {x: 0})});
+                    return;
+                }
+                
+                // All valid, Grade the worksheet and transition
+                if (state.currentWorksheetId === 'table2') gradeWorksheetTable2();
+                else gradeWorksheetClass1();
+                
+                showResults();
+            });
+        });
+
+        // ----------------------------------------------------
+        // GRADING LOGIC
+        // ----------------------------------------------------
+        // Helper function to grade text input sections easily
+        const gradeInputs = (selector, sectionName, getQText) => {
+            document.querySelectorAll(selector).forEach((input, index) => {
+                const uAns = input.value.trim();
+                const cAns = input.dataset.ans;
+                if (!cAns) return; // Skip ungraded items
+                const isCorrect = uAns.toLowerCase() === cAns.toLowerCase();
+                if(isCorrect) state.totalCorrect++;
+                
+                state.results.push({
+                    q: getQText ? getQText(input, index) : `Blank ${index+1}`,
+                    userAns: uAns,
+                    correctAns: cAns,
+                    isCorrect: isCorrect,
+                    section: sectionName
+                });
+            });
+        };
+
+        // Helper to grade pill sections
+        const gradePills = (selector, sectionName) => {
+            document.querySelectorAll(selector).forEach(q => {
+                const qTextEl = q.querySelector('.font-baloo');
+                const qText = qTextEl ? qTextEl.innerText.trim().replace(/ ?\?$/, '') + ' ?' : 'Question';
+                const cAns = q.dataset.ans;
+                const selectedPill = q.querySelector('.selected');
+                const uAns = selectedPill ? selectedPill.innerText.replace(/[^a-zA-Z -]/g, '').trim() : 'None';
+                // For exact matches checking, especially on pills with emojis:
+                let isCorrect = uAns === cAns;
+                if (selectedPill && selectedPill.dataset.val) {
+                    isCorrect = selectedPill.dataset.val === cAns;
+                } else if (uAns.includes(cAns)) {
+                    isCorrect = true; // basic fallback for emoji inclusion
+                }
+
+                if(isCorrect) state.totalCorrect++;
+                
+                state.results.push({
+                    q: qText,
+                    userAns: selectedPill ? selectedPill.innerText.trim() : 'None',
+                    correctAns: cAns,
+                    isCorrect: isCorrect,
+                    section: sectionName
+                });
+            });
+        };
+
+        function gradeWorksheetTable2() {
+            state.results = [];
+            state.totalCorrect = 0;
+
+            // Section 2
+            gradeInputs('.q-s2', 'Section 2: Number Pattern', (el, i) => {
+                return i < 5 ? `Row A, blank ${i+1}` : `Row B, blank ${i-4}`;
+            });
+            
+            // Section 3
+            gradeInputs('.q-s3', 'Section 3: Fill in the Blanks', (el) => {
+                return el.parentElement.innerText.split('=')[0].trim() + ' = ?';
+            });
+            
+            // Section 4
+            gradePills('#screen-worksheet-table2 .s4-question', 'Section 4: Circle Answer');
+            
+            // Section 5
+            gradeInputs('.q-s5', 'Section 5: Count the Pairs', (el, i) => `Image group ${i+1}`);
+            
+            // Section 6 (Treated as ONE pass/fail item if exactly matched)
+            const s6Tiles = Array.from(document.querySelectorAll('#s6-grid .number-tile'));
+            const selectedVals = s6Tiles.filter(t => t.classList.contains('selected')).map(t => parseInt(t.dataset.val));
+            const correctSet = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20];
+            
+            let s6IsCorrect = false;
+            if(selectedVals.length === correctSet.length) {
+                selectedVals.sort((a,b)=>a-b); // sort numerically
+                s6IsCorrect = selectedVals.every((val, index) => val === correctSet[index]);
+            }
+            
+            if(s6IsCorrect) state.totalCorrect++;
+            state.results.push({
+                q: "Find the Table of 2 (Grid)",
+                userAns: selectedVals.length ? selectedVals.join(', ') : 'None',
+                correctAns: correctSet.join(', '),
+                isCorrect: s6IsCorrect,
+                section: 'Section 6: Multiples of 2'
+            });
+            
+            // Section 7
+            gradeInputs('.q-s7', 'Section 7: Mini Test', (el) => el.parentElement.innerText.split('=')[0].trim() + ' = ?');
+            gradeInputs('.q-s7b', 'Section 7: Bonus', (el, i) => `Bonus blank ${i+1}`);
+        }
+
+        function gradeWorksheetClass1() {
+            state.results = [];
+            state.totalCorrect = 0;
+            
+            gradePills('.c1-s1', 'Section 1: Living vs Non-Living');
+            gradePills('.c1-s2a', 'Section 2A: Naming Words');
+            // Section 2B is intentionally ignored
+            gradePills('.c1-s3', 'Section 3: Beginning Sounds');
+            gradePills('.c1-s4', 'Section 4: Reading Comprehension');
+            gradePills('.c1-s5', 'Section 5: Vowels & Articles');
+            gradePills('.c1-s6', 'Section 6: Singular / Plural');
+            gradePills('.c1-s7', 'Section 7: This / That');
+            gradePills('.c1-s8', 'Section 8: Mini Test');
+        }
+
+        // ----------------------------------------------------
+        // SCREEN 3: Results Display & Animations
+        // ----------------------------------------------------
+        function showResults() {
+            // Update Subtitle dynamically
+            document.getElementById('res-subtitle').innerText = `${worksheetsConfig[state.currentWorksheetId].title} — Results Summary`;
+            
+            // Populate Student Data
+            document.getElementById('res-name').innerText = state.student.name;
+            document.getElementById('res-id').innerText = state.student.id;
+            
+            const d = new Date(state.student.date);
+            document.getElementById('res-date').innerText = d.toLocaleDateString();
+            
+            const pct = Math.round((state.totalCorrect / state.totalPossible) * 100);
+            
+            // Populate Error Breakdown
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            
+            const incorrects = state.results.filter(r => !r.isCorrect);
+            
+            if(incorrects.length === 0) {
+                reviewList.innerHTML = `
+                    <div class="bg-green-50 text-green-800 p-6 rounded-xl border border-green-200 text-center font-bold text-xl">
+                        🎉 Perfect score! Nothing to review! 🌟
+                    </div>
+                `;
+            } else {
+                let currentSection = '';
+                incorrects.forEach(item => {
+                    if(item.section !== currentSection) {
+                        currentSection = item.section;
+                        const secHeader = document.createElement('h4');
+                        secHeader.className = 'font-bold text-navy mt-4 mb-2 bg-gray-100 inline-block px-3 py-1 rounded';
+                        secHeader.innerText = currentSection;
+                        reviewList.appendChild(secHeader);
+                    }
+                    const row = document.createElement('div');
+                    row.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100 gap-2';
+                    row.innerHTML = `
+                        <div class="font-medium text-navy text-lg">${item.q}</div>
+                        <div class="flex items-center gap-4 text-lg">
+                            <span class="text-red-600 line-through decoration-2">You: ${item.userAns}</span>
+                            <span class="text-green-600 font-bold">Correct: ${item.correctAns}</span>
+                        </div>
+                    `;
+                    reviewList.appendChild(row);
+                });
+            }
+            
+            // Set Tier Message
+            let msg = "";
+            if(pct >= 90) msg = "🌟 Outstanding! You're a Table of 2 Superstar!";
+            else if(pct >= 70) msg = "👍 Great job! Just a little more practice!";
+            else if(pct >= 50) msg = "💪 Good effort! Let's practice a bit more together.";
+            else msg = "📚 Keep practicing — you'll get there!";
+            
+            document.getElementById('res-message').innerText = msg;
+            
+            // Transition Active Worksheet -> S5 (Results)
+            const targetScreen = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+            
+            gsap.to(targetScreen, {
+                opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                    document.querySelector(targetScreen).classList.remove('active');
+                    document.getElementById('screen-results').classList.add('active');
+                    window.scrollTo(0, 0);
+                    
+                    // Reveal results card
+                    gsap.to('#screen-3', { opacity: 1, duration: 0.1 });
+                    gsap.from('#results-card', { y: 50, opacity: 0, duration: 0.6, ease: "back.out(1.2)" });
+                    
+                    // Animate Score Ring
+                    const ring = document.getElementById('score-ring');
+                    // dasharray is set up to have gap of 100
+                    gsap.fromTo(ring, {strokeDasharray: "0, 100"}, {strokeDasharray: `${pct}, 100`, duration: 2, ease: "power2.out", delay: 0.3});
+                    
+                    // Animate Score Number
+                    const scoreObj = { val: 0 };
+                    gsap.to(scoreObj, {
+                        val: state.totalCorrect,
+                        duration: 2,
+                        ease: "power2.out",
+                        delay: 0.3,
+                        onUpdate: () => {
+                            document.getElementById('score-num').innerText = Math.round(scoreObj.val);
+                        }
+                    });
+                    
+                    // Animate Percentage Number
+                    const pctObj = { val: 0 };
+                    gsap.to(pctObj, {
+                        val: pct,
+                        duration: 2,
+                        ease: "power2.out",
+                        delay: 0.3,
+                        onUpdate: () => {
+                            document.getElementById('res-percent').innerText = Math.round(pctObj.val) + "%";
+                        },
+                        onComplete: () => {
+                            fireConfetti(); // Trigger celebration at the end!
+                        }
+                    });
+                }
+            });
+        }
+
+        // ----------------------------------------------------
+        // CONFETTI ANIMATION
+        // ----------------------------------------------------
+        function fireConfetti() {
+            const container = document.getElementById('confetti');
+            container.style.display = 'block';
+            const colors = ['#f0b429', '#1e3a5f', '#ef4444', '#3b82f6', '#10b981'];
+            
+            for(let i=0; i<80; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti absolute rounded-full';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Mix of circles and squares
+                if(Math.random() > 0.5) conf.style.borderRadius = '0';
+                
+                // Random size variation
+                const size = Math.random() * 8 + 6;
+                conf.style.width = size + 'px';
+                conf.style.height = size + 'px';
+                
+                // Start from center of screen roughly
+                conf.style.left = '50%';
+                conf.style.top = '50%';
+                
+                container.appendChild(conf);
+                
+                // Burst Physics via GSAP
+                const angle = Math.random() * Math.PI * 2; 
+                const velocity = 100 + Math.random() * 300;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                gsap.to(conf, {
+                    x: vx * 1.5,
+                    y: (vy * 1.5) + 300, // +300 gravity pull
+                    rotation: Math.random() * 720 - 360,
+                    duration: 1.5 + Math.random() * 1.5,
+                    ease: "power1.out",
+                    opacity: 0,
+                    onComplete: () => conf.remove()
+                });
+            }
+            
+            setTimeout(() => { container.style.display = 'none'; }, 4000);
+        }
+
+        // ----------------------------------------------------
+        // TRY AGAIN & CHOOSE ANOTHER
+        // ----------------------------------------------------
+        document.getElementById('btn-retry').addEventListener('click', () => {
+            gsap.to('#screen-results', {
+                opacity: 0, duration: 0.3, onComplete: () => {
+                    document.getElementById('screen-results').classList.remove('active');
+                    
+                    const targetScreen = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                    
+                    // Reset all inputs & state
+                    document.querySelectorAll(`${targetScreen} input`).forEach(inp => inp.value = '');
+                    document.querySelectorAll(`${targetScreen} .selected`).forEach(el => el.classList.remove('selected'));
+                    document.querySelectorAll(`${targetScreen} .input-error`).forEach(el => el.classList.remove('input-error'));
+                    document.querySelectorAll(`${targetScreen} .pill-error`).forEach(el => el.classList.remove('pill-error'));
+                    if (state.currentWorksheetId === 'table2') document.getElementById('s6-grid').classList.remove('grid-error');
+                    
+                    // Go to Selection (or back to S1) - specification says "Try Again (same worksheet)" so we go back to the worksheet
+                    document.querySelector(targetScreen).classList.add('active');
+                    gsap.to(targetScreen, { opacity: 1, y: 0, duration: 0.4 });
+                    window.scrollTo(0, 0);
+                    
+                    // Reset visuals
+                    document.getElementById('score-ring').style.strokeDasharray = "0, 100";
+                    document.getElementById('score-num').innerText = "0";
+                    document.getElementById('res-percent').innerText = "0%";
+                    document.getElementById('res-message').innerText = "";
+                }
+            });
+        });
+
+        document.getElementById('btn-choose-another').addEventListener('click', () => {
+            gsap.to('#screen-results', {
+                opacity: 0, duration: 0.3, onComplete: () => {
+                    document.getElementById('screen-results').classList.remove('active');
+                    
+                    const targetScreen = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                    
+                    // Reset all inputs & state
+                    document.querySelectorAll(`${targetScreen} input`).forEach(inp => inp.value = '');
+                    document.querySelectorAll(`${targetScreen} .selected`).forEach(el => el.classList.remove('selected'));
+                    document.querySelectorAll(`${targetScreen} .input-error`).forEach(el => el.classList.remove('input-error'));
+                    document.querySelectorAll(`${targetScreen} .pill-error`).forEach(el => el.classList.remove('pill-error'));
+                    if (state.currentWorksheetId === 'table2') document.getElementById('s6-grid').classList.remove('grid-error');
+                    
+                    // Go to Selection Screen
+                    document.getElementById('screen-selection').classList.add('active');
+                    gsap.to('#screen-selection', { opacity: 1, y: 0, duration: 0.4 });
+                    window.scrollTo(0, 0);
+                    
+                    // Reset visuals
+                    document.getElementById('score-ring').style.strokeDasharray = "0, 100";
+                    document.getElementById('score-num').innerText = "0";
+                    document.getElementById('res-percent').innerText = "0%";
+                    document.getElementById('res-message').innerText = "";
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // EXPORT / DOWNLOAD LOGIC
+        // ----------------------------------------------------
+        function setupExportMode() {
+            const card = document.getElementById('results-card');
+            card.classList.add('pdf-mode'); // lock width for consistent snapshot
+            document.body.style.overflow = 'hidden'; 
+            return card;
+        }
+        
+        function cleanupExportMode() {
+            const card = document.getElementById('results-card');
+            card.classList.remove('pdf-mode');
+            document.body.style.overflow = '';
+        }
+
+        function getFileName(ext) {
+            const safeName = state.student.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'student';
+            const date = state.student.date || new Date().toISOString().split('T')[0];
+            const prefix = worksheetsConfig[state.currentWorksheetId].exportPrefix;
+            return `${prefix}_${safeName}_${date}.${ext}`;
+        }
+
+        // Download Image (PNG)
+        document.getElementById('btn-img').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-img');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Generating...";
+            btn.disabled = true;
+            
+            const card = setupExportMode();
+            
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const link = document.createElement('a');
+                link.download = getFileName('png');
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch(e) {
+                console.error(e);
+                alert("Sorry, could not generate image.");
+            }
+            
+            cleanupExportMode();
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+
+        // Download PDF
+        document.getElementById('btn-pdf').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-pdf');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Generating...";
+            btn.disabled = true;
+            
+            const card = setupExportMode();
+            
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                // Create PDF, A4 standard, Portrait
+                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(getFileName('pdf'));
+            } catch(e) {
+                console.error(e);
+                alert("Sorry, could not generate PDF.");
+            }
+            
+            cleanupExportMode();
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+        
+    </script>
 </body>
 </html>
