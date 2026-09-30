@@ -236,48 +236,54 @@
         <!-- SCREEN 2: Worksheet Selection -->
         <main id="screen-selection" class="screen max-w-7xl mx-auto">
             <h3 id="selection-greeting" class="text-3xl font-baloo font-bold text-center mb-8">Hi! Which worksheet would you like to try today?</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
                 <!-- Card 1 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="table2">
-                    <div class="text-6xl mb-4">🧮</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Maths Marvels — Table of 2</h4>
-                    <p class="text-gray-500 font-medium mb-6">Multiplication practice for KG learners</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="table2">
+                    <div class="text-5xl mb-3">🧮</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Maths Marvels — Table of 2</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Multiplication practice for KG learners</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
                 <!-- Card 2 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="class1">
-                    <div class="text-6xl mb-4">📖</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Little Explorers — Class I English & EVS</h4>
-                    <p class="text-gray-500 font-medium mb-6">Living things, naming words, sounds, grammar & more!</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="class1">
+                    <div class="text-5xl mb-3">📖</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Little Explorers — Class I English & EVS</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Living things, naming words, sounds, grammar & more!</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
                 <!-- Card 3 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="nature">
-                    <div class="text-6xl mb-4">🌿</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Nature Explorers — Living, Plants & Animals</h4>
-                    <p class="text-gray-500 font-medium mb-6">Basic classification fun for KG learners</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="nature">
+                    <div class="text-5xl mb-3">🌿</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Nature Explorers — Living, Plants & Animals</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Basic classification fun for KG learners</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
                 <!-- Card 4 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="islamiat">
-                    <div class="text-6xl mb-4">☪️</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Little Believers — Islamiat Basics</h4>
-                    <p class="text-gray-500 font-medium mb-6">Five Pillars, Prophets, Angels & Holy Books</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start &rarr;</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="islamiat">
+                    <div class="text-5xl mb-3">☪️</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Little Believers — Islamiat Basics</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Five Pillars, Prophets, Angels & Holy Books</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
                 <!-- Card 5 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="numberNinjas">
-                    <div class="text-6xl mb-4">&#128290;</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Number Ninjas &mdash; Class II Maths & Grammar</h4>
-                    <p class="text-gray-500 font-medium mb-6">3-digit addition/subtraction + nouns & verbs</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start &rarr;</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="numberNinjas">
+                    <div class="text-5xl mb-3">&#128290;</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Number Ninjas &mdash; Class II Maths & Grammar</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">3-digit addition/subtraction + nouns & verbs</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
                 <!-- Card 6 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="grammarChamps">
-                    <div class="text-6xl mb-4">✍️</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Grammar Champs &mdash; Class III Nouns, Verbs & Articles</h4>
-                    <p class="text-gray-500 font-medium mb-6">Types of nouns, -ing verbs, and a/an articles</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start &rarr;</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="grammarChamps">
+                    <div class="text-5xl mb-3">✍️</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Grammar Champs &mdash; Class III Nouns, Verbs & Articles</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Types of nouns, -ing verbs, and a/an articles</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
             </div>
         </main>
