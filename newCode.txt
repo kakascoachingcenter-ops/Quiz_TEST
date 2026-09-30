@@ -1,0 +1,150 @@
+﻿function renderGrammarChampsWorksheet() {
+    const container = document.getElementById('screen-worksheet-grammarChamps');
+    if (container.children.length > 2) return;
+
+    let html = '';
+    let sectionCount = 1;
+
+    const secHeader = (title, subtitle) => `
+        <div class="flex items-center gap-4 mb-2">
+            <div class="badge">${sectionCount++}</div>
+            <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+        </div>
+        ${subtitle ? <p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p> : ''}
+    `;
+
+    // Section 1: Types of Nouns
+    const s1Items = [
+        {q: "dog", a: "Common Noun"}, {q: "Karachi", a: "Proper Noun"}, {q: "a herd of cows", a: "Collective Noun"},
+        {q: "Ali", a: "Proper Noun"}, {q: "teacher", a: "Common Noun"}, {q: "a flock of birds", a: "Collective Noun"},
+        {q: "river", a: "Common Noun"}, {q: "Eid", a: "Proper Noun"}, {q: "a team of players", a: "Collective Noun"},
+        {q: "Pakistan", a: "Proper Noun"}, {q: "book", a: "Common Noun"}, {q: "a bunch of grapes", a: "Collective Noun"}
+    ];
+    html += <div class="section-card gs-reveal"> + secHeader("Types of Nouns", "Tap the correct noun type.") + <div class="space-y-4">;
+    s1Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s1" data-q="s1-${i}" data-ans="${item.a}">
+                <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex flex-wrap gap-4">
+                    <div class="pill s4-opt" data-val="Common Noun">Common Noun</div>
+                    <div class="pill s4-opt" data-val="Proper Noun">Proper Noun</div>
+                    <div class="pill s4-opt" data-val="Collective Noun">Collective Noun</div>
+                </div>
+            </div>`;
+    });
+    html += </div></div>;
+
+    // Section 2: Verbs with -ing
+    const s2Items = [
+        {q: "The boy is ___ (run) in the park.", a: "running", opts: ["runing", "running", "runnning"]},
+        {q: "She is ___ (write) a letter.", a: "writing", opts: ["writeing", "writting", "writing"]},
+        {q: "They are ___ (play) football.", a: "playing", opts: ["playing", "playeing", "plaing"]},
+        {q: "I am ___ (read) a book.", a: "reading", opts: ["reading", "readding", "readeing"]},
+        {q: "He is ___ (swim) in the pool.", a: "swimming", opts: ["swiming", "swimming", "swimmming"]},
+        {q: "We are ___ (sing) a song.", a: "singing", opts: ["singing", "singging", "singeing"]},
+        {q: "The cat is ___ (sit) on the mat.", a: "sitting", opts: ["siting", "sitting", "sittting"]},
+        {q: "She is ___ (dance) at the party.", a: "dancing", opts: ["danceing", "dansing", "dancing"]},
+        {q: "They are ___ (jump) on the bed.", a: "jumping", opts: ["jumping", "jumpping", "jumbing"]},
+        {q: "He is ___ (make) a sandcastle.", a: "making", opts: ["makeing", "makking", "making"]},
+        {q: "I am ___ (eat) my lunch.", a: "eating", opts: ["eating", "eatting", "eateing"]},
+        {q: "The baby is ___ (sleep) quietly.", a: "sleeping", opts: ["sleeping", "sleepping", "sleeepin"]}
+    ];
+    html += <div class="section-card gs-reveal"> + secHeader("Verbs with '-ing'", "Tap the correct spelling.") + <div class="space-y-4">;
+    s2Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-s2" data-q="s2-${i}" data-ans="${item.a}">
+                <div class="text-xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex flex-wrap gap-3">
+                    ${item.opts.map(opt => <div class="pill s4-opt" data-val="${opt}">${opt}</div>).join('')}
+                </div>
+            </div>`;
+    });
+    html += </div></div>;
+
+    // Section 3: Articles
+    const s3Items = [
+        {q: "___ apple", a: "an"}, {q: "___ dog", a: "a"}, {q: "___ umbrella", a: "an"},
+        {q: "___ ball", a: "a"}, {q: "___ elephant", a: "an"}, {q: "___ cat", a: "a"},
+        {q: "___ orange", a: "an"}, {q: "___ banana", a: "a"}, {q: "___ egg", a: "an"},
+        {q: "___ hour", a: "an"}, {q: "___ ice-cream", a: "an"}, {q: "___ table", a: "a"}
+    ];
+    html += <div class="section-card gs-reveal"> + secHeader("Articles — 'a' or 'an'", "Tap 'a' or 'an'.") + <div class="space-y-4">;
+    s3Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s3" data-q="s3-${i}" data-ans="${item.a}">
+                <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex gap-4">
+                    <div class="pill s4-opt" data-val="a">a</div>
+                    <div class="pill s4-opt" data-val="an">an</div>
+                </div>
+            </div>`;
+    });
+    html += </div></div>;
+
+    // Mini Test
+    const mtItems = [
+        {q: "\"a herd of sheep\" is a ___ noun", a: "Collective", opts: ["Common", "Proper", "Collective"]},
+        {q: "She is ___ (write) her name.", a: "writing", opts: ["writeing", "writing", "writting"]},
+        {q: "___ owl", a: "an", opts: ["a", "an"]},
+        {q: "\"London\" is a ___ noun", a: "Proper", opts: ["Common", "Proper", "Collective"]},
+        {q: "He is ___ (run) home.", a: "running", opts: ["runing", "running", "runnning"]}
+    ];
+    html += <div class="section-card gs-reveal"> + secHeader("Grammar Champs Mini Test 🏆", "Mixed review!") + <div class="space-y-4">;
+    mtItems.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-mt" data-q="mt-${i}" data-ans="${item.a}">
+                <div class="text-xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex flex-wrap gap-3">
+                    ${item.opts.map(opt => <div class="pill s4-opt" data-val="${opt}">${opt}</div>).join('')}
+                </div>
+            </div>`;
+    });
+    html += </div></div>;
+
+    // Insert into DOM
+    container.insertAdjacentHTML('afterbegin', html);
+    registerGrammarChampsInputs();
+}
+
+function registerGrammarChampsInputs() {
+    document.querySelectorAll('#screen-worksheet-grammarChamps .s4-question').forEach(q => {
+        const pills = q.querySelectorAll('.pill');
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                pills.forEach(p => p.classList.remove('selected'));
+                pill.classList.add('selected');
+                q.classList.remove('pill-error');
+                gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
+            });
+        });
+    });
+}
+
+function gradeWorksheetGrammarChamps() {
+    state.results = [];
+    state.totalCorrect = 0;
+
+    const gradePills = (selector, sectionName) => {
+        document.querySelectorAll(selector).forEach(q => {
+            const qTextEl = q.querySelector('.font-baloo');
+            const qText = qTextEl ? qTextEl.innerText.trim().replace(/ ?\?$/, '') + ' ?' : 'Question';
+            const cAns = q.dataset.ans;
+            const selectedPill = q.querySelector('.selected');
+            const uAns = selectedPill ? selectedPill.innerText.replace(/[^a-zA-Z -]/g, '').trim() : 'None';
+            let isCorrect = uAns === cAns;
+            if (selectedPill && selectedPill.dataset.val) {
+                isCorrect = selectedPill.dataset.val === cAns;
+            }
+            if (isCorrect) state.totalCorrect++;
+            state.results.push({
+                q: qText, userAns: selectedPill ? (selectedPill.dataset.val || uAns) : 'None',
+                correctAns: cAns, isCorrect, section: sectionName
+            });
+        });
+    }
+
+    gradePills('.gc-s1', 'Section 1: Types of Nouns');
+    gradePills('.gc-s2', 'Section 2: Verbs with -ing');
+    gradePills('.gc-s3', 'Section 3: Articles');
+    gradePills('.gc-mt', 'Grammar Champs Mini Test');
+}
