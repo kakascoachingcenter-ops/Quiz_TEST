@@ -33,6 +33,8 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
 
     <style>
         /* Base Styles */
@@ -64,7 +66,7 @@
         .btn:not(:disabled):active { transform: scale(0.95); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); }
         
-        .pill { padding: 0.5rem 1.5rem; border-radius: 9999px; border: 3px solid #1e3a5f; color: #1e3a5f; font-weight: 700; font-size: 1.25rem; cursor: pointer; transition: all 0.2s; background-color: white; user-select: none; text-align: center; min-width: 4rem;}
+        .pill { padding: 0.5rem 1.5rem; border-radius: 9999px; border: 3px solid #1e3a5f; color: #1e3a5f; font-weight: 700; font-size: 1.25rem; cursor: pointer; transition: all 0.2s; background-color: white; user-select: none; text-align: center; min-width: 4rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
         .pill.selected { background-color: #1e3a5f; color: white; transform: scale(1.05); }
         .pill-error { border-color: #ef4444; }
         
@@ -78,10 +80,110 @@
         /* Confetti */
         #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none;}
         
-        /* Capture Mode */
+        /* PDF Mode */
         .pdf-mode { width: 800px !important; max-width: 800px !important; margin: 0 auto !important; }
         .pdf-mode .no-print { display: none !important; }
         .pdf-mode .section-card { break-inside: avoid; page-break-inside: avoid; }
+
+        /* =====================================================
+           ISLAMIAT WORKSHEET — SPECIFIC STYLES
+           ===================================================== */
+
+        /* Flip Cards */
+        .flip-card { perspective: 1200px; }
+        .flip-card-inner {
+            position: relative; width: 100%; height: 100%;
+            transform-style: preserve-3d;
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute; inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flip-card-back { transform: rotateY(180deg); }
+
+        /* Islamic Geometric Header Background */
+        .islamiat-section-header { position: relative; z-index: 1; }
+        .islamiat-section-header::before {
+            content: '';
+            position: absolute;
+            inset: -8px -16px;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpolygon points='30,3 36,22 56,22 41,34 47,54 30,42 13,54 19,34 4,22 24,22' fill='none' stroke='%231e3a5f' stroke-width='0.8'/%3E%3C/svg%3E");
+            background-size: 60px 60px;
+            opacity: 0.06;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 8px;
+            animation: islamicParallax 20s linear infinite;
+        }
+        @keyframes islamicParallax {
+            0%   { background-position: 0px 0px; }
+            100% { background-position: 60px 60px; }
+        }
+
+        /* Islamiat Drag & Drop */
+        .isl-drag-item {
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+            position: relative;
+            z-index: 10;
+            transition: box-shadow 0.2s;
+        }
+        .isl-drag-item:active { cursor: grabbing; }
+        .isl-drop-zone {
+            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+        .zone-occupied {
+            border-color: #1e3a5f !important;
+            border-style: solid !important;
+            background-color: #eaf1fb !important;
+        }
+        .zone-correct-glow {
+            border-color: #10b981 !important;
+            background-color: #f0fdf4 !important;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.45) !important;
+        }
+        .zone-wrong-flash {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        .drag-correct {
+            border-color: #10b981 !important;
+            background-color: #f0fdf4 !important;
+        }
+        .drag-wrong-flash {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+
+        /* Pillar Icon Tiles (Section 1 graded round) */
+        .isl-pillar-tile {
+            border-width: 2px;
+            border-style: solid;
+            border-color: #1e3a5f;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .isl-pillar-tile.selected {
+            background-color: #1e3a5f !important;
+            border-color: #f0b429 !important;
+            border-width: 3px !important;
+            transform: scale(1.08);
+        }
+        .isl-pillar-tile.selected .text-navy { color: #f0b429 !important; }
+
+        /* Worship Grid Tile (Section 3) */
+        .isl-worship-tile { transition: transform 0.2s, background-color 0.2s; }
+        .isl-worship-tile.selected {
+            background-color: #f0b429 !important;
+            border-color: #f0b429 !important;
+        }
+
+        /* isl-reveal: initial state managed by GSAP (gsap.set), not CSS */
+        .isl-reveal { /* intentionally empty — GSAP controls visibility */ }
+        
+        #screen-results.active ~ #global-footer { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen pb-20">
@@ -123,6 +225,7 @@
                 </div>
                 
                 <div class="mt-8 text-center">
+                    <div id="login-error" class="hidden text-red-600 font-bold mb-4 px-4 py-3 bg-red-50 rounded-xl border-2 border-red-200"></div>
                     <button id="btn-start" class="btn btn-gold w-full flex items-center justify-center gap-2" disabled>
                         Start Worksheet <span class="text-2xl">→</span>
                     </button>
@@ -131,22 +234,56 @@
         </main>
 
         <!-- SCREEN 2: Worksheet Selection -->
-        <main id="screen-selection" class="screen max-w-4xl mx-auto">
+        <main id="screen-selection" class="screen max-w-7xl mx-auto">
             <h3 id="selection-greeting" class="text-3xl font-baloo font-bold text-center mb-8">Hi! Which worksheet would you like to try today?</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
                 <!-- Card 1 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="table2">
-                    <div class="text-6xl mb-4">🧮</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Maths Marvels — Table of 2</h4>
-                    <p class="text-gray-500 font-medium mb-6">Multiplication practice for KG learners</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="table2">
+                    <div class="text-5xl mb-3">🧮</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Maths Marvels — Table of 2</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Multiplication practice for KG learners</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
                 <!-- Card 2 -->
-                <div class="ws-card bg-white rounded-3xl p-8 shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer text-center relative overflow-hidden" data-worksheet="class1">
-                    <div class="text-6xl mb-4">📖</div>
-                    <h4 class="text-2xl font-baloo font-bold text-navy mb-2">Little Explorers — Class I English & EVS Worksheet</h4>
-                    <p class="text-gray-500 font-medium mb-6">Living things, naming words, sounds, grammar & more!</p>
-                    <button class="btn btn-gold w-full text-xl py-3">Start →</button>
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="class1">
+                    <div class="text-5xl mb-3">📖</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Little Explorers — Class I English & EVS</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Living things, naming words, sounds, grammar & more!</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
+                </div>
+                <!-- Card 3 -->
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="nature">
+                    <div class="text-5xl mb-3">🌿</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Nature Explorers — Living, Plants & Animals</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Basic classification fun for KG learners</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
+                </div>
+                <!-- Card 4 -->
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="islamiat">
+                    <div class="text-5xl mb-3">☪️</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Little Believers — Islamiat Basics</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Five Pillars, Prophets, Angels & Holy Books</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
+                </div>
+                <!-- Card 5 -->
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="numberNinjas">
+                    <div class="text-5xl mb-3">&#128290;</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Number Ninjas &mdash; Class II Maths & Grammar</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">3-digit addition/subtraction + nouns & verbs</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
+                </div>
+                <!-- Card 6 -->
+                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="grammarChamps">
+                    <div class="text-5xl mb-3">✍️</div>
+                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Grammar Champs &mdash; Class III Nouns, Verbs & Articles</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-4">Types of nouns, -ing verbs, and a/an articles</p>
+                    <div class="flex-grow"></div>
+                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
                 </div>
             </div>
         </main>
@@ -402,7 +539,55 @@
             </div>
         </main>
 
-        <!-- SCREEN 5: Results -->
+        <!-- SCREEN 5: Nature Explorers Worksheet -->
+        <main id="screen-worksheet-nature" class="screen worksheet-container">
+            <!-- Content will be added here -->
+            
+            <!-- Submit Nature -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 6: Little Believers — Islamiat Basics Worksheet -->
+        <main id="screen-worksheet-islamiat" class="screen worksheet-container">
+            <!-- Content rendered dynamically by renderIslamiatWorksheet() -->
+
+            <!-- Submit Islamiat -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 8: Number Ninjas Worksheet -->
+        <main id="screen-worksheet-numberNinjas" class="screen worksheet-container">
+            <!-- Content rendered dynamically by renderNumberNinjasWorksheet() -->
+
+            <!-- Submit Number Ninjas -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 9: Grammar Champs Worksheet -->
+        <main id="screen-worksheet-grammarChamps" class="screen worksheet-container">
+            <!-- Content rendered dynamically by renderGrammarChampsWorksheet() -->
+
+            <!-- Submit Grammar Champs -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
+        <!-- SCREEN 7: Results -->
         <main id="screen-results" class="screen">
             <div id="results-card" class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-4 border-lightBlue relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-4 bg-navy"></div>
@@ -430,7 +615,7 @@
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <div class="text-5xl font-baloo font-bold text-navy"><span id="score-num">0</span></div>
-                            <div class="text-lg text-gray-500 font-bold">out of 39</div>
+                            <div class="text-lg text-gray-500 font-bold">out of <span id="score-total">39</span></div>
                         </div>
                     </div>
                     
@@ -448,6 +633,10 @@
                     </div>
                 </div>
                 
+                <!-- Results Footer (for export) -->
+                <div class="text-center mt-10 pt-6 border-t-2 border-gray-100 text-navy font-bold text-sm sm:text-base" style="opacity: 0.8;">
+                    📞 KAKA'S COACHING INSTITUTE — 0300-2917500
+                </div>
             </div>
             
             <!-- Actions -->
@@ -459,9 +648,40 @@
             </div>
         </main>
         
+        <!-- Global Footer -->
+        <div class="text-center mt-12 pb-4 pt-8 text-navy font-bold text-sm sm:text-base border-t-2 border-gray-100 no-print" style="opacity: 0.8;" id="global-footer">
+            📞 KAKA'S COACHING INSTITUTE — 0300-2917500
+        </div>
     </div>
 
     <script>
+        // STUDENT ROSTER — update this list when students are added/removed
+        const studentRoster = [
+            { id: 1019, name: "Muhammad Zayan" },
+            { id: 1020, name: "Eshal Faraz" },
+            { id: 1023, name: "Usman Ali" },
+            { id: 1024, name: "Muhammad Esa" },
+            { id: 1025, name: "Muhammad Moosa" },
+            { id: 1026, name: "Kirama" },
+            { id: 1029, name: "Muhammad Ayan" },
+            { id: 1031, name: "Abdul-wasey" },
+            { id: 1032, name: "Mohtashim Shiekh" },
+            { id: 1033, name: "Nashwan Shiekh" },
+            { id: 1036, name: "Zoya" },
+            { id: 1037, name: "Muhammad" },
+            { id: 1038, name: "Musab Attia" },
+            { id: 1039, name: "Syed Zahra" },
+            { id: 1040, name: "Syed Marium" },
+            { id: 1041, name: "Ibrahim" },
+            { id: 1044, name: "Fatima" },
+            { id: 1045, name: "Zainab" },
+            { id: 1047, name: "Rabia" },
+            { id: 1048, name: "Hooria" },
+            { id: 1049, name: "Fatima" },
+            { id: 1050, name: "Dua" },
+            { id: 1051, name: "Syed Asad-ur-Rahman" },
+        ];
+
         // --- GRADING LOGIC EXPLANATION ---
         const state = {
             student: { name: '', id: '', date: '' },
@@ -483,6 +703,33 @@
                 exportPrefix: "KCI_ClassI_Result",
                 totalPossible: 74,
                 render: renderClass1Worksheet
+            },
+            nature: {
+                title: "Nature Explorers — Living, Plants & Animals",
+                exportPrefix: "KCI_NatureExplorers_Result",
+                totalPossible: 33,
+                render: renderNatureWorksheet
+            },
+            islamiat: {
+                title: "Little Believers &mdash; Islamiat Basics",
+                exportPrefix: "KCI_Islamiat_Result",
+                totalPossible: 21,
+                render: renderIslamiatWorksheet,
+                onShown: registerIslamiatScrollAnimations
+            },
+            numberNinjas: {
+                title: "Number Ninjas &mdash; Class II Maths & Grammar",
+                exportPrefix: "KCI_NumberNinjas_Result",
+                totalPossible: 41,
+                render: renderNumberNinjasWorksheet,
+                onShown: registerNumberNinjasInputs
+            },
+            grammarChamps: {
+                title: "Grammar Champs &mdash; Class III Nouns, Verbs & Articles",
+                exportPrefix: "KCI_GrammarChamps_Result",
+                totalPossible: 41,
+                render: renderGrammarChampsWorksheet,
+                onShown: registerGrammarChampsInputs
             }
         };
 
@@ -683,6 +930,104 @@
             setupPillsInteractivity('#screen-worksheet-class1 .s4-question');
         }
 
+        function renderNatureWorksheet() {
+            const container = document.getElementById('screen-worksheet-nature');
+            if (container.children.length > 2) return; // Already rendered
+
+            let html = '';
+            let sectionCount = 1;
+
+            // Helper to generate a section header
+            const secHeader = (title, subtitle) => `
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="badge">${sectionCount++}</div>
+                    <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+                </div>
+                ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+            `;
+
+            // Section 1: Living or Non-Living?
+            const s1Items = [
+                {q: "🐕 Dog", a: "Living"}, {q: "🌻 Sunflower", a: "Living"}, {q: "📱 Phone", a: "Non-Living"}, {q: "🐟 Fish", a: "Living"}, {q: "⚽ Ball", a: "Non-Living"},
+                {q: "🌳 Tree", a: "Living"}, {q: "🚲 Bicycle", a: "Non-Living"}, {q: "🦋 Butterfly", a: "Living"}, {q: "🪑 Chair", a: "Non-Living"}, {q: "🐦 Bird", a: "Living"}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Living or Non-Living?", "Tap the correct button.")}<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            s1Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question nat-s1" data-q="s1-${i}" data-ans="${item.a}">
+                        <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                        <div class="flex gap-2">
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">🌱 Living</div>
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">🪨 Non-Living</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 2: Plant or Animal?
+            const s2Items = [
+                {q: "🌹 Rose", a: "Plant"}, {q: "🐘 Elephant", a: "Animal"}, {q: "🌵 Cactus", a: "Plant"}, {q: "🐒 Monkey", a: "Animal"}, {q: "🌾 Wheat", a: "Plant"},
+                {q: "🐄 Cow", a: "Animal"}, {q: "🌴 Palm Tree", a: "Plant"}, {q: "🐍 Snake", a: "Animal"}, {q: "🌿 Fern", a: "Plant"}, {q: "🐢 Turtle", a: "Animal"}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Plant or Animal?", "Tap the correct button.")}<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            s2Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question nat-s2" data-q="s2-${i}" data-ans="${item.a}">
+                        <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                        <div class="flex gap-2">
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">🌿 Plant</div>
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;">🐾 Animal</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 3: Wild or Domestic Animal?
+            const s3Items = [
+                {q: "🐕 Dog", a: "Domestic"}, {q: "🦁 Lion", a: "Wild"}, {q: "🐄 Cow", a: "Domestic"}, {q: "🐯 Tiger", a: "Wild"}, 
+                {q: "🐐 Goat", a: "Domestic"}, {q: "🐘 Elephant", a: "Wild"}, {q: "🐈 Cat", a: "Domestic"}, {q: "🦒 Giraffe", a: "Wild"}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Wild or Domestic Animal?", "Where do they live?")}<div class="space-y-4">`;
+            s3Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question nat-s3" data-q="s3-${i}" data-ans="${item.a}">
+                        <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;" data-val="Domestic">🏠 Domestic (lives with people)</div>
+                            <div class="pill s4-opt" style="padding: 0.5rem 1rem;" data-val="Wild">🌳 Wild (lives in the forest/jungle)</div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Section 4: Mini Test
+            const s4Items = [
+                {q: "1. 🌸 Flower is:", a: "Living", opts: ["🌱 Living", "🪨 Non-Living"]},
+                {q: "2. 🖥️ Computer is:", a: "Non-Living", opts: ["🌱 Living", "🪨 Non-Living"]},
+                {q: "3. 🌳 Tree is a:", a: "Plant", opts: ["🌿 Plant", "🐾 Animal"]},
+                {q: "4. 🐇 Rabbit is a:", a: "Animal", opts: ["🌿 Plant", "🐾 Animal"]},
+                {q: "5. 🐺 Wolf is a:", a: "Wild", opts: ["🏠 Domestic", "🌳 Wild"]}
+            ];
+            html += `<div class="section-card gs-reveal">${secHeader("Nature Mini Test", "Show what you learned!")}<div class="space-y-4">`;
+            s4Items.forEach((item, i) => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question nat-s4" data-q="s4-${i}" data-ans="${item.a}">
+                        <div class="text-xl font-bold font-baloo">${item.q}</div>
+                        <div class="flex flex-wrap gap-2 shrink-0">
+                            ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;" data-val="${opt.replace(/[^a-zA-Z-]/g, '').trim()}">${opt}</div>`).join('')}
+                        </div>
+                    </div>`;
+            });
+            html += `</div></div>`;
+
+            // Prepend HTML before the submit button
+            const submitBtn = container.lastElementChild;
+            container.insertAdjacentHTML('afterbegin', html);
+            
+            // Setup interactivity for newly injected pills
+            setupPillsInteractivity('#screen-worksheet-nature .s4-question');
+        }
+
         // Helper for pill interactivity
         function setupPillsInteractivity(selector) {
             document.querySelectorAll(selector).forEach(q => {
@@ -701,6 +1046,447 @@
                 });
             });
         }
+
+        // ============================================================
+        // GSAP Plugin Registration (ScrollTrigger + Draggable)
+        // ============================================================
+        gsap.registerPlugin(ScrollTrigger, Draggable);
+
+        // ============================================================
+        // ISLAMIAT WORKSHEET — BUILD HELPERS
+        // ============================================================
+
+        // Builds a two-column drag-and-drop board HTML string
+        function buildDragBoard(boardId, items, zones) {
+            const leftCol = items.map(item => `
+                <div class="isl-drag-item font-bold text-navy bg-white rounded-xl border-2 border-navy px-4 py-4 shadow-sm text-center"
+                     id="drag-${item.id}"
+                     data-drag-id="${item.id}"
+                     data-correct-zone="${item.correctZone}"
+                     style="min-height:70px; display:flex; align-items:center; justify-content:center;">
+                    ${item.label}
+                </div>`).join('');
+
+            const rightCol = zones.map(zone => `
+                <div class="isl-drop-zone rounded-xl border-2 border-dashed border-gray-300 px-4 py-4 text-gray-500 font-medium text-center bg-gray-50"
+                     id="${zone.id}"
+                     data-zone-id="${zone.id}"
+                     style="min-height:70px; display:flex; align-items:center; justify-content:center;">
+                    ${zone.label}
+                </div>`).join('');
+
+            return `
+            <div class="grid grid-cols-2 gap-4 mb-2" id="drag-board-${boardId}">
+                <div class="space-y-3" id="drag-left-${boardId}">${leftCol}</div>
+                <div class="space-y-3" id="drag-right-${boardId}">${rightCol}</div>
+            </div>`;
+        }
+
+        // ============================================================
+        // ISLAMIAT WORKSHEET — RENDER FUNCTION
+        // ============================================================
+        function renderIslamiatWorksheet() {
+            const container = document.getElementById('screen-worksheet-islamiat');
+            if (container.children.length > 2) return; // Already rendered
+
+            // --- Pillar data (icons are all abstract/object — no human figures) ---
+            const pillars = {
+                shahada: { icon: '☪️', name: 'Shahada', desc: 'Believing in Allah and His Prophet ﷺ' },
+                salah:   { icon: '🙏', name: 'Salah',   desc: 'Praying five times a day' },
+                zakat:   { icon: '🪙', name: 'Zakat',   desc: 'Giving to those in need' },
+                sawm:    { icon: '🌙', name: 'Sawm',    desc: 'Fasting in the month of Ramadan' },
+                hajj:    { icon: '🕋', name: 'Hajj',    desc: 'The special journey to the Kaaba' }
+            };
+
+            let html = '';
+            let sectionCount = 1;
+
+            const secHeader = (title, subtitle) => `
+                <div class="flex items-center gap-4 mb-2 islamiat-section-header">
+                    <div class="badge">${sectionCount++}</div>
+                    <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+                </div>
+                ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+            `;
+
+            // ─── SECTION 1: Five Pillars ───────────────────────────────────────
+            html += `<div class="section-card isl-reveal" id="isl-sec1">`;
+            html += secHeader('The Five Pillars of Islam 🕌', 'Tap each card to learn — then match below!');
+
+            // Flip-cards (informational, not graded)
+            html += `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">`;
+            Object.entries(pillars).forEach(([key, p]) => {
+                html += `
+                <div class="flip-card cursor-pointer" data-pillar="${key}" style="height:140px;">
+                    <div class="flip-card-inner rounded-2xl">
+                        <div class="flip-card-front bg-white rounded-2xl border-2 border-blue-200 flex flex-col items-center justify-center shadow-md p-3">
+                            <div class="text-5xl mb-2">${p.icon}</div>
+                            <div class="text-xs font-bold text-navy opacity-60 text-center">Tap to reveal</div>
+                        </div>
+                        <div class="flip-card-back bg-navy rounded-2xl flex flex-col items-center justify-center text-white p-3">
+                            <div class="text-xl font-baloo font-bold mb-1">${p.name}</div>
+                            <div class="text-xs text-center leading-tight opacity-90">${p.desc}</div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+
+            // Graded recognition round — short description → tap matching pillar icon
+            html += `<div class="bg-yellow-50 rounded-2xl p-5 border-2 border-gold">
+                <p class="font-baloo font-bold text-lg text-navy mb-4">🎯 Now match the description to the right Pillar!</p>`;
+
+            const s1Graded = [
+                { q: "This means giving charity to the poor.",           ans: "zakat",   opts: ["zakat","hajj","salah"] },
+                { q: "This means praying five times a day.",             ans: "salah",   opts: ["salah","sawm","shahada"] },
+                { q: "This means fasting in Ramadan.",                   ans: "sawm",    opts: ["sawm","zakat","hajj"] },
+                { q: "This means the special journey to the Kaaba.",     ans: "hajj",    opts: ["hajj","salah","shahada"] },
+                { q: "This means believing in Allah and His Prophet ﷺ.", ans: "shahada", opts: ["shahada","sawm","zakat"] }
+            ];
+            s1Graded.forEach((item, i) => {
+                html += `
+                <div class="bg-white rounded-xl p-4 mb-3 s4-question isl-s1" data-q="isl-s1-${i}" data-ans="${item.ans}">
+                    <div class="text-base font-bold font-baloo mb-3">${i+1}. ${item.q}</div>
+                    <div class="flex gap-3 flex-wrap">
+                    ${item.opts.map(k => `
+                        <div class="s4-opt isl-pillar-tile cursor-pointer rounded-xl bg-gray-50 flex flex-col items-center justify-center p-3"
+                             data-val="${k}" style="min-width:80px; min-height:80px;">
+                            <div class="text-4xl mb-1">${pillars[k].icon}</div>
+                            <div class="text-xs font-bold text-navy">${pillars[k].name}</div>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+            });
+            html += `</div></div>`; // close graded box + section card
+
+            // ─── SECTION 2: First and Last Prophet ────────────────────────────
+            // CONTENT-SENSITIVITY: Prophets shown as TEXT ONLY — no icons, no figures
+            html += `<div class="section-card isl-reveal" id="isl-sec2">`;
+            html += secHeader('The First and Last Prophet', 'Tap the correct name!');
+            html += `<div class="space-y-4">`;
+            const s2Items = [
+                { q: "Who was the FIRST Prophet?", ans: "Prophet Adam (AS)",    opts: ["Prophet Adam (AS)", "Prophet Ibrahim (AS)", "Prophet Nooh (AS)"] },
+                { q: "Who was the LAST Prophet?",  ans: "Prophet Muhammad ﷺ",   opts: ["Prophet Isa (AS)", "Prophet Muhammad ﷺ", "Prophet Musa (AS)"] }
+            ];
+            s2Items.forEach((item, i) => {
+                html += `
+                <div class="bg-white p-5 rounded-2xl s4-question isl-s2" data-q="isl-s2-${i}" data-ans="${item.ans}">
+                    <div class="text-xl font-bold font-baloo mb-4">${i+1}. ${item.q}</div>
+                    <div class="flex flex-wrap gap-3">
+                    ${item.opts.map(opt => `
+                        <div class="s4-opt cursor-pointer border-2 border-navy rounded-xl px-5 py-3 font-bold text-navy text-center bg-white transition-all" data-val="${opt}">${opt}</div>`).join('')}
+                    </div>
+                </div>`;
+            });
+            html += `</div></div>`;
+
+            // ─── SECTION 3: Ways to Worship Allah ─────────────────────────────
+            html += `<div class="section-card isl-reveal" id="isl-sec3">`;
+            html += secHeader('Ways to Worship Allah', 'Tap ONLY the things that are ways to worship Allah.');
+            const s3Tiles = [
+                { id: 'praying',  icon: '🙏', label: 'Praying',           correct: true  },
+                { id: 'quran',    icon: '📖', label: 'Reading the Quran', correct: true  },
+                { id: 'fasting',  icon: '🌙', label: 'Fasting',           correct: true  },
+                { id: 'games',    icon: '🎮', label: 'Playing video games', correct: false },
+                { id: 'candy',    icon: '🍬', label: 'Eating candy',      correct: false },
+                { id: 'cartoons', icon: '📺', label: 'Watching cartoons', correct: false }
+            ];
+            html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-4" id="isl-s3-grid">`;
+            s3Tiles.forEach(tile => {
+                html += `
+                <div class="isl-worship-tile cursor-pointer rounded-2xl border-2 border-navy bg-white p-4 flex flex-col items-center justify-center gap-1 text-center"
+                     data-tile-id="${tile.id}" data-correct="${tile.correct}" style="min-height:90px;">
+                    <div class="text-4xl">${tile.icon}</div>
+                    <div class="text-sm font-bold text-navy">${tile.label}</div>
+                </div>`;
+            });
+            html += `</div></div>`;
+
+            // ─── SECTION 4: Match the Following — Drag and Drop ───────────────
+            // CONTENT-SENSITIVITY: Angels shown as ✨ + text label ONLY — no winged-person figure
+            html += `<div class="section-card isl-reveal" id="isl-sec4">`;
+            html += secHeader('Match the Following 🎯', 'Drag each item on the left to its correct answer on the right!');
+
+            // 4A: Angels and Duties
+            html += `<h4 class="font-baloo font-bold text-xl text-navy mb-3 pb-2 border-b-2 border-blue-100">4A — Angels and Their Duties</h4>`;
+            html += `<p class="text-sm text-gray-500 mb-3 italic">(✨ = Angel — shown as text only per Islamic convention)</p>`;
+            const angels4a = [
+                { id: 'jibreel',  label: '✨ Angel Jibreel (AS)',  correctZone: 'zone-messages' },
+                { id: 'mikaeel',  label: '✨ Angel Mikaeel (AS)',  correctZone: 'zone-rain'     },
+                { id: 'israfeel', label: '✨ Angel Israfeel (AS)', correctZone: 'zone-trumpet'  },
+                { id: 'izraeel',  label: '✨ Angel Izraeel (AS)',  correctZone: 'zone-souls'    }
+            ];
+            const zones4a = [
+                { id: 'zone-messages', label: 'Brings messages from Allah'          },
+                { id: 'zone-souls',    label: 'Takes the souls of people'           },
+                { id: 'zone-trumpet',  label: 'Will blow the trumpet on the Last Day' },
+                { id: 'zone-rain',     label: 'Takes care of rain and provision'    }
+            ];
+            html += buildDragBoard('4a', angels4a, zones4a);
+
+            // 4B: Books and Prophets
+            // CONTENT-SENSITIVITY: Prophets shown as text-only labels — no figure/avatar
+            html += `<h4 class="font-baloo font-bold text-xl text-navy mt-8 mb-3 pb-2 border-b-2 border-blue-100">4B — Holy Books and the Prophets Who Received Them</h4>`;
+            const books4b = [
+                { id: 'quran-book', label: '📖 The Quran',  correctZone: 'zone-muhammad' },
+                { id: 'tawrat',     label: '📖 The Tawrat', correctZone: 'zone-musa'     },
+                { id: 'zabur',      label: '📖 The Zabur',  correctZone: 'zone-dawood'   },
+                { id: 'injeel',     label: '📖 The Injeel', correctZone: 'zone-isa'      }
+            ];
+            const zones4b = [
+                { id: 'zone-isa',      label: 'Prophet Isa (AS)'      },
+                { id: 'zone-muhammad', label: 'Prophet Muhammad ﷺ'    },
+                { id: 'zone-dawood',   label: 'Prophet Dawood (AS)'   },
+                { id: 'zone-musa',     label: 'Prophet Musa (AS)'     }
+            ];
+            html += buildDragBoard('4b', books4b, zones4b);
+            html += `</div>`;
+
+            // ─── FINAL SECTION: Mini Test ──────────────────────────────────────
+            html += `<div class="section-card isl-reveal" id="isl-sec5">`;
+            html += secHeader('Little Believers Mini Test 🏆', "Show what you've learned!");
+            const miniTestItems = [
+                { q: "Which Pillar means giving charity?",        ans: "Zakat",               opts: ["Zakat", "Hajj", "Salah"] },
+                { q: "Who was the LAST Prophet?",                 ans: "Prophet Muhammad ﷺ",  opts: ["Prophet Isa (AS)", "Prophet Muhammad ﷺ", "Prophet Nooh (AS)"] },
+                { q: "Tap the way to worship Allah:",             ans: "Praying 🙏",           opts: ["Praying 🙏", "Playing toys 🧸"] },
+                { q: "Which Angel takes care of rain?",           ans: "Angel Mikaeel (AS)",  opts: ["Angel Mikaeel (AS)", "Angel Jibreel (AS)", "Angel Izraeel (AS)"] },
+                { q: "Which Book was given to Prophet Musa (AS)?", ans: "The Tawrat",          opts: ["The Quran", "The Tawrat", "The Injeel"] }
+            ];
+            html += `<div class="space-y-4">`;
+            miniTestItems.forEach((item, i) => {
+                html += `
+                <div class="bg-white p-5 rounded-2xl s4-question isl-mt" data-q="isl-mt-${i}" data-ans="${item.ans}">
+                    <div class="text-xl font-bold font-baloo mb-4">${i+1}. ${item.q}</div>
+                    <div class="flex flex-wrap gap-3">
+                    ${item.opts.map(opt => `
+                        <div class="s4-opt cursor-pointer border-2 border-navy rounded-xl px-5 py-3 font-bold text-navy text-center bg-white transition-all" data-val="${opt}">${opt}</div>`).join('')}
+                    </div>
+                </div>`;
+            });
+            html += `</div></div>`;
+
+            // Inject all content before the submit button
+            container.insertAdjacentHTML('afterbegin', html);
+
+            // Immediately hide all sections with GSAP so they don't flash visible
+            // before the screen transition completes and onShown fires.
+            gsap.set('#isl-sec1', { opacity: 0, scale: 0.88, y: 30 });
+            gsap.set('#isl-sec2', { opacity: 0, x: -70 });
+            gsap.set('#isl-sec3', { opacity: 0, rotation: -4, x: -30 });
+            gsap.set('#isl-sec4', { opacity: 0, x: 70 });
+            gsap.set('#isl-sec5', { opacity: 0, scale: 0.88, y: 40 });
+
+            // Setup pill interactivity for all graded tap-select questions
+            setupPillsInteractivity('#screen-worksheet-islamiat .s4-question');
+
+            // Setup worship grid toggle
+            setupIslamiatWorshipGrid();
+
+            // Initialize GSAP Draggable on all drag items
+            initIslamiatDragDrop();
+
+            // NOTE: registerIslamiatScrollAnimations() is called via onShown
+            // AFTER the screen becomes visible, so ScrollTrigger has correct positions.
+        }
+
+        // ============================================================
+        // ISLAMIAT — DRAG AND DROP INITIALIZER
+        // ============================================================
+        function initIslamiatDragDrop() {
+            if (!window.Draggable) { console.warn('GSAP Draggable not loaded'); return; }
+
+            // Shared state: placements[dragId] = zoneId, occupied[zoneId] = dragId
+            window.islamiatDragState = { placements: {}, occupied: {} };
+
+            document.querySelectorAll('#screen-worksheet-islamiat .isl-drag-item').forEach(item => {
+                Draggable.create(item, {
+                    type: 'x,y',
+                    zIndexBoost: true,
+                    onDragStart: function() {
+                        gsap.to(item, { scale: 1.06, boxShadow: '0 10px 24px rgba(0,0,0,0.22)', duration: 0.15 });
+                    },
+                    onDragEnd: function() {
+                        const self = this;
+                        gsap.to(item, { scale: 1, boxShadow: '0 2px 4px rgba(0,0,0,0.08)', duration: 0.15 });
+
+                        const dragId    = item.dataset.dragId;
+                        const corrZone  = item.dataset.correctZone;
+                        const itemRect  = item.getBoundingClientRect();
+                        const itemCX    = itemRect.left + itemRect.width  / 2;
+                        const itemCY    = itemRect.top  + itemRect.height / 2;
+
+                        // Find closest drop zone within 110px
+                        let closestZone = null;
+                        let closestDist = 110;
+                        document.querySelectorAll('#screen-worksheet-islamiat .isl-drop-zone').forEach(zone => {
+                            const zr   = zone.getBoundingClientRect();
+                            const dist = Math.hypot(itemCX - (zr.left + zr.width/2), itemCY - (zr.top + zr.height/2));
+                            if (dist < closestDist) { closestDist = dist; closestZone = zone; }
+                        });
+
+                        if (closestZone) {
+                            const zoneId    = closestZone.dataset.zoneId;
+                            const isCorrect = corrZone === zoneId;
+
+                            // Free previously occupied zone by this item
+                            const oldZoneId = window.islamiatDragState.placements[dragId];
+                            if (oldZoneId && oldZoneId !== zoneId) {
+                                delete window.islamiatDragState.occupied[oldZoneId];
+                                const oldEl = document.getElementById(oldZoneId);
+                                if (oldEl) oldEl.classList.remove('zone-occupied', 'zone-correct-glow');
+                            }
+
+                            // Evict any different item already in the target zone
+                            const occupant = window.islamiatDragState.occupied[zoneId];
+                            if (occupant && occupant !== dragId) {
+                                const evictEl = document.getElementById('drag-' + occupant);
+                                if (evictEl) {
+                                    delete window.islamiatDragState.placements[occupant];
+                                    evictEl.classList.remove('drag-correct');
+                                    gsap.to(evictEl, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.5)' });
+                                }
+                            }
+
+                            // Calculate snap coordinates (zone center relative to item's current transform)
+                            const zr       = closestZone.getBoundingClientRect();
+                            const snapToX  = (zr.left + zr.width/2)  - (itemRect.left + itemRect.width/2)  + self.x;
+                            const snapToY  = (zr.top  + zr.height/2) - (itemRect.top  + itemRect.height/2) + self.y;
+
+                            // Record placement
+                            window.islamiatDragState.placements[dragId] = zoneId;
+                            window.islamiatDragState.occupied[zoneId]   = dragId;
+                            closestZone.classList.add('zone-occupied');
+
+                            if (isCorrect) {
+                                // ✅ Correct: snap → green glow + scale bounce
+                                gsap.to(item, {
+                                    x: snapToX, y: snapToY, duration: 0.4, ease: 'back.out(2)',
+                                    onComplete: () => {
+                                        closestZone.classList.add('zone-correct-glow');
+                                        item.classList.add('drag-correct');
+                                        gsap.fromTo(item, { scale: 1 }, {
+                                            scale: 1.18, duration: 0.14, yoyo: true, repeat: 3, ease: 'power2.inOut',
+                                            onComplete: () => gsap.set(item, { scale: 1 })
+                                        });
+                                    }
+                                });
+                            } else {
+                                // ❌ Wrong: snap to zone briefly, flash red, then elastic-return to origin
+                                gsap.to(item, {
+                                    x: snapToX, y: snapToY, duration: 0.25, ease: 'power2.out',
+                                    onComplete: () => {
+                                        closestZone.classList.add('zone-wrong-flash');
+                                        item.classList.add('drag-wrong-flash');
+                                        gsap.fromTo(item,
+                                            { x: snapToX - 8 },
+                                            { x: snapToX + 8, duration: 0.08, yoyo: true, repeat: 5,
+                                              onComplete: () => {
+                                                  item.classList.remove('drag-wrong-flash');
+                                                  closestZone.classList.remove('zone-wrong-flash', 'zone-occupied');
+                                                  // Remove placement — wrong items do NOT stay placed
+                                                  delete window.islamiatDragState.placements[dragId];
+                                                  delete window.islamiatDragState.occupied[zoneId];
+                                                  gsap.to(item, { x: 0, y: 0, duration: 0.55, ease: 'elastic.out(1, 0.4)' });
+                                              }
+                                            }
+                                        );
+                                    }
+                                });
+                            }
+                        } else {
+                            // Not near any zone → elastic return to starting position
+                            const oldZoneId = window.islamiatDragState.placements[dragId];
+                            if (oldZoneId) {
+                                delete window.islamiatDragState.occupied[oldZoneId];
+                                delete window.islamiatDragState.placements[dragId];
+                                const oldEl = document.getElementById(oldZoneId);
+                                if (oldEl) oldEl.classList.remove('zone-occupied', 'zone-correct-glow');
+                                item.classList.remove('drag-correct');
+                            }
+                            gsap.to(item, { x: 0, y: 0, duration: 0.55, ease: 'elastic.out(1, 0.4)' });
+                        }
+                    }
+                });
+            });
+        }
+
+        // ============================================================
+        // ISLAMIAT — WORSHIP GRID TOGGLE
+        // ============================================================
+        function setupIslamiatWorshipGrid() {
+            document.querySelectorAll('#screen-worksheet-islamiat .isl-worship-tile').forEach(tile => {
+                tile.addEventListener('click', () => {
+                    tile.classList.toggle('selected');
+                    document.getElementById('isl-s3-grid').classList.remove('grid-error');
+                    if (tile.classList.contains('selected')) {
+                        gsap.fromTo(tile, { scale: 0.9, rotation: 0 }, { scale: 1.1, rotation: 5, duration: 0.3, ease: 'back.out(2)' });
+                    } else {
+                        gsap.to(tile, { scale: 1, rotation: 0, duration: 0.2 });
+                    }
+                });
+            });
+        }
+
+        // ============================================================
+        // ISLAMIAT — SCROLL-TRIGGER ANIMATIONS (distinct per section)
+        // ============================================================
+        function registerIslamiatScrollAnimations() {
+            // Called by onShown AFTER the screen is active and visible.
+            // All sections were pre-hidden with gsap.set() inside renderIslamiatWorksheet().
+            // We animate FROM that hidden state TO the visible state with explicit destinations.
+
+            // Section 1: already in viewport at top — animate in immediately (no ScrollTrigger)
+            gsap.to('#isl-sec1', {
+                opacity: 1, scale: 1, y: 0,
+                duration: 0.8, ease: 'back.out(1.5)', delay: 0.05,
+                onComplete: () => gsap.set('#isl-sec1', { clearProps: 'transform' })
+            });
+
+            // Section 2: slide in from left when scrolled into view
+            gsap.fromTo('#isl-sec2',
+                { opacity: 0, x: -70 },
+                { opacity: 1, x: 0, duration: 0.75, ease: 'power3.out',
+                  scrollTrigger: { trigger: '#isl-sec2', start: 'top 88%', once: true } }
+            );
+
+            // Section 3: rotate-in from left edge
+            gsap.fromTo('#isl-sec3',
+                { opacity: 0, rotation: -4, x: -30 },
+                { opacity: 1, rotation: 0, x: 0, duration: 0.7, ease: 'power3.out',
+                  transformOrigin: 'left center',
+                  scrollTrigger: { trigger: '#isl-sec3', start: 'top 88%', once: true } }
+            );
+
+            // Section 4: slide in from right
+            gsap.fromTo('#isl-sec4',
+                { opacity: 0, x: 70 },
+                { opacity: 1, x: 0, duration: 0.75, ease: 'power3.out',
+                  scrollTrigger: { trigger: '#isl-sec4', start: 'top 88%', once: true } }
+            );
+
+            // Section 5 (Mini Test): scale-up from bottom
+            gsap.fromTo('#isl-sec5',
+                { opacity: 0, scale: 0.88, y: 40 },
+                { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: 'back.out(1.5)',
+                  scrollTrigger: { trigger: '#isl-sec5', start: 'top 88%', once: true } }
+            );
+
+            ScrollTrigger.refresh();
+        }
+
+        // ============================================================
+        // ISLAMIAT — FLIP-CARD INTERACTIVITY
+        // (Set up inside the ws-card click handler after render;
+        //  also safe to call early — delegated listener re-checks)
+        // ============================================================
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.flip-card');
+            if (!card) return;
+            const inner   = card.querySelector('.flip-card-inner');
+            const flipped  = card.dataset.flipped === 'true';
+            gsap.to(inner, { rotateY: flipped ? 0 : 180, duration: 0.55, ease: 'power2.inOut' });
+            card.dataset.flipped = flipped ? 'false' : 'true';
+        });
 
         // Initialize Lenis for smooth scrolling
         const lenis = new Lenis({
@@ -734,15 +1520,59 @@
         function checkS1Validity() {
             const isValid = s1Inputs.every(input => input.value.trim() !== '');
             btnStart.disabled = !isValid;
+            
+            // Clear any active errors when user edits fields
+            const errorContainer = document.getElementById('login-error');
+            if (errorContainer && !errorContainer.classList.contains('hidden')) {
+                errorContainer.classList.add('hidden');
+                document.getElementById('studentId').classList.remove('input-error');
+            }
         }
 
         btnStart.addEventListener('click', () => {
-            state.student.name = document.getElementById('studentName').value.trim();
-            state.student.id = document.getElementById('studentId').value.trim();
-            state.student.date = document.getElementById('studentDate').value;
+            const enteredId = document.getElementById('studentId').value.trim();
+            const enteredDate = document.getElementById('studentDate').value;
             
+            const errorContainer = document.getElementById('login-error');
+            const nameInput = document.getElementById('studentName');
+            const idInput = document.getElementById('studentId');
+            const screen1Card = document.querySelector('#screen-1 .bg-white');
+
+            const showError = (msg, fieldsToHighlight) => {
+                errorContainer.innerText = msg;
+                errorContainer.classList.remove('hidden');
+                fieldsToHighlight.forEach(el => el.classList.add('input-error'));
+                gsap.fromTo(screen1Card, {x: -10}, {x: 10, duration: 0.1, yoyo: true, repeat: 5, onComplete: () => gsap.set(screen1Card, {x: 0})});
+            };
+
+            const matchedStudent = studentRoster.find(s => s.id === parseInt(enteredId));
+            
+            if (!matchedStudent) {
+                showError("This ID isn't registered. Please check with your teacher.", [idInput]);
+                return;
+            }
+            
+            // Name Correction & Flash
+            const typedName = nameInput.value.trim();
+            nameInput.value = matchedStudent.name; 
+            
+            state.student.name = matchedStudent.name; // Use on-file name
+            state.student.id = enteredId;
+            state.student.date = enteredDate;
+            
+            // If the name was corrected, show a brief flash to draw attention before transitioning
+            let delayMs = 0;
+            if (typedName.toLowerCase() !== matchedStudent.name.toLowerCase()) {
+                gsap.fromTo(nameInput, 
+                    { backgroundColor: '#dcfce3', color: '#166534', borderColor: '#22c55e' }, 
+                    { backgroundColor: '#f9fafb', color: '#1e3a5f', borderColor: '#e5e7eb', duration: 0.8 }
+                );
+                delayMs = 0.6; // delay transition so they see it
+            }
+
             // GSAP Transition from S1 -> Selection
             gsap.to('#screen-1', {
+                delay: delayMs,
                 opacity: 0, y: -20, duration: 0.4, onComplete: () => {
                     document.getElementById('screen-1').classList.remove('active');
                     document.getElementById('screen-selection').classList.add('active');
@@ -773,7 +1603,7 @@
                     worksheetsConfig[wsId].render();
                 }
                 
-                const targetScreen = wsId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                const targetScreen = '#screen-worksheet-' + wsId;
                 
                 // GSAP Transition from Selection -> Worksheet
                 gsap.to('#screen-selection', {
@@ -786,6 +1616,11 @@
                         gsap.to(`${targetScreen} .gs-reveal`, {
                             opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "back.out(1.2)"
                         });
+
+                        // Let any worksheet run post-activation setup (e.g. ScrollTrigger registration)
+                        if (worksheetsConfig[wsId] && worksheetsConfig[wsId].onShown) {
+                            worksheetsConfig[wsId].onShown();
+                        }
                     }
                 });
             });
@@ -849,13 +1684,13 @@
                 let isValid = true;
                 let firstInvalid = null;
                 
-                const activeContainer = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                const activeContainer = `#screen-worksheet-${state.currentWorksheetId}`;
                 
                 // Validate Text Inputs (ignore those that are not graded in Class1 Part B)
                 const textInputs = document.querySelectorAll(`${activeContainer} input[type="text"]`);
                 textInputs.forEach(input => {
-                    // Skip validation for Part B of Class 1 (fun section without dataset ans)
-                    if (!input.dataset.ans && state.currentWorksheetId === 'class1') return;
+                    // Skip validation for ungraded inputs (Class 1 Part B, Number Ninjas carry boxes)
+                    if (!input.dataset.ans && (state.currentWorksheetId === 'class1' || state.currentWorksheetId === 'numberNinjas')) return;
                     
                     if(input.value.trim() === '') {
                         isValid = false;
@@ -885,6 +1720,37 @@
                         if(!firstInvalid) firstInvalid = s6Grid;
                     }
                 }
+
+                // Validate Islamiat-specific elements (worship grid + all 8 drag items placed)
+                if (state.currentWorksheetId === 'islamiat') {
+                    const worshipSelected = document.querySelectorAll('#isl-s3-grid .isl-worship-tile.selected');
+                    if (worshipSelected.length === 0) {
+                        isValid = false;
+                        const s3Grid = document.getElementById('isl-s3-grid');
+                        if (s3Grid) s3Grid.classList.add('grid-error');
+                        if (!firstInvalid) firstInvalid = document.getElementById('isl-sec3');
+                    }
+                    const totalDragItems = document.querySelectorAll('#screen-worksheet-islamiat .isl-drag-item').length;
+                    const placedCount    = Object.keys((window.islamiatDragState || {}).placements || {}).length;
+                    if (placedCount < totalDragItems) {
+                        isValid = false;
+                        if (!firstInvalid) firstInvalid = document.getElementById('isl-sec4');
+                    }
+                }
+
+                // Validate Number Ninjas: each answer column group needs all 3 digits filled
+                if (state.currentWorksheetId === 'numberNinjas') {
+                    document.querySelectorAll(`${activeContainer} .nn-col-group`).forEach(group => {
+                        const digits = group.querySelectorAll('.nn-digit');
+                        digits.forEach(d => {
+                            if (d.value.trim() === '') {
+                                isValid = false;
+                                d.classList.add('input-error');
+                                if (!firstInvalid) firstInvalid = group;
+                            }
+                        });
+                    });
+                }
                 
                 if(!isValid) {
                     // Smooth scroll to the first missing answer
@@ -896,9 +1762,14 @@
                 
                 // All valid, Grade the worksheet and transition
                 if (state.currentWorksheetId === 'table2') gradeWorksheetTable2();
-                else gradeWorksheetClass1();
+                else if (state.currentWorksheetId === 'class1') gradeWorksheetClass1();
+                else if (state.currentWorksheetId === 'nature') gradeWorksheetNature();
+                else if (state.currentWorksheetId === 'islamiat') gradeWorksheetIslamiat();
+                else if (state.currentWorksheetId === 'numberNinjas') gradeWorksheetNumberNinjas();
+                else if (state.currentWorksheetId === 'grammarChamps') gradeWorksheetGrammarChamps();
                 
                 showResults();
+
             });
         });
 
@@ -1012,6 +1883,527 @@
             gradePills('.c1-s8', 'Section 8: Mini Test');
         }
 
+        function gradeWorksheetNature() {
+            state.results = [];
+            state.totalCorrect = 0;
+
+            gradePills('.nat-s1', 'Section 1: Living or Non-Living?');
+            gradePills('.nat-s2', 'Section 2: Plant or Animal?');
+            gradePills('.nat-s3', 'Section 3: Wild or Domestic Animal?');
+            gradePills('.nat-s4', 'Section 4: Nature Mini Test');
+        }
+
+        // ============================================================
+        // ISLAMIAT — GRADING ORCHESTRATOR  (total: 21 items)
+        // ============================================================
+        function gradeWorksheetIslamiat() {
+            state.results = [];
+            state.totalCorrect = 0;
+
+            // Section 1: Five Pillars — 5 graded icon-choice items
+            gradePills('.isl-s1', 'Section 1: Five Pillars of Islam');
+
+            // Section 2: Prophets — 2 text-choice items
+            gradePills('.isl-s2', 'Section 2: First and Last Prophet');
+
+            // Section 3: Worship grid — 1 set-match item
+            gradeIslamiatWorshipGrid();
+
+            // Section 4: Drag-and-drop — 8 pairs (4A + 4B)
+            gradeIslamiatDragDrop();
+
+            // Mini Test — 5 items
+            gradePills('.isl-mt', 'Little Believers Mini Test');
+        }
+
+        // Section 3: set-match grading (must select exactly {praying, quran, fasting})
+        function gradeIslamiatWorshipGrid() {
+            const correctIds = ['praying', 'quran', 'fasting'];
+            const tiles = document.querySelectorAll('#screen-worksheet-islamiat .isl-worship-tile');
+            const selectedIds = Array.from(tiles)
+                .filter(t => t.classList.contains('selected'))
+                .map(t => t.dataset.tileId);
+
+            const isCorrect = correctIds.length === selectedIds.length &&
+                              correctIds.every(id => selectedIds.includes(id));
+            if (isCorrect) state.totalCorrect++;
+
+            state.results.push({
+                q: 'Ways to Worship Allah — tap-all-that-apply grid',
+                userAns: selectedIds.length ? selectedIds.join(', ') : 'None selected',
+                correctAns: correctIds.join(', '),
+                isCorrect,
+                section: 'Section 3: Ways to Worship Allah'
+            });
+        }
+
+        // Section 4: grade each drag-drop pair individually
+        function gradeIslamiatDragDrop() {
+            const zoneLabels = {
+                'zone-messages': 'Brings messages from Allah',
+                'zone-rain':     'Takes care of rain and provision',
+                'zone-trumpet':  'Will blow the trumpet on the Last Day',
+                'zone-souls':    'Takes the souls of people',
+                'zone-muhammad': 'Prophet Muhammad ﷺ',
+                'zone-musa':     'Prophet Musa (AS)',
+                'zone-dawood':   'Prophet Dawood (AS)',
+                'zone-isa':      'Prophet Isa (AS)'
+            };
+            const allPairs = [
+                // 4A — Angels & Duties
+                { dragId: 'jibreel',   label: 'Angel Jibreel (AS)',  correctZone: 'zone-messages', correctLabel: 'Brings messages from Allah' },
+                { dragId: 'mikaeel',   label: 'Angel Mikaeel (AS)',  correctZone: 'zone-rain',     correctLabel: 'Takes care of rain and provision' },
+                { dragId: 'israfeel',  label: 'Angel Israfeel (AS)', correctZone: 'zone-trumpet',  correctLabel: 'Will blow the trumpet on the Last Day' },
+                { dragId: 'izraeel',   label: 'Angel Izraeel (AS)',  correctZone: 'zone-souls',    correctLabel: 'Takes the souls of people' },
+                // 4B — Books & Prophets
+                { dragId: 'quran-book', label: 'The Quran',  correctZone: 'zone-muhammad', correctLabel: 'Prophet Muhammad ﷺ' },
+                { dragId: 'tawrat',     label: 'The Tawrat', correctZone: 'zone-musa',     correctLabel: 'Prophet Musa (AS)' },
+                { dragId: 'zabur',      label: 'The Zabur',  correctZone: 'zone-dawood',   correctLabel: 'Prophet Dawood (AS)' },
+                { dragId: 'injeel',     label: 'The Injeel', correctZone: 'zone-isa',      correctLabel: 'Prophet Isa (AS)' }
+            ];
+
+            const placements = window.islamiatDragState ? window.islamiatDragState.placements : {};
+
+            allPairs.forEach(pair => {
+                const placedZoneId = placements[pair.dragId];
+                const isCorrect    = placedZoneId === pair.correctZone;
+                if (isCorrect) state.totalCorrect++;
+
+                const userAnsLabel = placedZoneId ? (zoneLabels[placedZoneId] || placedZoneId) : 'Not placed';
+                // Rich review text for incorrect drag-drop: shows exactly what was matched vs what was correct
+                const reviewQ = !isCorrect && placedZoneId
+                    ? `You matched '${pair.label}' with '${userAnsLabel}' — correct answer: '${pair.correctLabel}'`
+                    : `${pair.label} → ?`;
+
+                state.results.push({
+                    q: reviewQ,
+                    userAns: userAnsLabel,
+                    correctAns: pair.correctLabel,
+                    isCorrect,
+                    section: 'Section 4: Match the Following'
+                });
+            });
+        }
+
+// ============================================================
+// NUMBER NINJAS WORKSHEET
+// ============================================================
+
+function renderNumberNinjasWorksheet() {
+    const container = document.getElementById('screen-worksheet-numberNinjas');
+    // We expect 1 child (the submit button div) to be present initially
+    if (container.children.length > 2) return; 
+
+    let html = '';
+    let sectionCount = 1;
+
+    const secHeader = (title, subtitle) => `
+        <div class="flex items-center gap-4 mb-2">
+            <div class="badge">${sectionCount++}</div>
+            <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+        </div>
+        ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+    `;
+
+    // SECTION 1: Addition with Carrying (3-digit)
+    const s1PartA = [
+        {n1: "456", n2: "278", a: "734"},
+        {n1: "385", n2: "247", a: "632"},
+        {n1: "568", n2: "375", a: "943"},
+        {n1: "296", n2: "458", a: "754"}
+    ];
+    const s1PartB = [
+        {q: "342 + 289 =", a: "631"},
+        {q: "175 + 458 =", a: "633"},
+        {q: "264 + 397 =", a: "661"},
+        {q: "483 + 129 =", a: "612"}
+    ];
+
+    html += `<div class="section-card gs-reveal">${secHeader("Addition with Carrying (3-digit)", "Part A: Show your working. Part B: No training wheels!")}`;
+    html += `<div class="font-bold text-xl mb-4 mt-2">Part A</div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">`;
+    s1PartA.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-2xl flex flex-col items-center shadow-sm border border-gray-100">
+                <div class="font-bold text-gray-400 mb-2">${i+1}.</div>
+                <div class="grid grid-cols-4 gap-1 text-2xl font-bold font-baloo text-center" style="width:140px;">
+                    <div></div><div class="text-gray-400">H</div><div class="text-gray-400">T</div><div class="text-gray-400">O</div>
+                    <div></div><div></div>
+                    <div><input type="text" inputmode="numeric" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none nn-scaffold" maxlength="1"></div>
+                    <div><input type="text" inputmode="numeric" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none nn-scaffold" maxlength="1"></div>
+                    
+                    <div></div><div>${item.n1[0]}</div><div>${item.n1[1]}</div><div>${item.n1[2]}</div>
+                    <div>+</div><div>${item.n2[0]}</div><div>${item.n2[1]}</div><div>${item.n2[2]}</div>
+                </div>
+                <div class="w-full h-1 bg-navy my-2" style="max-width:140px;"></div>
+                <div class="grid grid-cols-4 gap-1 w-full justify-center nn-col-group nn-s1a" style="max-width:140px;" data-ans="${item.a}">
+                    <div></div>
+                    <input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto nn-digit" maxlength="1">
+                    <input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto nn-digit" maxlength="1">
+                    <input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto nn-digit" maxlength="1">
+                </div>
+            </div>`;
+    });
+    html += `</div>`;
+    
+    html += `<div class="font-bold text-xl mb-4">Part B</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+    s1PartB.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4">
+                <div class="text-2xl font-bold font-baloo">${i+5}. <span class="ml-2">${item.q}</span></div>
+                <input type="text" inputmode="numeric" class="input-box w-20 nn-s1b" data-ans="${item.a}" maxlength="3">
+            </div>`;
+    });
+    html += `</div></div>`;
+
+
+    // SECTION 2: Subtraction with Borrowing (3-digit)
+    const s2PartA = [
+        {n1: "542", n2: "267", a: "275"},
+        {n1: "823", n2: "456", a: "367"},
+        {n1: "604", n2: "238", a: "366"},
+        {n1: "950", n2: "384", a: "566"}
+    ];
+    const s2PartB = [
+        {q: "500 - 246 =", a: "254"},
+        {q: "712 - 358 =", a: "354"},
+        {q: "640 - 275 =", a: "365"},
+        {q: "921 - 467 =", a: "454"}
+    ];
+
+    html += `<div class="section-card gs-reveal">${secHeader("Subtraction with Borrowing (3-digit)", "Part A: Show your working. Part B: Plain equations.")}`;
+    html += `<div class="font-bold text-xl mb-4 mt-2">Part A</div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">`;
+    s2PartA.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-2xl flex flex-col items-center shadow-sm border border-gray-100">
+                <div class="font-bold text-gray-400 mb-2">${i+1}.</div>
+                <div class="grid grid-cols-4 gap-1 text-2xl font-bold font-baloo text-center" style="width:140px;">
+                    <div></div><div class="text-gray-400">H</div><div class="text-gray-400">T</div><div class="text-gray-400">O</div>
+                    <div></div>
+                    <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none nn-scaffold" maxlength="2"></div>
+                    <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none nn-scaffold" maxlength="2"></div>
+                    <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none nn-scaffold" maxlength="2"></div>
+                    
+                    <div></div><div>${item.n1[0]}</div><div>${item.n1[1]}</div><div>${item.n1[2]}</div>
+                    <div>-</div><div>${item.n2[0]}</div><div>${item.n2[1]}</div><div>${item.n2[2]}</div>
+                </div>
+                <div class="w-full h-1 bg-navy my-2" style="max-width:140px;"></div>
+                <div class="grid grid-cols-4 gap-1 w-full justify-center nn-col-group nn-s2a" style="max-width:140px;" data-ans="${item.a}">
+                    <div></div>
+                    <input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto nn-digit" maxlength="1">
+                    <input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto nn-digit" maxlength="1">
+                    <input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto nn-digit" maxlength="1">
+                </div>
+            </div>`;
+    });
+    html += `</div>`;
+    
+    html += `<div class="font-bold text-xl mb-4">Part B</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+    s2PartB.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4">
+                <div class="text-2xl font-bold font-baloo">${i+5}. <span class="ml-2">${item.q}</span></div>
+                <input type="text" inputmode="numeric" class="input-box w-20 nn-s2b" data-ans="${item.a}" maxlength="3">
+            </div>`;
+    });
+    html += `</div></div>`;
+
+
+    // SECTION 3: Nouns
+    const s3Items = [
+        {w: "dog", a: "Common Noun"}, {w: "Karachi", a: "Proper Noun"}, {w: "teacher", a: "Common Noun"},
+        {w: "Eid", a: "Proper Noun"}, {w: "river", a: "Common Noun"}, {w: "Pakistan", a: "Proper Noun"},
+        {w: "book", a: "Common Noun"}, {w: "Ahmed", a: "Proper Noun"}, {w: "school", a: "Common Noun"},
+        {w: "Friday", a: "Proper Noun"}
+    ];
+    html += `<div class="section-card gs-reveal">${secHeader("Nouns — Common vs Proper", "Tap the correct button for each word.")}<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">`;
+    s3Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question nn-s3" data-q="s3-${i}" data-ans="${item.a}">
+                <div class="text-2xl font-bold font-baloo">${i+1}. ${item.w}</div>
+                <div class="flex gap-2">
+                    <div class="pill s4-opt" style="padding: 0.5rem 1rem;">Common Noun</div>
+                    <div class="pill s4-opt" style="padding: 0.5rem 1rem;">Proper Noun</div>
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+
+    // SECTION 4: Verbs
+    const s4Items = [
+        {q: "The dog runs fast.", opts: ["dog", "runs", "fast"], a: "runs"},
+        {q: "She sings a song.", opts: ["She", "sings", "song"], a: "sings"},
+        {q: "Birds fly in the sky.", opts: ["Birds", "fly", "sky"], a: "fly"},
+        {q: "He eats an apple.", opts: ["He", "eats", "apple"], a: "eats"},
+        {q: "The baby sleeps quietly.", opts: ["baby", "sleeps", "quietly"], a: "sleeps"},
+        {q: "We play cricket.", opts: ["We", "play", "cricket"], a: "play"},
+        {q: "The cat jumps on the table.", opts: ["cat", "jumps", "table"], a: "jumps"},
+        {q: "I read books.", opts: ["I", "read", "books"], a: "read"},
+        {q: "The sun shines brightly.", opts: ["sun", "shines", "brightly"], a: "shines"},
+        {q: "They dance at the party.", opts: ["They", "dance", "party"], a: "dance"}
+    ];
+    html += `<div class="section-card gs-reveal">${secHeader("Verbs — Find the Action Word", "Find the verb in each sentence.")}<div class="space-y-4">`;
+    s4Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question nn-s4" data-q="s4-${i}" data-ans="${item.a}">
+                <div class="text-xl font-bold font-baloo">${i+1}. "${item.q}"</div>
+                <div class="flex flex-wrap gap-2">
+                    ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 5: Mini Test
+    html += `<div class="section-card gs-reveal">${secHeader("Number Ninjas Mini Test", "A little bit of everything!")}<div class="space-y-6 bg-white p-6 rounded-2xl">`;
+    
+    html += `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="flex items-center gap-4 text-2xl font-bold font-baloo">1. <span class="w-24 text-right">367 + 258 =</span> <input type="text" inputmode="numeric" class="input-box w-20 nn-mt" data-ans="625" maxlength="3"></div>
+            <div class="flex items-center gap-4 text-2xl font-bold font-baloo">2. <span class="w-24 text-right">713 - 246 =</span> <input type="text" inputmode="numeric" class="input-box w-20 nn-mt" data-ans="467" maxlength="3"></div>
+        </div>
+        <div class="w-full h-px bg-gray-200"></div>
+    `;
+
+    const mtPills = [
+        {n: 3, q: "Which is a Proper Noun?", opts: ["city", "Lahore", "building"], a: "Lahore"},
+        {n: 4, q: "Find the verb: 'The boy kicks the ball.'", opts: ["boy", "kicks", "ball"], a: "kicks"},
+        {n: 5, q: "Which is a Common Noun?", opts: ["Ali", "Monday", "chair"], a: "chair"}
+    ];
+    mtPills.forEach(item => {
+        html += `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question nn-mt-pills" data-q="mt-${item.n}" data-ans="${item.a}">
+                <div class="text-xl font-bold font-baloo">${item.n}. ${item.q}</div>
+                <div class="flex flex-wrap gap-2">
+                    ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // Insert HTML before the submit button
+    container.insertAdjacentHTML('afterbegin', html);
+    
+    // Wire up pills since they are dynamically added
+    container.querySelectorAll('.s4-question').forEach(q => {
+        const pills = q.querySelectorAll('.s4-opt');
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                pills.forEach(p => p.classList.remove('selected'));
+                pill.classList.add('selected');
+                q.classList.remove('pill-error');
+                gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
+            });
+        });
+    });
+}
+
+function registerNumberNinjasInputs() {
+    const container = document.getElementById('screen-worksheet-numberNinjas');
+
+    // PIN-code style auto-advance for the digit boxes in Section 1A and 2A
+    const groups = container.querySelectorAll('.nn-col-group');
+    groups.forEach(group => {
+        const inputs = Array.from(group.querySelectorAll('.nn-digit'));
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+                input.classList.remove('input-error');
+                if (input.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+    });
+
+    // Numeric-only enforcement for 3-digit plain answer inputs
+    container.querySelectorAll('.nn-s1b, .nn-s2b, .nn-mt').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            this.classList.remove('input-error');
+        });
+    });
+}
+
+function gradeWorksheetNumberNinjas() {
+    state.results = [];
+    state.totalCorrect = 0;
+
+    // Helper to grade digit-grouped boxes
+    const gradeDigitGroups = (selector, sectionName, offset) => {
+        document.querySelectorAll(selector).forEach((group, index) => {
+            const inputs = group.querySelectorAll('.nn-digit');
+            let uAns = '';
+            inputs.forEach(inp => uAns += inp.value.trim());
+            const cAns = group.dataset.ans;
+            if (!cAns) return;
+
+            const isCorrect = uAns === cAns;
+            if(isCorrect) state.totalCorrect++;
+
+            state.results.push({
+                q: `Question ${index + offset}`,
+                userAns: uAns || 'None',
+                correctAns: cAns,
+                isCorrect: isCorrect,
+                section: sectionName
+            });
+        });
+    };
+
+    gradeDigitGroups('.nn-s1a', 'Section 1: Addition (Part A)', 1);
+    gradeInputs('.nn-s1b', 'Section 1: Addition (Part B)', (el, i) => `Question ${i+5}`);
+    
+    gradeDigitGroups('.nn-s2a', 'Section 2: Subtraction (Part A)', 1);
+    gradeInputs('.nn-s2b', 'Section 2: Subtraction (Part B)', (el, i) => `Question ${i+5}`);
+
+    gradePills('.nn-s3', 'Section 3: Nouns');
+    gradePills('.nn-s4', 'Section 4: Verbs');
+
+    gradeInputs('.nn-mt', 'Mini Test: Math', (el, i) => `Question ${i+1}`);
+    gradePills('.nn-mt-pills', 'Mini Test: Grammar');
+}
+
+function renderGrammarChampsWorksheet() {
+    const container = document.getElementById('screen-worksheet-grammarChamps');
+    if (container.children.length > 2) return;
+
+    let html = '';
+    let sectionCount = 1;
+
+    const secHeader = (title, subtitle) => `
+        <div class="flex items-center gap-4 mb-2 border-b-2 border-blue-200 pb-4">
+            <div class="badge">${sectionCount++}</div>
+            <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+        </div>
+        ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+    `;
+
+    // Section 1: Types of Nouns
+    const s1Items = [
+        {q: "dog", a: "Common Noun"}, {q: "Karachi", a: "Proper Noun"}, {q: "a herd of cows", a: "Collective Noun"},
+        {q: "Ali", a: "Proper Noun"}, {q: "teacher", a: "Common Noun"}, {q: "a flock of birds", a: "Collective Noun"},
+        {q: "river", a: "Common Noun"}, {q: "Eid", a: "Proper Noun"}, {q: "a team of players", a: "Collective Noun"},
+        {q: "Pakistan", a: "Proper Noun"}, {q: "book", a: "Common Noun"}, {q: "a bunch of grapes", a: "Collective Noun"}
+    ];
+    html += `<div class="section-card gs-reveal">` + secHeader("Types of Nouns — Common, Proper, Collective", "Tap the correct noun type.") + `<div class="space-y-4">`;
+    s1Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s1" data-q="s1-${i}" data-ans="${item.a}">
+                <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex flex-wrap gap-4">
+                    <div class="pill s4-opt" data-val="Common Noun">Common Noun</div>
+                    <div class="pill s4-opt" data-val="Proper Noun">Proper Noun</div>
+                    <div class="pill s4-opt" data-val="Collective Noun">Collective Noun</div>
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // Section 2: Verbs with -ing
+    const s2Items = [
+        {q: "The boy is ___ (run) in the park.", a: "running", opts: ["runing", "running", "runnning"]},
+        {q: "She is ___ (write) a letter.", a: "writing", opts: ["writeing", "writting", "writing"]},
+        {q: "They are ___ (play) football.", a: "playing", opts: ["playing", "playeing", "plaing"]},
+        {q: "I am ___ (read) a book.", a: "reading", opts: ["reading", "readding", "readeing"]},
+        {q: "He is ___ (swim) in the pool.", a: "swimming", opts: ["swiming", "swimming", "swimmming"]},
+        {q: "We are ___ (sing) a song.", a: "singing", opts: ["singing", "singging", "singeing"]},
+        {q: "The cat is ___ (sit) on the mat.", a: "sitting", opts: ["siting", "sitting", "sittting"]},
+        {q: "She is ___ (dance) at the party.", a: "dancing", opts: ["danceing", "dansing", "dancing"]},
+        {q: "They are ___ (jump) on the bed.", a: "jumping", opts: ["jumping", "jumpping", "jumbing"]},
+        {q: "He is ___ (make) a sandcastle.", a: "making", opts: ["makeing", "makking", "making"]},
+        {q: "I am ___ (eat) my lunch.", a: "eating", opts: ["eating", "eatting", "eateing"]},
+        {q: "The baby is ___ (sleep) quietly.", a: "sleeping", opts: ["sleeping", "sleepping", "sleeepin"]}
+    ];
+    html += `<div class="section-card gs-reveal">` + secHeader("Verbs with '-ing'", "Tap the correct spelling.") + `<div class="space-y-4">`;
+    s2Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-s2" data-q="s2-${i}" data-ans="${item.a}">
+                <div class="text-xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex flex-wrap gap-3">
+                    ${item.opts.map(opt => `<div class="pill s4-opt" data-val="${opt}">${opt}</div>`).join('')}
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // Section 3: Articles
+    const s3Items = [
+        {q: "___ apple", a: "an"}, {q: "___ dog", a: "a"}, {q: "___ umbrella", a: "an"},
+        {q: "___ ball", a: "a"}, {q: "___ elephant", a: "an"}, {q: "___ cat", a: "a"},
+        {q: "___ orange", a: "an"}, {q: "___ banana", a: "a"}, {q: "___ egg", a: "an"},
+        {q: "___ hour", a: "an"}, {q: "___ ice-cream", a: "an"}, {q: "___ table", a: "a"}
+    ];
+    html += `<div class="section-card gs-reveal">` + secHeader("Articles — 'a' or 'an'", "Tap 'a' or 'an'.") + `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+    s3Items.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s3" data-q="s3-${i}" data-ans="${item.a}">
+                <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex gap-4">
+                    <div class="pill s4-opt" data-val="a">a</div>
+                    <div class="pill s4-opt" data-val="an">an</div>
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // Mini Test
+    const mtItems = [
+        {q: "\"a herd of sheep\" is a ___ noun", a: "Collective", opts: ["Common", "Proper", "Collective"]},
+        {q: "She is ___ (write) her name.", a: "writing", opts: ["writeing", "writing", "writting"]},
+        {q: "___ owl", a: "an", opts: ["a", "an"]},
+        {q: "\"London\" is a ___ noun", a: "Proper", opts: ["Common", "Proper", "Collective"]},
+        {q: "He is ___ (run) home.", a: "running", opts: ["runing", "running", "runnning"]}
+    ];
+    html += `<div class="section-card gs-reveal">` + secHeader("Grammar Champs Mini Test 🏆", "Mixed review!") + `<div class="space-y-4">`;
+    mtItems.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-mt" data-q="mt-${i}" data-ans="${item.a}">
+                <div class="text-xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
+                <div class="flex flex-wrap gap-3">
+                    ${item.opts.map(opt => `<div class="pill s4-opt" data-val="${opt}">${opt}</div>`).join('')}
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // Insert into DOM
+    container.insertAdjacentHTML('afterbegin', html);
+}
+
+function registerGrammarChampsInputs() {
+    const container = document.getElementById('screen-worksheet-grammarChamps');
+    if (container.dataset.eventsBound === 'true') return;
+    container.dataset.eventsBound = 'true';
+
+    document.querySelectorAll('#screen-worksheet-grammarChamps .s4-question').forEach(q => {
+        const pills = q.querySelectorAll('.pill');
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                pills.forEach(p => p.classList.remove('selected'));
+                pill.classList.add('selected');
+                q.classList.remove('pill-error');
+                gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
+            });
+        });
+    });
+}
+
+function gradeWorksheetGrammarChamps() {
+    state.results = [];
+    state.totalCorrect = 0;
+
+    gradePills('.gc-s1', 'Section 1: Types of Nouns');
+    gradePills('.gc-s2', 'Section 2: Verbs with -ing');
+    gradePills('.gc-s3', 'Section 3: Articles');
+    gradePills('.gc-mt', 'Grammar Champs Mini Test');
+}
+
         // ----------------------------------------------------
         // SCREEN 3: Results Display & Animations
         // ----------------------------------------------------
@@ -1025,6 +2417,9 @@
             
             const d = new Date(state.student.date);
             document.getElementById('res-date').innerText = d.toLocaleDateString();
+            
+            // Update score total dynamically
+            document.getElementById('score-total').innerText = state.totalPossible;
             
             const pct = Math.round((state.totalCorrect / state.totalPossible) * 100);
             
@@ -1065,15 +2460,15 @@
             
             // Set Tier Message
             let msg = "";
-            if(pct >= 90) msg = "🌟 Outstanding! You're a Table of 2 Superstar!";
+            if(pct >= 90) msg = "🌟 Outstanding! You're a Superstar!";
             else if(pct >= 70) msg = "👍 Great job! Just a little more practice!";
             else if(pct >= 50) msg = "💪 Good effort! Let's practice a bit more together.";
             else msg = "📚 Keep practicing — you'll get there!";
             
             document.getElementById('res-message').innerText = msg;
             
-            // Transition Active Worksheet -> S5 (Results)
-            const targetScreen = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+            // Transition Active Worksheet -> Results
+            const targetScreen = `#screen-worksheet-${state.currentWorksheetId}`;
             
             gsap.to(targetScreen, {
                 opacity: 0, y: -20, duration: 0.4, onComplete: () => {
@@ -1082,7 +2477,7 @@
                     window.scrollTo(0, 0);
                     
                     // Reveal results card
-                    gsap.to('#screen-3', { opacity: 1, duration: 0.1 });
+                    gsap.to('#screen-results', { opacity: 1, duration: 0.1 });
                     gsap.from('#results-card', { y: 50, opacity: 0, duration: 0.6, ease: "back.out(1.2)" });
                     
                     // Animate Score Ring
@@ -1175,7 +2570,7 @@
                 opacity: 0, duration: 0.3, onComplete: () => {
                     document.getElementById('screen-results').classList.remove('active');
                     
-                    const targetScreen = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                    const targetScreen = `#screen-worksheet-${state.currentWorksheetId}`;
                     
                     // Reset all inputs & state
                     document.querySelectorAll(`${targetScreen} input`).forEach(inp => inp.value = '');
@@ -1183,8 +2578,34 @@
                     document.querySelectorAll(`${targetScreen} .input-error`).forEach(el => el.classList.remove('input-error'));
                     document.querySelectorAll(`${targetScreen} .pill-error`).forEach(el => el.classList.remove('pill-error'));
                     if (state.currentWorksheetId === 'table2') document.getElementById('s6-grid').classList.remove('grid-error');
+
+                    // Islamiat-specific reset
+                    if (state.currentWorksheetId === 'islamiat') {
+                        // Return all drag items to their natural positions
+                        document.querySelectorAll('#screen-worksheet-islamiat .isl-drag-item').forEach(item => {
+                            gsap.set(item, { x: 0, y: 0 });
+                            item.classList.remove('drag-correct', 'drag-wrong-flash');
+                        });
+                        // Clear all zone highlight classes
+                        document.querySelectorAll('#screen-worksheet-islamiat .isl-drop-zone').forEach(zone => {
+                            zone.classList.remove('zone-occupied', 'zone-correct-glow', 'zone-wrong-flash');
+                        });
+                        // Clear worship grid error
+                        const s3Grid = document.getElementById('isl-s3-grid');
+                        if (s3Grid) s3Grid.classList.remove('grid-error');
+                        // Clear drag state
+                        window.islamiatDragState = { placements: {}, occupied: {} };
+                        // Kill any live Draggable instances and re-init
+                        if (window.Draggable) {
+                            document.querySelectorAll('#screen-worksheet-islamiat .isl-drag-item').forEach(item => {
+                                const inst = Draggable.get(item);
+                                if (inst) inst.kill();
+                            });
+                            initIslamiatDragDrop();
+                        }
+                    }
                     
-                    // Go to Selection (or back to S1) - specification says "Try Again (same worksheet)" so we go back to the worksheet
+                    // Go back to the same worksheet
                     document.querySelector(targetScreen).classList.add('active');
                     gsap.to(targetScreen, { opacity: 1, y: 0, duration: 0.4 });
                     window.scrollTo(0, 0);
@@ -1203,7 +2624,7 @@
                 opacity: 0, duration: 0.3, onComplete: () => {
                     document.getElementById('screen-results').classList.remove('active');
                     
-                    const targetScreen = state.currentWorksheetId === 'table2' ? '#screen-worksheet-table2' : '#screen-worksheet-class1';
+                    const targetScreen = `#screen-worksheet-${state.currentWorksheetId}`;
                     
                     // Reset all inputs & state
                     document.querySelectorAll(`${targetScreen} input`).forEach(inp => inp.value = '');
@@ -1211,6 +2632,27 @@
                     document.querySelectorAll(`${targetScreen} .input-error`).forEach(el => el.classList.remove('input-error'));
                     document.querySelectorAll(`${targetScreen} .pill-error`).forEach(el => el.classList.remove('pill-error'));
                     if (state.currentWorksheetId === 'table2') document.getElementById('s6-grid').classList.remove('grid-error');
+
+                    // Islamiat-specific reset
+                    if (state.currentWorksheetId === 'islamiat') {
+                        document.querySelectorAll('#screen-worksheet-islamiat .isl-drag-item').forEach(item => {
+                            gsap.set(item, { x: 0, y: 0 });
+                            item.classList.remove('drag-correct', 'drag-wrong-flash');
+                        });
+                        document.querySelectorAll('#screen-worksheet-islamiat .isl-drop-zone').forEach(zone => {
+                            zone.classList.remove('zone-occupied', 'zone-correct-glow', 'zone-wrong-flash');
+                        });
+                        const s3Grid = document.getElementById('isl-s3-grid');
+                        if (s3Grid) s3Grid.classList.remove('grid-error');
+                        window.islamiatDragState = { placements: {}, occupied: {} };
+                        if (window.Draggable) {
+                            document.querySelectorAll('#screen-worksheet-islamiat .isl-drag-item').forEach(item => {
+                                const inst = Draggable.get(item);
+                                if (inst) inst.kill();
+                            });
+                            initIslamiatDragDrop();
+                        }
+                    }
                     
                     // Go to Selection Screen
                     document.getElementById('screen-selection').classList.add('active');
@@ -1316,3 +2758,4 @@
     </script>
 </body>
 </html>
+
