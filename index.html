@@ -6,7 +6,7 @@
     <title>KAKA'S COACHING INSTITUTE - Table of 2 Worksheet</title>
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,6 +35,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* Base Styles */
@@ -184,6 +185,364 @@
         .isl-reveal { /* intentionally empty — GSAP controls visibility */ }
         
         #screen-results.active ~ #global-footer { display: none !important; }
+
+        /* =====================================================
+           SCREEN 2 — FILTER SYSTEM STYLES
+           ===================================================== */
+
+        /* --- Worksheet Card Badge (NEW / Current) --- */
+        .ws-badge {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            line-height: 1.4;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 2;
+        }
+        .ws-badge-new {
+            background: linear-gradient(135deg, #f0b429 0%, #e09a10 100%);
+            color: #1e3a5f;
+            box-shadow: 0 2px 6px rgba(240,180,41,0.45);
+            letter-spacing: 0.03em;
+        }
+        .ws-badge-current {
+            background: transparent;
+            color: #9ca3af;
+            border: 1.5px solid #d1d5db;
+            letter-spacing: 0.02em;
+        }
+
+        /* --- Filter Bar (above grid) --- */
+        #filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding: 0 1rem;
+            max-width: 72rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #btn-open-filters {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: #1e3a5f;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.92rem;
+            padding: 0.55rem 1.2rem;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(30,58,95,0.25);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        #btn-open-filters:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(30,58,95,0.3); }
+        #btn-open-filters:active { transform: scale(0.95); }
+        #filter-active-count {
+            display: none;
+            position: absolute;
+            top: -0.45rem;
+            right: -0.45rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: #f0b429;
+            color: #1e3a5f;
+            font-size: 0.65rem;
+            font-weight: 800;
+            border-radius: 9999px;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        #filter-active-count.visible { display: flex; }
+
+        /* --- Active Chip Row --- */
+        #active-chip-row {
+            display: none;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0 1rem;
+            max-width: 72rem;
+            margin: 0 auto 1rem;
+        }
+        #active-chip-row.visible { display: flex; }
+        .active-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #eaf1fb;
+            border: 1.5px solid #1e3a5f;
+            color: #1e3a5f;
+            font-size: 0.78rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .active-chip:hover { background: #dbeafe; }
+        .active-chip-x { font-size: 0.8rem; font-weight: 900; line-height: 1; }
+        #clear-all-filters {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #6b7280;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.2rem 0.3rem;
+            transition: color 0.15s;
+        }
+        #clear-all-filters:hover { color: #ef4444; }
+
+        /* --- Grid Empty State --- */
+        #ws-empty-state {
+            display: none;
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        #ws-empty-state.visible { display: block; }
+
+        /* --- Filter Sheet Overlay --- */
+        #filter-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 400;
+            backdrop-filter: blur(2px);
+        }
+        #filter-overlay.open { display: block; }
+
+        /* --- Bottom Sheet --- */
+        #filter-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 500;
+            background: white;
+            border-radius: 1.5rem 1.5rem 0 0;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+            max-height: 75vh;
+            display: flex;
+            flex-direction: column;
+            /* starts off-screen; GSAP animates translateY */
+            transform: translateY(100%);
+        }
+        #filter-sheet-handle {
+            width: 2.5rem;
+            height: 0.3rem;
+            background: #d1d5db;
+            border-radius: 9999px;
+            margin: 0.75rem auto 0;
+            flex-shrink: 0;
+        }
+        #filter-sheet-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem 0.5rem;
+            flex-shrink: 0;
+            border-bottom: 1.5px solid #f1f5f9;
+        }
+        #filter-sheet-header h2 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            margin: 0;
+        }
+        #btn-close-sheet {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 9999px;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #64748b;
+            transition: background 0.15s;
+        }
+        #btn-close-sheet:hover { background: #e2e8f0; }
+        #filter-sheet-body {
+            overflow-y: auto;
+            padding: 1rem 1.25rem;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        .filter-group { margin-bottom: 1.25rem; }
+        .filter-group-label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            margin-bottom: 0.6rem;
+        }
+        .filter-chips-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            border: 2px solid #cbd5e1;
+            background: white;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.18s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .filter-chip:hover { border-color: #1e3a5f; color: #1e3a5f; }
+        .filter-chip.active {
+            background: #1e3a5f;
+            border-color: #1e3a5f;
+            color: #f0b429;
+            box-shadow: 0 2px 8px rgba(30,58,95,0.3);
+        }
+        #filter-sheet-footer {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.85rem 1.25rem;
+            border-top: 1.5px solid #f1f5f9;
+            flex-shrink: 0;
+            background: white;
+        }
+        #btn-clear-all-sheet {
+            flex: 1;
+            padding: 0.65rem;
+            border-radius: 0.75rem;
+            border: 2px solid #cbd5e1;
+            background: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        #btn-clear-all-sheet:hover { border-color: #ef4444; color: #ef4444; }
+        #btn-apply-filters {
+            flex: 2;
+            padding: 0.65rem;
+            border-radius: 0.75rem;
+            border: none;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a9e 100%);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(30,58,95,0.3);
+            transition: all 0.18s;
+        }
+        #btn-apply-filters:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(30,58,95,0.4); }
+        #btn-apply-filters:active { transform: scale(0.97); }
+
+        /* =====================================================
+           URDU DOST WORKSHEET — RTL / NASTALIQ STYLES
+           ===================================================== */
+
+        /* Nastaliq font utility */
+        .font-nastaliq {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            line-height: 2.2;   /* Nastaliq needs extra vertical space for diacritics */
+        }
+
+        /* RTL content wrapper — applied to the entire urdu worksheet content area */
+        .urdu-rtl-container {
+            direction: rtl;
+        }
+
+        /* Section header stays flex; with dir=rtl the badge naturally moves to the right side */
+        .urdu-rtl-container .section-card { text-align: right; }
+
+        /* Large Urdu stimulus word (the word/letter being classified) */
+        .urdu-stimulus {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            font-size: 2.75rem;
+            line-height: 2.2;
+            color: #1e3a5f;
+            font-weight: 700;
+            display: inline-block;
+            min-width: 3rem;
+            text-align: center;
+        }
+
+        /* Option pills for Urdu: allow natural RTL flex flow (dir=rtl on container handles ordering) */
+        .urdu-pill {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            font-size: 1.35rem;
+            line-height: 2;
+            padding: 0.55rem 1.5rem;
+            border-radius: 9999px;
+            border: 3px solid #1e3a5f;
+            color: #1e3a5f;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: white;
+            user-select: none;
+            text-align: center;
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .urdu-pill.selected {
+            background-color: #1e3a5f;
+            color: white;
+            transform: scale(1.05);
+        }
+        .urdu-pill-error { border-color: #ef4444 !important; }
+
+        /* Joining-exercise prompt line */
+        .urdu-join-prompt {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            font-size: 1.6rem;
+            line-height: 2.2;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+
+        /* html2canvas Nastaliq note — shown only if export fails */
+        .urdu-canvas-note {
+            display: none;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-20">
@@ -193,10 +552,7 @@
         
         <!-- Header -->
         <header class="text-center mb-10 flex flex-col items-center">
-            <div class="w-24 h-24 mb-4 bg-navy rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden" id="logo-container">
-                <!-- Logo Placeholder -->
-                <img id="logo" src="Logo.jpg" alt="KCI Logo" class="w-full h-full object-cover z-10 bg-white">
-            </div>
+            <img id="logo" src="logo.svg" alt="KCI Logo" class="w-28 h-28 mb-2 object-contain" style="filter: drop-shadow(0 4px 12px rgba(30,58,95,0.18));">
             <h1 class="text-4xl md:text-5xl font-baloo font-bold text-navy mb-2">KAKA'S COACHING INSTITUTE</h1>
             <h2 id="main-subtitle" class="text-2xl text-gold font-bold bg-navy px-6 py-2 rounded-full inline-block shadow-md">Welcome!</h2>
         </header>
@@ -236,57 +592,49 @@
         <!-- SCREEN 2: Worksheet Selection -->
         <main id="screen-selection" class="screen max-w-7xl mx-auto">
             <h3 id="selection-greeting" class="text-3xl font-baloo font-bold text-center mb-8">Hi! Which worksheet would you like to try today?</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
-                <!-- Card 1 -->
-                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="table2">
-                    <div class="text-5xl mb-3">🧮</div>
-                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Maths Marvels — Table of 2</h4>
-                    <p class="text-sm text-gray-500 font-medium mb-4">Multiplication practice for KG learners</p>
-                    <div class="flex-grow"></div>
-                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
-                </div>
-                <!-- Card 2 -->
-                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="class1">
-                    <div class="text-5xl mb-3">📖</div>
-                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Little Explorers — Class I English & EVS</h4>
-                    <p class="text-sm text-gray-500 font-medium mb-4">Living things, naming words, sounds, grammar & more!</p>
-                    <div class="flex-grow"></div>
-                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
-                </div>
-                <!-- Card 3 -->
-                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="nature">
-                    <div class="text-5xl mb-3">🌿</div>
-                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Nature Explorers — Living, Plants & Animals</h4>
-                    <p class="text-sm text-gray-500 font-medium mb-4">Basic classification fun for KG learners</p>
-                    <div class="flex-grow"></div>
-                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
-                </div>
-                <!-- Card 4 -->
-                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="islamiat">
-                    <div class="text-5xl mb-3">☪️</div>
-                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Little Believers — Islamiat Basics</h4>
-                    <p class="text-sm text-gray-500 font-medium mb-4">Five Pillars, Prophets, Angels & Holy Books</p>
-                    <div class="flex-grow"></div>
-                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
-                </div>
-                <!-- Card 5 -->
-                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="numberNinjas">
-                    <div class="text-5xl mb-3">&#128290;</div>
-                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Number Ninjas &mdash; Class II Maths & Grammar</h4>
-                    <p class="text-sm text-gray-500 font-medium mb-4">3-digit addition/subtraction + nouns & verbs</p>
-                    <div class="flex-grow"></div>
-                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
-                </div>
-                <!-- Card 6 -->
-                <div class="ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center" data-worksheet="grammarChamps">
-                    <div class="text-5xl mb-3">✍️</div>
-                    <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug">Grammar Champs &mdash; Class III Nouns, Verbs & Articles</h4>
-                    <p class="text-sm text-gray-500 font-medium mb-4">Types of nouns, -ing verbs, and a/an articles</p>
-                    <div class="flex-grow"></div>
-                    <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &rarr;</button>
+
+            <!-- Filter Bar -->
+            <div id="filter-bar">
+                <button id="btn-open-filters">
+                    &#x1F50D; Filters
+                    <span id="filter-active-count">0</span>
+                </button>
+            </div>
+
+            <!-- Active Chip Row (visible when filters applied) -->
+            <div id="active-chip-row">
+                <!-- Populated dynamically by JS -->
+            </div>
+
+            <!-- Dynamic Worksheet Grid (JS-rendered) -->
+            <div id="ws-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
+                <!-- Cards injected by renderSelectionGrid() -->
+                <div id="ws-empty-state">
+                    <div class="text-5xl mb-4">&#x1F50D;</div>
+                    <p class="text-xl font-baloo font-bold text-navy mb-2">No worksheets match these filters yet!</p>
+                    <p class="text-gray-500 font-medium">Try clearing one filter to see more.</p>
                 </div>
             </div>
         </main>
+
+        <!-- Filter Sheet Overlay -->
+        <div id="filter-overlay"></div>
+
+        <!-- Bottom Sheet Filter Drawer -->
+        <div id="filter-sheet">
+            <div id="filter-sheet-handle"></div>
+            <div id="filter-sheet-header">
+                <h2>Filter Worksheets</h2>
+                <button id="btn-close-sheet" aria-label="Close filters">&#x2715;</button>
+            </div>
+            <div id="filter-sheet-body">
+                <!-- Filter groups injected by buildFilterSheet() -->
+            </div>
+            <div id="filter-sheet-footer">
+                <button id="btn-clear-all-sheet">Clear All</button>
+                <button id="btn-apply-filters">Apply (6)</button>
+            </div>
+        </div>
 
         <!-- SCREEN 3: Table of 2 Worksheet -->
         <main id="screen-worksheet-table2" class="screen worksheet-container">
@@ -294,7 +642,7 @@
             <div class="section-card gs-reveal">
                 <div class="flex items-center gap-4 mb-6 border-b-2 border-blue-200 pb-4">
                     <div class="badge">1</div>
-                    <h3 class="text-2xl font-baloo font-bold">Say and Trace 🗣️</h3>
+                    <h3 class="text-2xl font-baloo font-bold">Say and Trace 🗣️</h3>
                 </div>
                 <p class="text-lg mb-6 font-medium">Read the table of 2 out loud!</p>
                 
@@ -587,14 +935,34 @@
             </div>
         </main>
 
+        <!-- SCREEN 10: اردو دوست — Urdu Dost Worksheet -->
+        <main id="screen-worksheet-urduDost" class="screen worksheet-container">
+            <!-- Content rendered dynamically by renderUrduDostWorksheet() -->
+            <!-- NOTE: The worksheet content area inside will have dir="rtl" lang="ur"
+                 applied by the render function. The shell <main> stays LTR so the
+                 global header/footer/submit button are unaffected. -->
+
+            <!-- Submit Urdu Dost — stays LTR chrome as per spec -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+                <p class="urdu-canvas-note" id="urdu-canvas-note">
+                    ⚠️ Known limitation: Nastaliq font may not fully rasterize in PDF/PNG export via html2canvas.
+                    Topic labels will still be correct; only the visual script quality in the exported image may vary.
+                </p>
+            </div>
+        </main>
+
         <!-- SCREEN 7: Results -->
+
         <main id="screen-results" class="screen">
             <div id="results-card" class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border-4 border-lightBlue relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-4 bg-navy"></div>
                 
                 <!-- Results Header -->
                 <div class="text-center mb-8 pb-8 border-b-2 border-gray-100 pt-4">
-                    <img src="Logo.jpg" class="w-20 h-20 mx-auto mb-4 rounded-xl object-contain shadow-sm bg-white" alt="KCI Logo">
+                    <img src="logo.svg" class="w-20 h-20 mx-auto mb-4 rounded-xl object-contain shadow-sm bg-white" alt="KCI Logo">
                     <h2 class="text-3xl font-baloo font-bold text-navy mb-2">KAKA'S COACHING INSTITUTE</h2>
                     <h3 id="res-subtitle" class="text-xl text-gray-500 font-bold">Results Summary</h3>
                 </div>
@@ -627,10 +995,11 @@
                 
                 <!-- Breakdown -->
                 <div class="mt-8">
-                    <h3 class="text-2xl font-baloo font-bold text-navy mb-4 border-b-2 border-gray-100 pb-2">What to Review</h3>
-                    <div id="review-list" class="space-y-4">
+                    <h3 class="text-2xl font-baloo font-bold text-navy mb-4 border-b-2 border-gray-100 pb-2">📊 Topic Breakdown</h3>
+                    <div id="topic-breakdown-list" class="space-y-3">
                         <!-- Populated by JS -->
                     </div>
+                    <p id="res-summary-line" class="mt-4 text-base text-gray-600 font-medium text-center italic"></p>
                 </div>
                 
                 <!-- Results Footer (for export) -->
@@ -642,7 +1011,7 @@
             <!-- Actions -->
             <div class="mt-8 flex flex-col sm:flex-row flex-wrap gap-4 justify-center no-print">
                 <button id="btn-pdf" class="btn bg-red-500 hover:bg-red-600 border-red-600 text-lg">📥 Download PDF</button>
-                <button id="btn-img" class="btn bg-green-500 hover:bg-green-600 border-green-600 text-lg">🖼️ Download Image</button>
+                <button id="btn-img" class="btn bg-green-500 hover:bg-green-600 border-green-600 text-lg">🖼️ Download Image</button>
                 <button id="btn-retry" class="btn btn-gold text-lg">🔄 Try Again</button>
                 <button id="btn-choose-another" class="btn bg-blue-500 hover:bg-blue-600 text-lg">📚 Choose Another</button>
             </div>
@@ -696,40 +1065,89 @@
                 title: "Table of 2",
                 exportPrefix: "KCI_Table2_Result",
                 totalPossible: 39,
-                render: null // Already in HTML
+                render: null, // Already in HTML
+                // --- Metadata for Screen 2 filter / sort system ---
+                subject: "Maths",
+                classLevel: "KG",
+                difficulty: "Easy",
+                dateAdded: "2026-10-02",
+                cardIcon: "&#x1F9EE;",
+                cardDesc: "Multiplication practice for KG learners"
             },
             class1: {
                 title: "Class I English & EVS Worksheet",
                 exportPrefix: "KCI_ClassI_Result",
                 totalPossible: 74,
-                render: renderClass1Worksheet
+                render: renderClass1Worksheet,
+                subject: "English",
+                classLevel: "Class I",
+                difficulty: "Easy",
+                dateAdded: "2026-10-02",
+                cardIcon: "&#x1F4D6;",
+                cardDesc: "Living things, naming words, sounds, grammar &amp; more!"
             },
             nature: {
                 title: "Nature Explorers — Living, Plants & Animals",
                 exportPrefix: "KCI_NatureExplorers_Result",
                 totalPossible: 33,
-                render: renderNatureWorksheet
+                render: renderNatureWorksheet,
+                subject: "EVS",
+                classLevel: "KG",
+                difficulty: "Easy",
+                dateAdded: "2026-10-02",
+                cardIcon: "&#x1F33F;",
+                cardDesc: "Basic classification fun for KG learners"
             },
             islamiat: {
                 title: "Little Believers &mdash; Islamiat Basics",
                 exportPrefix: "KCI_Islamiat_Result",
                 totalPossible: 21,
                 render: renderIslamiatWorksheet,
-                onShown: registerIslamiatScrollAnimations
+                onShown: registerIslamiatScrollAnimations,
+                subject: "Islamiat",
+                classLevel: "KG",
+                difficulty: "Easy",
+                dateAdded: "2026-10-02",
+                cardIcon: "&#x262A;&#xFE0F;",
+                cardDesc: "Five Pillars, Prophets, Angels &amp; Holy Books"
             },
             numberNinjas: {
                 title: "Number Ninjas &mdash; Class II Maths & Grammar",
                 exportPrefix: "KCI_NumberNinjas_Result",
                 totalPossible: 41,
                 render: renderNumberNinjasWorksheet,
-                onShown: registerNumberNinjasInputs
+                onShown: registerNumberNinjasInputs,
+                subject: "Maths",
+                classLevel: "Class II",
+                difficulty: "Medium",
+                dateAdded: "2026-10-02",
+                cardIcon: "&#x1F4D0;",
+                cardDesc: "3-digit addition/subtraction + nouns &amp; verbs"
             },
             grammarChamps: {
                 title: "Grammar Champs &mdash; Class III Nouns, Verbs & Articles",
                 exportPrefix: "KCI_GrammarChamps_Result",
                 totalPossible: 41,
                 render: renderGrammarChampsWorksheet,
-                onShown: registerGrammarChampsInputs
+                onShown: registerGrammarChampsInputs,
+                subject: "English",
+                classLevel: "Class III",
+                difficulty: "Medium",
+                dateAdded: "2026-10-02",
+                cardIcon: "&#x270D;&#xFE0F;",
+                cardDesc: "Types of nouns, -ing verbs, and a/an articles"
+            },
+            urduDost: {
+                title: "&#x1F4D7; اردو دوست (Urdu Dost) &mdash; Class I Urdu",
+                exportPrefix: "KCI_UrduDost_Result",
+                totalPossible: 35,
+                render: renderUrduDostWorksheet,
+                subject: "Urdu",
+                classLevel: "Class I",
+                difficulty: "Easy",
+                dateAdded: "2026-10-05",
+                cardIcon: "&#x1F4D7;",
+                cardDesc: "<span class='font-nastaliq' lang='ur' dir='rtl' style='display:block; font-size:1.05rem; line-height:2;'>مذکر مؤنث اور مصوتے</span><span style='font-size:0.85em;'>Masculine/Feminine &amp; Vowels</span>"
             }
         };
 
@@ -752,12 +1170,12 @@
             // Section 1: Living/Non-Living (Radio)
             const s1Items = [
                 {q: "🐶 Dog", a: "Living"}, {q: "🌳 Tree", a: "Living"}, {q: "🪑 Chair", a: "Non-Living"}, {q: "🐟 Fish", a: "Living"}, {q: "🚗 Car", a: "Non-Living"},
-                {q: "🌸 Flower", a: "Living"}, {q: "📚 Book", a: "Non-Living"}, {q: "🐦 Bird", a: "Living"}, {q: "⛰️ Mountain", a: "Non-Living"}, {q: "🦋 Butterfly", a: "Living"}
+                {q: "🌸 Flower", a: "Living"}, {q: "📚 Book", a: "Non-Living"}, {q: "🐦 Bird", a: "Living"}, {q: "⛰️ Mountain", a: "Non-Living"}, {q: "🦋 Butterfly", a: "Living"}
             ];
             html += `<div class="section-card gs-reveal">${secHeader("Living vs Non-Living Things", "Tap the correct button for each.")}<div class="space-y-4">`;
             s1Items.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s1" data-q="s1-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s1" data-topic="Living Things" data-q="s1-${i}" data-ans="${item.a}">
                         <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
                         <div class="flex gap-4">
                             <div class="pill s4-opt">🌱 Living</div>
@@ -778,7 +1196,7 @@
             html += `<div class="section-card gs-reveal">${secHeader("Naming Words (Nouns) - Part A", "Which word is a Naming Word (Noun)?")}<div class="space-y-4">`;
             s2aItems.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question c1-s2a" data-q="s2a-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question c1-s2a" data-topic="Naming Words" data-q="s2a-${i}" data-ans="${item.a}">
                         <div class="text-xl font-bold font-baloo">${i+1}.</div>
                         <div class="flex flex-wrap gap-3">
                             ${item.opts.map(opt => `<div class="pill s4-opt">${opt}</div>`).join('')}
@@ -806,12 +1224,12 @@
                 {l:"J", q:"🏺 Jug", a:"J", opts:["J","G","Y"]}, {l:"K", q:"🪁 Kite", a:"K", opts:["K","C","G"]}, {l:"L", q:"🦁 Lion", a:"L", opts:["L","N","R"]},
                 {l:"M", q:"🐒 Monkey", a:"M", opts:["M","N","W"]}, {l:"N", q:"🪹 Nest", a:"N", opts:["N","M","H"]}, {l:"O", q:"🍊 Orange", a:"O", opts:["O","A","U"]},
                 {l:"P", q:"🐧 Penguin", a:"P", opts:["P","B","D"]}, {l:"Q", q:"👸 Queen", a:"Q", opts:["Q","K","C"]}, {l:"R", q:"🐰 Rabbit", a:"R", opts:["R","L","W"]},
-                {l:"S", q:"☀️ Sun", a:"S", opts:["S","C","Z"]}, {l:"T", q:"🐯 Tiger", a:"T", opts:["T","D","F"]}
+                {l:"S", q:"☀️ Sun", a:"S", opts:["S","C","Z"]}, {l:"T", q:"🐯 Tiger", a:"T", opts:["T","D","F"]}
             ];
             html += `<div class="section-card gs-reveal">${secHeader("Beginning Sounds A to T", "Choose the correct starting letter.")}<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">`;
             s3Items.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s3" data-q="s3-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s3" data-topic="Beginning Sounds" data-q="s3-${i}" data-ans="${item.a}">
                         <div class="text-xl font-bold font-baloo">${item.l} - ${item.q}</div>
                         <div class="flex gap-2">
                             ${item.opts.map(opt => `<div class="pill s4-opt" style="min-width:3rem; padding: 0.5rem;">${opt}</div>`).join('')}
@@ -835,7 +1253,7 @@
                 </div><div class="space-y-4">`;
             s4Items.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s4" data-q="s4-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s4" data-topic="Reading Comprehension" data-q="s4-${i}" data-ans="${item.a}">
                         <div class="text-xl font-bold font-baloo">${item.q}</div>
                         <div class="flex flex-wrap gap-2">
                             ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
@@ -852,7 +1270,7 @@
             html += `<div class="section-card gs-reveal">${secHeader("Vowels & Articles", "Choose 'a' or 'an'.")}<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
             s5Items.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4 s4-question c1-s5" data-q="s5-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4 s4-question c1-s5" data-topic="Articles" data-q="s5-${i}" data-ans="${item.a}">
                         <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
                         <div class="flex gap-2">
                             <div class="pill s4-opt" style="padding: 0.5rem 1rem;">a</div>
@@ -873,7 +1291,7 @@
             html += `<div class="section-card gs-reveal">${secHeader("Singular / Plural", "Choose the correct plural.")}<div class="space-y-4">`;
             s6Items.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s6" data-q="s6-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question c1-s6" data-topic="Singular/Plural" data-q="s6-${i}" data-ans="${item.a}">
                         <div class="text-xl font-bold font-baloo">${i+1}. ${item.q} → </div>
                         <div class="flex gap-2">
                             ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
@@ -892,7 +1310,7 @@
             html += `<div class="section-card gs-reveal">${secHeader("This / That", "Choose 'This' or 'That'.")}<div class="space-y-4">`;
             s7Items.forEach((item, i) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question c1-s7" data-q="s7-${i}" data-ans="${item.a}">
+                    <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question c1-s7" data-topic="This/That" data-q="s7-${i}" data-ans="${item.a}">
                         <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
                         <div class="flex gap-2 shrink-0">
                             <div class="pill s4-opt" style="padding: 0.5rem 1rem;">This</div>
@@ -1003,7 +1421,7 @@
             // Section 4: Mini Test
             const s4Items = [
                 {q: "1. 🌸 Flower is:", a: "Living", opts: ["🌱 Living", "🪨 Non-Living"]},
-                {q: "2. 🖥️ Computer is:", a: "Non-Living", opts: ["🌱 Living", "🪨 Non-Living"]},
+                {q: "2. 🖥️ Computer is:", a: "Non-Living", opts: ["🌱 Living", "🪨 Non-Living"]},
                 {q: "3. 🌳 Tree is a:", a: "Plant", opts: ["🌿 Plant", "🐾 Animal"]},
                 {q: "4. 🐇 Rabbit is a:", a: "Animal", opts: ["🌿 Plant", "🐾 Animal"]},
                 {q: "5. 🐺 Wolf is a:", a: "Wild", opts: ["🏠 Domestic", "🌳 Wild"]}
@@ -1029,23 +1447,8 @@
         }
 
         // Helper for pill interactivity
-        function setupPillsInteractivity(selector) {
-            document.querySelectorAll(selector).forEach(q => {
-                const pills = q.querySelectorAll('.s4-opt');
-                pills.forEach(pill => {
-                    // Prevent multiple listeners if setup again
-                    if (pill.dataset.bound) return;
-                    pill.dataset.bound = "true";
-                    
-                    pill.addEventListener('click', () => {
-                        pills.forEach(p => p.classList.remove('selected'));
-                        pill.classList.add('selected');
-                        q.classList.remove('pill-error');
-                        gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
-                    });
-                });
-            });
-        }
+        // No-op: pill interactivity is handled by app-container event delegation.
+        function setupPillsInteractivity(selector) {}
 
         // ============================================================
         // GSAP Plugin Registration (ScrollTrigger + Draggable)
@@ -1109,7 +1512,7 @@
                 ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
             `;
 
-            // ─── SECTION 1: Five Pillars ───────────────────────────────────────
+            // â”€â”€â”€ SECTION 1: Five Pillars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             html += `<div class="section-card isl-reveal" id="isl-sec1">`;
             html += secHeader('The Five Pillars of Islam 🕌', 'Tap each card to learn — then match below!');
 
@@ -1159,7 +1562,7 @@
             });
             html += `</div></div>`; // close graded box + section card
 
-            // ─── SECTION 2: First and Last Prophet ────────────────────────────
+            // â”€â”€â”€ SECTION 2: First and Last Prophet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             // CONTENT-SENSITIVITY: Prophets shown as TEXT ONLY — no icons, no figures
             html += `<div class="section-card isl-reveal" id="isl-sec2">`;
             html += secHeader('The First and Last Prophet', 'Tap the correct name!');
@@ -1180,7 +1583,7 @@
             });
             html += `</div></div>`;
 
-            // ─── SECTION 3: Ways to Worship Allah ─────────────────────────────
+            // â”€â”€â”€ SECTION 3: Ways to Worship Allah â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             html += `<div class="section-card isl-reveal" id="isl-sec3">`;
             html += secHeader('Ways to Worship Allah', 'Tap ONLY the things that are ways to worship Allah.');
             const s3Tiles = [
@@ -1202,19 +1605,19 @@
             });
             html += `</div></div>`;
 
-            // ─── SECTION 4: Match the Following — Drag and Drop ───────────────
-            // CONTENT-SENSITIVITY: Angels shown as ✨ + text label ONLY — no winged-person figure
+            // â”€â”€â”€ SECTION 4: Match the Following — Drag and Drop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // CONTENT-SENSITIVITY: Angels shown as âœ¨ + text label ONLY — no winged-person figure
             html += `<div class="section-card isl-reveal" id="isl-sec4">`;
             html += secHeader('Match the Following 🎯', 'Drag each item on the left to its correct answer on the right!');
 
             // 4A: Angels and Duties
             html += `<h4 class="font-baloo font-bold text-xl text-navy mb-3 pb-2 border-b-2 border-blue-100">4A — Angels and Their Duties</h4>`;
-            html += `<p class="text-sm text-gray-500 mb-3 italic">(✨ = Angel — shown as text only per Islamic convention)</p>`;
+            html += `<p class="text-sm text-gray-500 mb-3 italic">(âœ¨ = Angel — shown as text only per Islamic convention)</p>`;
             const angels4a = [
-                { id: 'jibreel',  label: '✨ Angel Jibreel (AS)',  correctZone: 'zone-messages' },
-                { id: 'mikaeel',  label: '✨ Angel Mikaeel (AS)',  correctZone: 'zone-rain'     },
-                { id: 'israfeel', label: '✨ Angel Israfeel (AS)', correctZone: 'zone-trumpet'  },
-                { id: 'izraeel',  label: '✨ Angel Izraeel (AS)',  correctZone: 'zone-souls'    }
+                { id: 'jibreel',  label: 'âœ¨ Angel Jibreel (AS)',  correctZone: 'zone-messages' },
+                { id: 'mikaeel',  label: 'âœ¨ Angel Mikaeel (AS)',  correctZone: 'zone-rain'     },
+                { id: 'israfeel', label: 'âœ¨ Angel Israfeel (AS)', correctZone: 'zone-trumpet'  },
+                { id: 'izraeel',  label: 'âœ¨ Angel Izraeel (AS)',  correctZone: 'zone-souls'    }
             ];
             const zones4a = [
                 { id: 'zone-messages', label: 'Brings messages from Allah'          },
@@ -1242,7 +1645,7 @@
             html += buildDragBoard('4b', books4b, zones4b);
             html += `</div>`;
 
-            // ─── FINAL SECTION: Mini Test ──────────────────────────────────────
+            // â”€â”€â”€ FINAL SECTION: Mini Test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             html += `<div class="section-card isl-reveal" id="isl-sec5">`;
             html += secHeader('Little Believers Mini Test 🏆', "Show what you've learned!");
             const miniTestItems = [
@@ -1371,7 +1774,7 @@
                                     }
                                 });
                             } else {
-                                // ❌ Wrong: snap to zone briefly, flash red, then elastic-return to origin
+                                // âŒ Wrong: snap to zone briefly, flash red, then elastic-return to origin
                                 gsap.to(item, {
                                     x: snapToX, y: snapToY, duration: 0.25, ease: 'power2.out',
                                     onComplete: () => {
@@ -1581,49 +1984,44 @@
                     document.getElementById('selection-greeting').innerText = `Hi ${state.student.name.split(' ')[0]}! Which worksheet would you like to try today?`;
                     
                     gsap.to('#screen-selection', { opacity: 1, duration: 0.1 });
-                    gsap.fromTo('.ws-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.2, ease: "back.out(1.2)" });
+                    renderSelectionGrid();
+                    buildFilterSheet();
                 }
             });
         });
 
         // ----------------------------------------------------
         // SCREEN 2: Worksheet Selection Interactivity
+        // Card clicks use event delegation on #ws-grid so
+        // dynamically-rendered cards are automatically wired.
         // ----------------------------------------------------
-        document.querySelectorAll('.ws-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const wsId = card.dataset.worksheet;
-                state.currentWorksheetId = wsId;
-                state.totalPossible = worksheetsConfig[wsId].totalPossible;
-                
-                // Update Main Subtitle
-                document.getElementById('main-subtitle').innerText = worksheetsConfig[wsId].title;
-                
-                // Render if dynamic
-                if (worksheetsConfig[wsId].render) {
-                    worksheetsConfig[wsId].render();
-                }
-                
-                const targetScreen = '#screen-worksheet-' + wsId;
-                
-                // GSAP Transition from Selection -> Worksheet
-                gsap.to('#screen-selection', {
-                    opacity: 0, y: -20, duration: 0.4, onComplete: () => {
-                        document.getElementById('screen-selection').classList.remove('active');
-                        document.querySelector(targetScreen).classList.add('active');
-                        window.scrollTo(0, 0);
-                        
-                        gsap.to(targetScreen, { opacity: 1, duration: 0.1 });
-                        gsap.to(`${targetScreen} .gs-reveal`, {
-                            opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "back.out(1.2)"
-                        });
-
-                        // Let any worksheet run post-activation setup (e.g. ScrollTrigger registration)
-                        if (worksheetsConfig[wsId] && worksheetsConfig[wsId].onShown) {
-                            worksheetsConfig[wsId].onShown();
-                        }
+        function launchWorksheet(wsId) {
+            state.currentWorksheetId = wsId;
+            state.totalPossible = worksheetsConfig[wsId].totalPossible;
+            document.getElementById('main-subtitle').innerText = worksheetsConfig[wsId].title;
+            if (worksheetsConfig[wsId].render) { worksheetsConfig[wsId].render(); }
+            const targetScreen = '#screen-worksheet-' + wsId;
+            gsap.to('#screen-selection', {
+                opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                    document.getElementById('screen-selection').classList.remove('active');
+                    document.querySelector(targetScreen).classList.add('active');
+                    window.scrollTo(0, 0);
+                    gsap.to(targetScreen, { opacity: 1, duration: 0.1 });
+                    gsap.to(`${targetScreen} .gs-reveal`, {
+                        opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "back.out(1.2)"
+                    });
+                    if (worksheetsConfig[wsId] && worksheetsConfig[wsId].onShown) {
+                        worksheetsConfig[wsId].onShown();
                     }
-                });
+                }
             });
+        }
+
+        document.getElementById('ws-grid').addEventListener('click', (e) => {
+            const card = e.target.closest('.ws-card');
+            if (!card) return;
+            const wsId = card.dataset.worksheet;
+            if (wsId && worksheetsConfig[wsId]) launchWorksheet(wsId);
         });
 
         // ----------------------------------------------------
@@ -1638,18 +2036,21 @@
         });
 
         // Setup Section 4 (Pills / Radio Button Logic)
-        document.querySelectorAll('.s4-question').forEach(q => {
-            const pills = q.querySelectorAll('.s4-opt');
-            pills.forEach(pill => {
-                pill.addEventListener('click', () => {
-                    pills.forEach(p => p.classList.remove('selected')); // Deselect others
-                    pill.classList.add('selected'); // Select current
-                    q.classList.remove('pill-error'); 
-                    
-                    // Pop animation on tap
-                    gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
-                });
-            });
+        // Use event delegation so dynamically-rendered worksheets (Class 1, Nature, Islamiat, etc.)
+        // also work — their DOM is injected AFTER DOMContentLoaded so per-element binding misses them.
+        document.getElementById('app-container').addEventListener('click', (e) => {
+            const pill = e.target.closest('.s4-opt');
+            if (!pill) return;
+            const q = pill.closest('.s4-question');
+            if (!q) return;
+
+            // Deselect siblings
+            q.querySelectorAll('.s4-opt').forEach(p => p.classList.remove('selected'));
+            pill.classList.add('selected');
+            q.classList.remove('pill-error');
+
+            // Pop animation on tap
+            gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
         });
 
         // Setup Section 6 (Grid Generation)
@@ -1751,6 +2152,18 @@
                         });
                     });
                 }
+
+                // Validate Urdu Dost: every ud-question must have a ud-opt selected
+                if (state.currentWorksheetId === 'urduDost') {
+                    document.querySelectorAll(`${activeContainer} .ud-question`).forEach(q => {
+                        const selected = q.querySelector('.ud-opt.selected');
+                        if (!selected) {
+                            isValid = false;
+                            q.classList.add('pill-error');
+                            if (!firstInvalid) firstInvalid = q;
+                        }
+                    });
+                }
                 
                 if(!isValid) {
                     // Smooth scroll to the first missing answer
@@ -1767,6 +2180,7 @@
                 else if (state.currentWorksheetId === 'islamiat') gradeWorksheetIslamiat();
                 else if (state.currentWorksheetId === 'numberNinjas') gradeWorksheetNumberNinjas();
                 else if (state.currentWorksheetId === 'grammarChamps') gradeWorksheetGrammarChamps();
+                else if (state.currentWorksheetId === 'urduDost') gradeWorksheetUrduDost();
                 
                 showResults();
 
@@ -1795,12 +2209,16 @@
             });
         };
 
-        // Helper to grade pill sections
+        // Helper to grade pill sections.
+        // Reads data-topic from each question element (if set) so the Results
+        // topic-breakdown bars group by the question's real skill topic rather
+        // than a generic section name. Falls back to sectionName when absent.
         const gradePills = (selector, sectionName) => {
             document.querySelectorAll(selector).forEach(q => {
                 const qTextEl = q.querySelector('.font-baloo');
                 const qText = qTextEl ? qTextEl.innerText.trim().replace(/ ?\?$/, '') + ' ?' : 'Question';
                 const cAns = q.dataset.ans;
+                const topic = q.dataset.topic || sectionName;
                 const selectedPill = q.querySelector('.selected');
                 const uAns = selectedPill ? selectedPill.innerText.replace(/[^a-zA-Z -]/g, '').trim() : 'None';
                 // For exact matches checking, especially on pills with emojis:
@@ -1812,13 +2230,14 @@
                 }
 
                 if(isCorrect) state.totalCorrect++;
-                
+
                 state.results.push({
                     q: qText,
                     userAns: selectedPill ? selectedPill.innerText.trim() : 'None',
                     correctAns: cAns,
                     isCorrect: isCorrect,
-                    section: sectionName
+                    section: sectionName,
+                    topic: topic  // drives the Results topic-breakdown bars
                 });
             });
         };
@@ -2118,7 +2537,7 @@ function renderNumberNinjasWorksheet() {
     html += `<div class="section-card gs-reveal">${secHeader("Nouns — Common vs Proper", "Tap the correct button for each word.")}<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">`;
     s3Items.forEach((item, i) => {
         html += `
-            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question nn-s3" data-q="s3-${i}" data-ans="${item.a}">
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question nn-s3" data-topic="Nouns" data-q="s3-${i}" data-ans="${item.a}">
                 <div class="text-2xl font-bold font-baloo">${i+1}. ${item.w}</div>
                 <div class="flex gap-2">
                     <div class="pill s4-opt" style="padding: 0.5rem 1rem;">Common Noun</div>
@@ -2145,7 +2564,7 @@ function renderNumberNinjasWorksheet() {
     html += `<div class="section-card gs-reveal">${secHeader("Verbs — Find the Action Word", "Find the verb in each sentence.")}<div class="space-y-4">`;
     s4Items.forEach((item, i) => {
         html += `
-            <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question nn-s4" data-q="s4-${i}" data-ans="${item.a}">
+            <div class="bg-white p-4 rounded-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 s4-question nn-s4" data-topic="Verbs" data-q="s4-${i}" data-ans="${item.a}">
                 <div class="text-xl font-bold font-baloo">${i+1}. "${item.q}"</div>
                 <div class="flex flex-wrap gap-2">
                     ${item.opts.map(opt => `<div class="pill s4-opt" style="padding: 0.5rem 1rem;">${opt}</div>`).join('')}
@@ -2184,18 +2603,7 @@ function renderNumberNinjasWorksheet() {
     // Insert HTML before the submit button
     container.insertAdjacentHTML('afterbegin', html);
     
-    // Wire up pills since they are dynamically added
-    container.querySelectorAll('.s4-question').forEach(q => {
-        const pills = q.querySelectorAll('.s4-opt');
-        pills.forEach(pill => {
-            pill.addEventListener('click', () => {
-                pills.forEach(p => p.classList.remove('selected'));
-                pill.classList.add('selected');
-                q.classList.remove('pill-error');
-                gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
-            });
-        });
-    });
+    // Pill interactivity handled by app-container event delegation.
 }
 
 function registerNumberNinjasInputs() {
@@ -2294,7 +2702,7 @@ function renderGrammarChampsWorksheet() {
     html += `<div class="section-card gs-reveal">` + secHeader("Types of Nouns — Common, Proper, Collective", "Tap the correct noun type.") + `<div class="space-y-4">`;
     s1Items.forEach((item, i) => {
         html += `
-            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s1" data-q="s1-${i}" data-ans="${item.a}">
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s1" data-topic="Nouns" data-q="s1-${i}" data-ans="${item.a}">
                 <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
                 <div class="flex flex-wrap gap-4">
                     <div class="pill s4-opt" data-val="Common Noun">Common Noun</div>
@@ -2323,7 +2731,7 @@ function renderGrammarChampsWorksheet() {
     html += `<div class="section-card gs-reveal">` + secHeader("Verbs with '-ing'", "Tap the correct spelling.") + `<div class="space-y-4">`;
     s2Items.forEach((item, i) => {
         html += `
-            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-s2" data-q="s2-${i}" data-ans="${item.a}">
+            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-s2" data-topic="Verbs" data-q="s2-${i}" data-ans="${item.a}">
                 <div class="text-xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
                 <div class="flex flex-wrap gap-3">
                     ${item.opts.map(opt => `<div class="pill s4-opt" data-val="${opt}">${opt}</div>`).join('')}
@@ -2342,7 +2750,7 @@ function renderGrammarChampsWorksheet() {
     html += `<div class="section-card gs-reveal">` + secHeader("Articles — 'a' or 'an'", "Tap 'a' or 'an'.") + `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
     s3Items.forEach((item, i) => {
         html += `
-            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s3" data-q="s3-${i}" data-ans="${item.a}">
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question gc-s3" data-topic="Articles" data-q="s3-${i}" data-ans="${item.a}">
                 <div class="text-2xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
                 <div class="flex gap-4">
                     <div class="pill s4-opt" data-val="a">a</div>
@@ -2354,16 +2762,16 @@ function renderGrammarChampsWorksheet() {
 
     // Mini Test
     const mtItems = [
-        {q: "\"a herd of sheep\" is a ___ noun", a: "Collective", opts: ["Common", "Proper", "Collective"]},
-        {q: "She is ___ (write) her name.", a: "writing", opts: ["writeing", "writing", "writting"]},
-        {q: "___ owl", a: "an", opts: ["a", "an"]},
-        {q: "\"London\" is a ___ noun", a: "Proper", opts: ["Common", "Proper", "Collective"]},
-        {q: "He is ___ (run) home.", a: "running", opts: ["runing", "running", "runnning"]}
+        {q: "\"a herd of sheep\" is a ___ noun", a: "Collective", opts: ["Common", "Proper", "Collective"], t:"Nouns"},
+        {q: "She is ___ (write) her name.", a: "writing", opts: ["writeing", "writing", "writting"], t:"Verbs"},
+        {q: "___ owl", a: "an", opts: ["a", "an"], t:"Articles"},
+        {q: "\"London\" is a ___ noun", a: "Proper", opts: ["Common", "Proper", "Collective"], t:"Nouns"},
+        {q: "He is ___ (run) home.", a: "running", opts: ["runing", "running", "runnning"], t:"Verbs"}
     ];
     html += `<div class="section-card gs-reveal">` + secHeader("Grammar Champs Mini Test 🏆", "Mixed review!") + `<div class="space-y-4">`;
     mtItems.forEach((item, i) => {
         html += `
-            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-mt" data-q="mt-${i}" data-ans="${item.a}">
+            <div class="bg-white p-4 rounded-xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 s4-question gc-mt" data-topic="${item.t}" data-q="mt-${i}" data-ans="${item.a}">
                 <div class="text-xl font-bold font-baloo">${i+1}. <span class="ml-2">${item.q}</span></div>
                 <div class="flex flex-wrap gap-3">
                     ${item.opts.map(opt => `<div class="pill s4-opt" data-val="${opt}">${opt}</div>`).join('')}
@@ -2380,18 +2788,7 @@ function registerGrammarChampsInputs() {
     const container = document.getElementById('screen-worksheet-grammarChamps');
     if (container.dataset.eventsBound === 'true') return;
     container.dataset.eventsBound = 'true';
-
-    document.querySelectorAll('#screen-worksheet-grammarChamps .s4-question').forEach(q => {
-        const pills = q.querySelectorAll('.pill');
-        pills.forEach(pill => {
-            pill.addEventListener('click', () => {
-                pills.forEach(p => p.classList.remove('selected'));
-                pill.classList.add('selected');
-                q.classList.remove('pill-error');
-                gsap.fromTo(pill, {scale: 0.9}, {scale: 1.05, duration: 0.3, ease: "back.out(2)"});
-            });
-        });
-    });
+    // Pill interactivity handled by app-container event delegation.
 }
 
 function gradeWorksheetGrammarChamps() {
@@ -2403,13 +2800,260 @@ function gradeWorksheetGrammarChamps() {
     gradePills('.gc-s3', 'Section 3: Articles');
     gradePills('.gc-mt', 'Grammar Champs Mini Test');
 }
+// ============================================================
+// URDU DOST WORKSHEET — RENDER FUNCTION
+// RTL worksheet: مذکر مؤنث (Masculine/Feminine) + مصوتے (Vowels)
+// ============================================================
+function renderUrduDostWorksheet() {
+    const container = document.getElementById('screen-worksheet-urduDost');
+    if (container.children.length > 2) return; // Already rendered
+
+    // --- Data ---
+
+    // Section 1: Masculine / Feminine (12 items)
+    const s1Items = [
+        { word: 'لڑکا',  ans: 'مذکر',  topic: 'مذکر مؤنث' },
+        { word: 'لڑکی',  ans: 'مؤنث',  topic: 'مذکر مؤنث' },
+        { word: 'گھوڑا', ans: 'مذکر',  topic: 'مذکر مؤنث' },
+        { word: 'گھوڑی', ans: 'مؤنث',  topic: 'مذکر مؤنث' },
+        { word: 'بکرا',  ans: 'مذکر',  topic: 'مذکر مؤنث' },
+        { word: 'بکری',  ans: 'مؤنث',  topic: 'مذکر مؤنث' },
+        { word: 'شیر',   ans: 'مذکر',  topic: 'مذکر مؤنث' },
+        { word: 'شیرنی', ans: 'مؤنث',  topic: 'مذکر مؤنث' },
+        { word: 'مرغا',  ans: 'مذکر',  topic: 'مذکر مؤنث' },
+        { word: 'مرغی',  ans: 'مؤنث',  topic: 'مذکر مؤنث' },
+        { word: 'کتا',   ans: 'مذکر',  topic: 'مذکر مؤنث' },
+        { word: 'بلی',   ans: 'مؤنث',  topic: 'مذکر مؤنث' }
+    ];
+
+    // Section 2: Identify the Vowel Sign (8 items)
+    const s2Items = [
+        { letter: 'بَ', ans: 'زبر',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'بِ', ans: 'زیر',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'بُ', ans: 'پیش',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'تَ', ans: 'زبر',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'تِ', ans: 'زیر',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'تُ', ans: 'پیش',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'کَ', ans: 'زبر',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] },
+        { letter: 'کِ', ans: 'زیر',  topic: 'مصوتے اور جوڑ توڑ', opts: ['زبر', 'زیر', 'پیش'] }
+    ];
+
+    // Section 3: Join the Letters (10 items)
+    const s3Items = [
+        { prompt: 'پ + زبر = ؟',  ans: 'پَ', opts: ['پَ', 'پِ', 'پُ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'م + زیر = ؟',  ans: 'مِ', opts: ['مِ', 'مَ', 'مُ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ت + پیش = ؟',  ans: 'تُ', opts: ['تُ', 'تَ', 'تِ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ک + زبر = ؟',  ans: 'کَ', opts: ['کَ', 'کِ', 'کُ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ب + زیر = ؟',  ans: 'بِ', opts: ['بِ', 'بَ', 'بُ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'د + پیش = ؟',  ans: 'دُ', opts: ['دُ', 'دَ', 'دِ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ر + زبر = ؟',  ans: 'رَ', opts: ['رَ', 'رِ', 'رُ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'س + زیر = ؟',  ans: 'سِ', opts: ['سِ', 'سَ', 'سُ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ل + پیش = ؟',  ans: 'لُ', opts: ['لُ', 'لَ', 'لِ'], topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ن + زبر = ؟',  ans: 'نَ', opts: ['نَ', 'نِ', 'نُ'], topic: 'مصوتے اور جوڑ توڑ' }
+    ];
+
+    // Mini Test (5 items — each tagged back to its REAL topic)
+    const miniTest = [
+        { prompt: 'لڑکا',                        ans: 'مذکر', opts: ['مذکر', 'مؤنث'],           topic: 'مذکر مؤنث' },
+        { prompt: 'گھوڑی',                       ans: 'مؤنث', opts: ['مذکر', 'مؤنث'],           topic: 'مذکر مؤنث' },
+        { prompt: 'مَ — کونسا مصوتہ ہے؟',        ans: 'زبر',  opts: ['زبر', 'زیر', 'پیش'],      topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ج + زیر = ؟',                 ans: 'جِ',   opts: ['جِ', 'جَ', 'جُ'],         topic: 'مصوتے اور جوڑ توڑ' },
+        { prompt: 'ہ + پیش = ؟',                 ans: 'ہُ',   opts: ['ہُ', 'ہَ', 'ہِ'],         topic: 'مصوتے اور جوڑ توڑ' }
+    ];
+
+    // --- Build HTML ---
+    let html = '';
+    let sectionCount = 1;
+
+    // RTL container wraps ALL content sections
+    // dir="rtl" lang="ur" ensures proper bidirectional text flow throughout
+    html += `<div class="urdu-rtl-container" dir="rtl" lang="ur">`;
+
+    // === SECTION HEADER HELPER ===
+    const secHeader = (titleUrdu, subtitleUrdu) => `
+        <div class="flex items-center gap-4 mb-2">
+            <div class="badge">${sectionCount++}</div>
+            <h3 class="text-2xl font-nastaliq font-bold">${titleUrdu}</h3>
+        </div>
+        ${subtitleUrdu ? `<p class="text-lg mb-6 font-nastaliq font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitleUrdu}</p>` : ''}
+    `;
+
+    // ============================
+    // SECTION 1: مذکر یا مؤنث؟
+    // ============================
+    html += `<div class="section-card gs-reveal">
+        ${secHeader('مذکر یا مؤنث؟', 'درست بٹن کو دبائیں۔')}
+        <div class="space-y-4">`;
+
+    s1Items.forEach((item, i) => {
+        html += `
+        <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ud-question ud-s1"
+             data-q="ud-s1-${i}" data-ans="${item.ans}" data-topic="${item.topic}">
+            <div class="urdu-stimulus">${i + 1}. ${item.word}</div>
+            <div class="flex gap-4 justify-end">
+                ${item.opts ? item.opts.map(o => `<div class="urdu-pill ud-opt" data-val="${o}">${o}</div>`).join('')
+                  : `<div class="urdu-pill ud-opt" data-val="مذکر">مذکر</div>
+                     <div class="urdu-pill ud-opt" data-val="مؤنث">مؤنث</div>`}
+            </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+
+    // ============================
+    // SECTION 2: مصوتے پہچانیں
+    // ============================
+    html += `<div class="section-card gs-reveal">
+        ${secHeader('مصوتے پہچانیں', 'ہر حرف میں کونسا مصوتہ ہے؟')}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+
+    s2Items.forEach((item, i) => {
+        html += `
+        <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ud-question ud-s2"
+             data-q="ud-s2-${i}" data-ans="${item.ans}" data-topic="${item.topic}">
+            <div class="urdu-stimulus">${i + 1}. ${item.letter}</div>
+            <div class="flex gap-3 justify-end">
+                ${item.opts.map(o => `<div class="urdu-pill ud-opt" data-val="${o}">${o}</div>`).join('')}
+            </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+
+    // ============================
+    // SECTION 3: جوڑ توڑ کریں
+    // ============================
+    html += `<div class="section-card gs-reveal">
+        ${secHeader('جوڑ توڑ کریں', 'درست جوڑ تلاش کریں۔')}
+        <div class="space-y-4">`;
+
+    s3Items.forEach((item, i) => {
+        html += `
+        <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ud-question ud-s3"
+             data-q="ud-s3-${i}" data-ans="${item.ans}" data-topic="${item.topic}">
+            <div class="urdu-join-prompt">${i + 1}. ${item.prompt}</div>
+            <div class="flex gap-3 justify-end">
+                ${item.opts.map(o => `<div class="urdu-pill ud-opt" data-val="${o}">${o}</div>`).join('')}
+            </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+
+    // ============================
+    // SECTION 4: اردو چیلنج (Mini Test)
+    // ============================
+    html += `<div class="section-card gs-reveal">
+        ${secHeader('اردو چیلنج 🏆', 'مکس سوالات — آپ تیار ہیں!')}
+        <div class="space-y-4">`;
+
+    miniTest.forEach((item, i) => {
+        html += `
+        <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 ud-question ud-mt"
+             data-q="ud-mt-${i}" data-ans="${item.ans}" data-topic="${item.topic}">
+            <div class="urdu-join-prompt">${i + 1}. ${item.prompt}</div>
+            <div class="flex gap-3 justify-end">
+                ${item.opts.map(o => `<div class="urdu-pill ud-opt" data-val="${o}">${o}</div>`).join('')}
+            </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+
+    // Close RTL container
+    html += `</div>`;
+
+    // Inject before the submit button
+    container.insertAdjacentHTML('afterbegin', html);
+
+    // Wire tap-select interactivity for Urdu pills via event delegation
+    // (same pattern as other worksheets — uses the app-container delegated handler below)
+    setupUrduPillsInteractivity();
+}
+
+// ============================================================
+// URDU DOST — PILL INTERACTIVITY
+// Uses its own delegated listener on the urduDost container
+// because .urdu-pill / .ud-opt differ from .s4-opt
+// ============================================================
+function setupUrduPillsInteractivity() {
+    const container = document.getElementById('screen-worksheet-urduDost');
+    if (container.dataset.urduEventsSet === 'true') return;
+    container.dataset.urduEventsSet = 'true';
+
+    container.addEventListener('click', (e) => {
+        const pill = e.target.closest('.ud-opt');
+        if (!pill) return;
+        const q = pill.closest('.ud-question');
+        if (!q) return;
+
+        // Deselect siblings
+        q.querySelectorAll('.ud-opt').forEach(p => p.classList.remove('selected', 'urdu-pill-error'));
+        // Also clear any pill-error on the question row itself
+        q.classList.remove('pill-error');
+        pill.classList.add('selected');
+
+        // Pop animation
+        gsap.fromTo(pill, { scale: 0.9 }, { scale: 1.05, duration: 0.3, ease: 'back.out(2)' });
+    });
+}
+
+// ============================================================
+// URDU DOST — GRADING FUNCTION
+// Reads data-topic from each question element so results
+// aggregate into exactly two topic bars on the Results report.
+// ============================================================
+function gradeWorksheetUrduDost() {
+    state.results = [];
+    state.totalCorrect = 0;
+
+    const gradeUrduPills = (selector) => {
+        document.querySelectorAll(selector).forEach(q => {
+            const cAns   = q.dataset.ans;
+            const topic  = q.dataset.topic || 'عمومی';
+            const selectedPill = q.querySelector('.ud-opt.selected');
+            const uAns   = selectedPill ? selectedPill.dataset.val : null;
+            const isCorrect = (uAns !== null) && (uAns === cAns);
+
+            if (isCorrect) state.totalCorrect++;
+
+            // For the question label use the first text element (stimulus/prompt)
+            const promptEl = q.querySelector('.urdu-stimulus, .urdu-join-prompt');
+            const qText = promptEl ? promptEl.innerText.trim() : 'سوال';
+
+            state.results.push({
+                q: qText,
+                userAns: uAns || 'جواب نہیں',
+                correctAns: cAns,
+                isCorrect: isCorrect,
+                section: topic,  // section label = topic name for Urdu worksheet
+                topic: topic     // CRITICAL: topic field drives the Results breakdown bars
+            });
+        });
+    };
+
+    gradeUrduPills('.ud-s1');
+    gradeUrduPills('.ud-s2');
+    gradeUrduPills('.ud-s3');
+    gradeUrduPills('.ud-mt');
+}
+
 
         // ----------------------------------------------------
         // SCREEN 3: Results Display & Animations
         // ----------------------------------------------------
+        function getPerformanceTier(percentage) {
+            if (percentage >= 90) return { label: 'Awesome', tagText: 'Perfect ⭐', colorHex: '#2e7d32' };
+            if (percentage >= 70) return { label: 'Good', tagText: 'Good 👍', colorHex: '#1e88e5' };
+            if (percentage >= 50) return { label: 'Average', tagText: 'Average 😐', colorHex: '#f0b429' };
+            return { label: 'Needs More Work', tagText: 'Needs More Work 📚', colorHex: '#d1453a' };
+        }
+
         function showResults() {
             // Update Subtitle dynamically
-            document.getElementById('res-subtitle').innerText = `${worksheetsConfig[state.currentWorksheetId].title} — Results Summary`;
+            // For Urdu worksheet: show RTL subtitle header
+            if (state.currentWorksheetId === 'urduDost') {
+                document.getElementById('res-subtitle').innerHTML =
+                    `<span class="font-nastaliq" dir="rtl" lang="ur" style="font-size:1rem; line-height:2;">اردو دوست</span> — Results Summary`;
+            } else {
+                document.getElementById('res-subtitle').innerText = `${worksheetsConfig[state.currentWorksheetId].title} — Results Summary`;
+            }
             
             // Populate Student Data
             document.getElementById('res-name').innerText = state.student.name;
@@ -2418,58 +3062,71 @@ function gradeWorksheetGrammarChamps() {
             const d = new Date(state.student.date);
             document.getElementById('res-date').innerText = d.toLocaleDateString();
             
-            // Update score total dynamically
-            document.getElementById('score-total').innerText = state.totalPossible;
-            
-            const pct = Math.round((state.totalCorrect / state.totalPossible) * 100);
-            
-            // Populate Error Breakdown
-            const reviewList = document.getElementById('review-list');
+            const overallPct = Math.round((state.totalCorrect / state.totalPossible) * 100);
+            const overallTier = getPerformanceTier(overallPct);
+
+            document.getElementById('res-message').innerText = `${overallPct}% — ${overallTier.label}! ${overallTier.tagText.split(' ')[1]}`;
+            document.getElementById('res-message').style.backgroundColor = overallTier.colorHex;
+
+            // Group results by topic
+            const topics = {};
+            state.results.forEach(r => {
+                const topic = r.topic || "General";
+                if (!topics[topic]) topics[topic] = { correct: 0, total: 0 };
+                topics[topic].total++;
+                if (r.isCorrect) topics[topic].correct++;
+            });
+
+            // Populate Topic Breakdown
+            const reviewList = document.getElementById('topic-breakdown-list');
             reviewList.innerHTML = '';
-            
-            const incorrects = state.results.filter(r => !r.isCorrect);
-            
-            if(incorrects.length === 0) {
-                reviewList.innerHTML = `
-                    <div class="bg-green-50 text-green-800 p-6 rounded-xl border border-green-200 text-center font-bold text-xl">
-                        🎉 Perfect score! Nothing to review! 🌟
+
+            const weakTopics = [];
+            let index = 0;
+
+            for (const [topicName, data] of Object.entries(topics)) {
+                const topicPct = Math.round((data.correct / data.total) * 100);
+                const tier = getPerformanceTier(topicPct);
+                if (topicPct < 70) weakTopics.push(topicName);
+
+                const row = document.createElement('div');
+                row.className = 'topic-row flex flex-col gap-2 p-3 bg-white rounded-lg border border-gray-100 shadow-sm';
+                
+                // For Urdu worksheet topics: apply Nastaliq font + RTL direction on the label span
+                const isUrduTopic = state.currentWorksheetId === 'urduDost';
+                const topicLabelHtml = isUrduTopic
+                    ? `<span class="font-nastaliq" dir="rtl" lang="ur" style="font-size:1.1rem; line-height:2;">${topicName}</span>`
+                    : `<span>${topicName}</span>`;
+                row.innerHTML = `
+                    <div class="flex justify-between items-center text-navy font-bold text-lg font-baloo">
+                        ${topicLabelHtml}
+                        <span>${topicPct}% — ${tier.tagText}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div class="topic-bar-fill h-3 rounded-full" style="width: 0%; background-color: ${tier.colorHex};" data-target-width="${topicPct}%"></div>
                     </div>
                 `;
-            } else {
-                let currentSection = '';
-                incorrects.forEach(item => {
-                    if(item.section !== currentSection) {
-                        currentSection = item.section;
-                        const secHeader = document.createElement('h4');
-                        secHeader.className = 'font-bold text-navy mt-4 mb-2 bg-gray-100 inline-block px-3 py-1 rounded';
-                        secHeader.innerText = currentSection;
-                        reviewList.appendChild(secHeader);
-                    }
-                    const row = document.createElement('div');
-                    row.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100 gap-2';
-                    row.innerHTML = `
-                        <div class="font-medium text-navy text-lg">${item.q}</div>
-                        <div class="flex items-center gap-4 text-lg">
-                            <span class="text-red-600 line-through decoration-2">You: ${item.userAns}</span>
-                            <span class="text-green-600 font-bold">Correct: ${item.correctAns}</span>
-                        </div>
-                    `;
-                    reviewList.appendChild(row);
-                });
+                reviewList.appendChild(row);
+                index++;
             }
-            
-            // Set Tier Message
-            let msg = "";
-            if(pct >= 90) msg = "🌟 Outstanding! You're a Superstar!";
-            else if(pct >= 70) msg = "👍 Great job! Just a little more practice!";
-            else if(pct >= 50) msg = "💪 Good effort! Let's practice a bit more together.";
-            else msg = "📚 Keep practicing — you'll get there!";
-            
-            document.getElementById('res-message').innerText = msg;
+
+            // Summary Line
+            const summaryEl = document.getElementById('res-summary-line');
+            if (weakTopics.length > 0) {
+                summaryEl.innerText = `Let's practice a bit more: ${weakTopics.join(', ')}`;
+            } else {
+                summaryEl.innerText = `Great work across every topic!`;
+            }
             
             // Transition Active Worksheet -> Results
             const targetScreen = `#screen-worksheet-${state.currentWorksheetId}`;
             
+            // Disable Export buttons initially
+            document.getElementById('btn-pdf').disabled = true;
+            document.getElementById('btn-img').disabled = true;
+            document.getElementById('btn-pdf').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-img').classList.add('opacity-50', 'cursor-not-allowed');
+
             gsap.to(targetScreen, {
                 opacity: 0, y: -20, duration: 0.4, onComplete: () => {
                     document.querySelector(targetScreen).classList.remove('active');
@@ -2479,42 +3136,71 @@ function gradeWorksheetGrammarChamps() {
                     // Reveal results card
                     gsap.to('#screen-results', { opacity: 1, duration: 0.1 });
                     gsap.from('#results-card', { y: 50, opacity: 0, duration: 0.6, ease: "back.out(1.2)" });
-                    
-                    // Animate Score Ring
-                    const ring = document.getElementById('score-ring');
-                    // dasharray is set up to have gap of 100
-                    gsap.fromTo(ring, {strokeDasharray: "0, 100"}, {strokeDasharray: `${pct}, 100`, duration: 2, ease: "power2.out", delay: 0.3});
-                    
+
+                    // Render Chart.js Doughnut
+                    const ctx = document.getElementById('score-chart').getContext('2d');
+                    if (window.scoreChartInstance) window.scoreChartInstance.destroy();
+
+                    window.scoreChartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Score', 'Remaining'],
+                            datasets: [{
+                                data: [overallPct, 100 - overallPct],
+                                backgroundColor: [overallTier.colorHex, '#e5e7eb'],
+                                borderWidth: 0,
+                                cutout: '75%',
+                                borderRadius: 5
+                            }]
+                        },
+                        options: {
+                            animation: {
+                                duration: 1000,
+                                easing: 'easeOutQuart'
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: false }
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+
+                    // Animate Topic Bars
+                    document.querySelectorAll('.topic-bar-fill').forEach((bar, i) => {
+                        gsap.to(bar, {
+                            width: bar.dataset.targetWidth,
+                            duration: 1,
+                            ease: "power2.out",
+                            delay: 0.2 + (i * 0.1)
+                        });
+                    });
+
                     // Animate Score Number
                     const scoreObj = { val: 0 };
                     gsap.to(scoreObj, {
-                        val: state.totalCorrect,
-                        duration: 2,
+                        val: overallPct,
+                        duration: 1,
                         ease: "power2.out",
-                        delay: 0.3,
                         onUpdate: () => {
                             document.getElementById('score-num').innerText = Math.round(scoreObj.val);
-                        }
-                    });
-                    
-                    // Animate Percentage Number
-                    const pctObj = { val: 0 };
-                    gsap.to(pctObj, {
-                        val: pct,
-                        duration: 2,
-                        ease: "power2.out",
-                        delay: 0.3,
-                        onUpdate: () => {
-                            document.getElementById('res-percent').innerText = Math.round(pctObj.val) + "%";
                         },
                         onComplete: () => {
-                            fireConfetti(); // Trigger celebration at the end!
+                            fireConfetti();
+                            
+                            // Re-enable export buttons after ALL animations finish
+                            setTimeout(() => {
+                                document.getElementById('btn-pdf').disabled = false;
+                                document.getElementById('btn-img').disabled = false;
+                                document.getElementById('btn-pdf').classList.remove('opacity-50', 'cursor-not-allowed');
+                                document.getElementById('btn-img').classList.remove('opacity-50', 'cursor-not-allowed');
+                            }, 500); // give it a little extra buffer
                         }
                     });
                 }
             });
         }
-
         // ----------------------------------------------------
         // CONFETTI ANIMATION
         // ----------------------------------------------------
@@ -2615,6 +3301,8 @@ function gradeWorksheetGrammarChamps() {
                     document.getElementById('score-num').innerText = "0";
                     document.getElementById('res-percent').innerText = "0%";
                     document.getElementById('res-message').innerText = "";
+                    document.getElementById('topic-breakdown-list').innerHTML = "";
+                    document.getElementById('res-summary-line').innerText = "";
                 }
             });
         });
@@ -2658,12 +3346,15 @@ function gradeWorksheetGrammarChamps() {
                     document.getElementById('screen-selection').classList.add('active');
                     gsap.to('#screen-selection', { opacity: 1, y: 0, duration: 0.4 });
                     window.scrollTo(0, 0);
+                    renderSelectionGrid();
                     
                     // Reset visuals
                     document.getElementById('score-ring').style.strokeDasharray = "0, 100";
                     document.getElementById('score-num').innerText = "0";
                     document.getElementById('res-percent').innerText = "0%";
                     document.getElementById('res-message').innerText = "";
+                    document.getElementById('topic-breakdown-list').innerHTML = "";
+                    document.getElementById('res-summary-line').innerText = "";
                 }
             });
         });
@@ -2755,7 +3446,337 @@ function gradeWorksheetGrammarChamps() {
             btn.disabled = false;
         });
         
-    </script>
+    
+        // ============================================================
+        // SCREEN 2 ââ‚¬â€ FILTER SYSTEM
+        // ============================================================
+
+        // Active filter state ââ‚¬â€ OR within group, AND across groups
+        const filterState = {
+            subject:    new Set(),
+            classLevel: new Set(),
+            difficulty: new Set()
+        };
+
+        // Pending state (inside the sheet, not yet applied)
+        const pendingFilter = {
+            subject:    new Set(),
+            classLevel: new Set(),
+            difficulty: new Set()
+        };
+
+        // ------------------------------------------------------------------
+        // Helpers
+        // ------------------------------------------------------------------
+        function isNewWorksheet(dateStr) {
+            const added = new Date(dateStr);
+            const now   = new Date();
+            const diffMs = now - added;
+            return diffMs <= 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+        }
+
+        function getFilteredWorksheets() {
+            return Object.entries(worksheetsConfig)
+                .filter(([, cfg]) => {
+                    const subjectOk    = filterState.subject.size    === 0 || filterState.subject.has(cfg.subject);
+                    const classOk      = filterState.classLevel.size === 0 || filterState.classLevel.has(cfg.classLevel);
+                    const difficultyOk = filterState.difficulty.size === 0 || filterState.difficulty.has(cfg.difficulty);
+                    return subjectOk && classOk && difficultyOk;
+                })
+                .sort((a, b) => {
+                    // Newest first (descending dateAdded)
+                    const dA = new Date(a[1].dateAdded);
+                    const dB = new Date(b[1].dateAdded);
+                    if (dB - dA !== 0) return dB - dA;
+                    return 0; // preserve insertion order for same date
+                });
+        }
+
+        function countPendingMatches() {
+            return Object.entries(worksheetsConfig)
+                .filter(([, cfg]) => {
+                    const subjectOk    = pendingFilter.subject.size    === 0 || pendingFilter.subject.has(cfg.subject);
+                    const classOk      = pendingFilter.classLevel.size === 0 || pendingFilter.classLevel.has(cfg.classLevel);
+                    const difficultyOk = pendingFilter.difficulty.size === 0 || pendingFilter.difficulty.has(cfg.difficulty);
+                    return subjectOk && classOk && difficultyOk;
+                }).length;
+        }
+
+        function totalActiveFilters() {
+            return filterState.subject.size + filterState.classLevel.size + filterState.difficulty.size;
+        }
+
+        // ------------------------------------------------------------------
+        // renderSelectionGrid ââ‚¬â€ builds card HTML from config, sorted + filtered
+        // ------------------------------------------------------------------
+        function renderSelectionGrid() {
+            const grid        = document.getElementById('ws-grid');
+            const emptyState  = document.getElementById('ws-empty-state');
+            const filtered    = getFilteredWorksheets();
+
+            // Remove all previous cards (keep empty state element)
+            Array.from(grid.querySelectorAll('.ws-card')).forEach(c => c.remove());
+
+            if (filtered.length === 0) {
+                emptyState.classList.add('visible');
+            } else {
+                emptyState.classList.remove('visible');
+                filtered.forEach(([wsId, cfg]) => {
+                    const isNew  = isNewWorksheet(cfg.dateAdded);
+                    const badge  = isNew
+                        ? `<span class="ws-badge ws-badge-new">&#x2728; NEW</span>`
+                        : `<span class="ws-badge ws-badge-current">Current</span>`;
+                    const card   = document.createElement('div');
+                    card.className = 'ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center';
+                    card.dataset.worksheet = wsId;
+                    card.style.position = 'relative';
+                    card.innerHTML = `
+                        ${badge}
+                        <div class="text-5xl mb-3">${cfg.cardIcon}</div>
+                        <h4 class="text-xl font-baloo font-bold text-navy mb-1 leading-snug pr-10">${cfg.title}</h4>
+                        <p class="text-sm text-gray-500 font-medium mb-4">${cfg.cardDesc}</p>
+                        <div class="flex-grow"></div>
+                        <div class="flex flex-wrap gap-1 justify-center mb-3">
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${cfg.subject}</span>
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${cfg.classLevel}</span>
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${cfg.difficulty}</span>
+                        </div>
+                        <button class="mt-auto btn btn-gold w-full text-xl py-3 rounded-xl hover:scale-105 transition-transform">Start &#x2192;</button>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                // Animate cards in
+                gsap.fromTo(grid.querySelectorAll('.ws-card'),
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "back.out(1.2)" }
+                );
+            }
+
+            // Sync filter button badge
+            const count     = totalActiveFilters();
+            const countEl   = document.getElementById('filter-active-count');
+            countEl.textContent = count;
+            if (count > 0) {
+                countEl.classList.add('visible');
+            } else {
+                countEl.classList.remove('visible');
+            }
+
+            updateActiveChipRow();
+        }
+
+        // ------------------------------------------------------------------
+        // updateActiveChipRow ââ‚¬â€ shows removable tags for applied filters
+        // ------------------------------------------------------------------
+        function updateActiveChipRow() {
+            const row = document.getElementById('active-chip-row');
+            row.innerHTML = '';
+
+            const allActive = [
+                ...Array.from(filterState.subject).map(v    => ({ group: 'subject',    value: v })),
+                ...Array.from(filterState.classLevel).map(v => ({ group: 'classLevel', value: v })),
+                ...Array.from(filterState.difficulty).map(v => ({ group: 'difficulty', value: v }))
+            ];
+
+            if (allActive.length === 0) {
+                row.classList.remove('visible');
+                return;
+            }
+
+            row.classList.add('visible');
+
+            allActive.forEach(({ group, value }) => {
+                const chip = document.createElement('button');
+                chip.className = 'active-chip';
+                chip.innerHTML = `${value} <span class="active-chip-x">&#x2715;</span>`;
+                chip.addEventListener('click', () => {
+                    filterState[group].delete(value);
+                    // Sync pending state too
+                    pendingFilter[group].delete(value);
+                    renderSelectionGrid();
+                    syncSheetChips();
+                });
+                row.appendChild(chip);
+            });
+
+            if (allActive.length > 1) {
+                const clearBtn = document.createElement('button');
+                clearBtn.id = 'clear-all-filters';
+                clearBtn.textContent = 'Clear all filters';
+                clearBtn.addEventListener('click', () => {
+                    ['subject', 'classLevel', 'difficulty'].forEach(g => {
+                        filterState[g].clear();
+                        pendingFilter[g].clear();
+                    });
+                    renderSelectionGrid();
+                    syncSheetChips();
+                });
+                row.appendChild(clearBtn);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // buildFilterSheet ââ‚¬â€ populates chip groups dynamically from config
+        // ------------------------------------------------------------------
+        function buildFilterSheet() {
+            const body = document.getElementById('filter-sheet-body');
+            body.innerHTML = '';
+
+            // Derive unique values for each facet (preserving insertion order)
+            const subjects    = [...new Set(Object.values(worksheetsConfig).map(c => c.subject))];
+            const classLevels = [...new Set(Object.values(worksheetsConfig).map(c => c.classLevel))];
+            const difficulties= [...new Set(Object.values(worksheetsConfig).map(c => c.difficulty))];
+
+            const groups = [
+                { key: 'subject',    label: 'Subject',     values: subjects },
+                { key: 'classLevel', label: 'Class Level', values: classLevels },
+                { key: 'difficulty', label: 'Difficulty',  values: difficulties }
+            ];
+
+            groups.forEach(({ key, label, values }) => {
+                const group = document.createElement('div');
+                group.className = 'filter-group';
+
+                const labelEl = document.createElement('div');
+                labelEl.className = 'filter-group-label';
+                labelEl.textContent = label;
+                group.appendChild(labelEl);
+
+                const wrap = document.createElement('div');
+                wrap.className = 'filter-chips-wrap';
+
+                values.forEach(val => {
+                    const chip = document.createElement('button');
+                    chip.className = 'filter-chip';
+                    chip.dataset.group = key;
+                    chip.dataset.value = val;
+                    chip.textContent = val;
+                    if (pendingFilter[key].has(val)) chip.classList.add('active');
+                    chip.addEventListener('click', () => {
+                        if (pendingFilter[key].has(val)) {
+                            pendingFilter[key].delete(val);
+                            chip.classList.remove('active');
+                        } else {
+                            pendingFilter[key].add(val);
+                            chip.classList.add('active');
+                        }
+                        updateApplyBtn();
+                    });
+                    wrap.appendChild(chip);
+                });
+
+                group.appendChild(wrap);
+                body.appendChild(group);
+            });
+
+            updateApplyBtn();
+        }
+
+        function updateApplyBtn() {
+            const count = countPendingMatches();
+            document.getElementById('btn-apply-filters').textContent = `Apply (${count})`;
+        }
+
+        function syncSheetChips() {
+            // Sync visual state of chips in open sheet with filterState
+            document.querySelectorAll('#filter-sheet-body .filter-chip').forEach(chip => {
+                const group = chip.dataset.group;
+                const val   = chip.dataset.value;
+                chip.classList.toggle('active', filterState[group] && filterState[group].has(val));
+                // Also sync pendingFilter
+                if (filterState[group] && filterState[group].has(val)) {
+                    pendingFilter[group].add(val);
+                } else {
+                    pendingFilter[group] && pendingFilter[group].delete(val);
+                }
+            });
+            updateApplyBtn();
+        }
+
+        // ------------------------------------------------------------------
+        // Sheet open / close (GSAP animated)
+        // ------------------------------------------------------------------
+        function openFilterSheet() {
+            // Sync pending to current applied state
+            ['subject', 'classLevel', 'difficulty'].forEach(g => {
+                pendingFilter[g] = new Set(filterState[g]);
+            });
+            syncSheetChips();
+
+            document.getElementById('filter-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            gsap.to('#filter-sheet', { y: '0%', duration: 0.42, ease: 'power3.out' });
+        }
+
+        function closeFilterSheet() {
+            gsap.to('#filter-sheet', {
+                y: '100%', duration: 0.35, ease: 'power3.in',
+                onComplete: () => {
+                    document.getElementById('filter-overlay').classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // Swipe-down gesture to close sheet
+        // ------------------------------------------------------------------
+        (function setupSwipeClose() {
+            const sheet   = document.getElementById('filter-sheet');
+            const handle  = document.getElementById('filter-sheet-handle');
+            let startY = 0, isDragging = false;
+
+            function onTouchStart(e) {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+            }
+            function onTouchMove(e) {
+                if (!isDragging) return;
+                const dy = e.touches[0].clientY - startY;
+                if (dy > 0) {
+                    gsap.set(sheet, { y: dy });
+                }
+            }
+            function onTouchEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                const dy = e.changedTouches[0].clientY - startY;
+                if (dy > 100) {
+                    closeFilterSheet();
+                } else {
+                    gsap.to(sheet, { y: 0, duration: 0.25, ease: 'power2.out' });
+                }
+            }
+
+            [sheet, handle].forEach(el => {
+                el.addEventListener('touchstart', onTouchStart, { passive: true });
+                el.addEventListener('touchmove',  onTouchMove,  { passive: true });
+                el.addEventListener('touchend',   onTouchEnd);
+            });
+        })();
+
+        // ------------------------------------------------------------------
+        // Wire filter UI buttons
+        // ------------------------------------------------------------------
+        document.getElementById('btn-open-filters').addEventListener('click', openFilterSheet);
+        document.getElementById('btn-close-sheet').addEventListener('click', closeFilterSheet);
+        document.getElementById('filter-overlay').addEventListener('click', closeFilterSheet);
+
+        document.getElementById('btn-clear-all-sheet').addEventListener('click', () => {
+            ['subject', 'classLevel', 'difficulty'].forEach(g => pendingFilter[g].clear());
+            document.querySelectorAll('#filter-sheet-body .filter-chip').forEach(c => c.classList.remove('active'));
+            updateApplyBtn();
+        });
+
+        document.getElementById('btn-apply-filters').addEventListener('click', () => {
+            ['subject', 'classLevel', 'difficulty'].forEach(g => {
+                filterState[g] = new Set(pendingFilter[g]);
+            });
+            renderSelectionGrid();
+            closeFilterSheet();
+        });
+</script>
 </body>
 </html>
 
