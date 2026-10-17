@@ -543,6 +543,122 @@
             font-style: italic;
             margin-top: 0.5rem;
         }
+    
+        /* --- Folder Cards & Breadcrumbs (Part B) --- */
+        .folder-card {
+            background: white;
+            border-radius: 1.25rem;
+            border: 4px solid #dbeafe;
+            padding: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 95, 0.1);
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            min-height: 56px;
+            user-select: none;
+        }
+        .folder-card:hover {
+            transform: translateY(-3px);
+            border-color: #f0b429;
+            box-shadow: 0 16px 30px -5px rgba(30, 58, 95, 0.16);
+        }
+        .folder-icon {
+            font-size: 3rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .folder-tag {
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .folder-tag-latest {
+            background: linear-gradient(135deg, #f0b429 0%, #e09a10 100%);
+            color: #1e3a5f;
+            box-shadow: 0 0 12px rgba(240, 180, 41, 0.6);
+        }
+        .folder-tag-old {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        /* --- Smart Starters Word Bank & Bottom Sheet --- */
+        .wb-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            height: 44px;
+            padding: 0.25rem 1rem;
+            border: 2px dashed #1e3a5f;
+            border-radius: 9999px;
+            background: #f8fafc;
+            color: #1e3a5f;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            vertical-align: middle;
+        }
+        .wb-slot.active-slot {
+            border-color: #f0b429;
+            background: #fef9c3;
+            box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.4);
+        }
+        .wb-slot.filled {
+            border-style: solid;
+            background: #1e3a5f;
+            color: white;
+        }
+        .wb-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            background: white;
+            border: 2px solid #1e3a5f;
+            color: #1e3a5f;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            min-height: 44px;
+        }
+        .wb-chip:hover {
+            border-color: #f0b429;
+            transform: translateY(-2px);
+        }
+        .wb-chip.used {
+            opacity: 0.35;
+            pointer-events: none;
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        .fib-blank {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            height: 38px;
+            border-bottom: 3px solid #1e3a5f;
+            padding: 0 0.5rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            vertical-align: middle;
+        }
+        .story-fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 350;
+            box-shadow: 0 8px 24px rgba(30,58,95,0.3);
+        }
+
     </style>
 </head>
 <body class="min-h-screen pb-20">
@@ -593,29 +709,65 @@
         <main id="screen-selection" class="screen max-w-7xl mx-auto">
             <h3 id="selection-greeting" class="text-3xl font-baloo font-bold text-center mb-8">Hi! Which worksheet would you like to try today?</h3>
 
-            <!-- Filter Bar -->
-            <div id="filter-bar">
-                <button id="btn-open-filters">
-                    &#x1F50D; Filters
-                    <span id="filter-active-count">0</span>
-                </button>
+            <!-- FOLDERS VIEW (Default view on tab) -->
+            <div id="folders-view" class="max-w-4xl mx-auto px-4">
+                <div id="folders-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Injected dynamically by renderFoldersView() -->
+                </div>
             </div>
 
-            <!-- Active Chip Row (visible when filters applied) -->
-            <div id="active-chip-row">
-                <!-- Populated dynamically by JS -->
-            </div>
+            <!-- INSIDE FOLDER VIEW (Hidden by default, shown when folder is opened) -->
+            <div id="folder-detail-view" style="display: none; opacity: 0;">
+                <div class="flex flex-wrap items-center justify-between gap-4 max-w-6xl mx-auto px-4 mb-6">
+                    <button id="btn-back-to-folders" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border-2 border-navy text-navy font-bold hover:bg-lightBlue transition-all shadow-sm">
+                        ← All Folders
+                    </button>
+                    <div id="folder-detail-header" class="text-2xl font-baloo font-bold text-navy">
+                        <!-- e.g. OCT-2026 · Latest -->
+                    </div>
+                </div>
 
-            <!-- Dynamic Worksheet Grid (JS-rendered) -->
-            <div id="ws-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
-                <!-- Cards injected by renderSelectionGrid() -->
-                <div id="ws-empty-state">
-                    <div class="text-5xl mb-4">&#x1F50D;</div>
-                    <p class="text-xl font-baloo font-bold text-navy mb-2">No worksheets match these filters yet!</p>
-                    <p class="text-gray-500 font-medium">Try clearing one filter to see more.</p>
+                <!-- Filter Bar -->
+                <div id="filter-bar">
+                    <button id="btn-open-filters">
+                        &#x1F50D; Filters
+                        <span id="filter-active-count">0</span>
+                    </button>
+                </div>
+
+                <!-- Active Chip Row (visible when filters applied) -->
+                <div id="active-chip-row">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <!-- Dynamic Worksheet Grid (JS-rendered) -->
+                <div id="ws-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
+                    <!-- Cards injected by renderSelectionGrid() -->
+                    <div id="ws-empty-state">
+                        <div class="text-5xl mb-4">&#x1F50D;</div>
+                        <p class="text-xl font-baloo font-bold text-navy mb-2">No worksheets match these filters yet!</p>
+                        <p class="text-gray-500 font-medium">Try clearing one filter to see more.</p>
+                    </div>
                 </div>
             </div>
         </main>
+
+        <!-- Story Reader Bottom Sheet Modal -->
+        <div id="story-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.55); z-index:450; backdrop-filter:blur(2px);"></div>
+        <div id="story-sheet" style="position:fixed; bottom:0; left:0; right:0; z-index:520; background:white; border-radius:1.5rem 1.5rem 0 0; box-shadow:0 -8px 40px rgba(0,0,0,0.18); max-height:80vh; display:flex; flex-direction:column; transform:translateY(100%);">
+            <div style="width:2.5rem; height:0.3rem; background:#d1d5db; border-radius:9999px; margin:0.75rem auto 0; flex-shrink:0;"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1.25rem 0.5rem; border-bottom:1.5px solid #f1f5f9; flex-shrink:0;">
+                <h2 style="font-family:'Baloo 2', cursive; font-size:1.25rem; font-weight:800; color:#1e3a5f; margin:0;">📖 Zara and the Little Bird</h2>
+                <button id="btn-close-story" aria-label="Close story" style="background:#f1f5f9; border:none; border-radius:9999px; width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; color:#64748b;">✕</button>
+            </div>
+            <div id="story-sheet-body" style="overflow-y:auto; padding:1.25rem; font-size:1.1rem; line-height:1.8; color:#1e3a5f;">
+                <p class="mb-4">Zara lived in a small house with a green gate. Behind the house was a big mango tree.</p>
+                <p class="mb-4">One sunny morning, Zara went out to play. She heard a soft sound. <strong>"Chirp, chirp!"</strong> She looked down and saw a little bird on the ground. It had a hurt wing.</p>
+                <p class="mb-4">"Don't be afraid, little bird," said Zara. She picked it up gently and ran to her mother. Her mother gave her a soft cloth and a small box. Zara put the bird in the box. She gave it some water and rice.</p>
+                <p class="mb-4">For three days, Zara took care of the bird. On the fourth day, the bird flapped its wings and flew up, up, up! It sat on the mango tree and sang a happy song. "Goodbye, my friend!" said Zara. She waved and smiled.</p>
+                <p>After that, the little bird came to the mango tree every morning to sing for Zara.</p>
+            </div>
+        </div>
 
         <!-- Filter Sheet Overlay -->
         <div id="filter-overlay"></div>
@@ -954,6 +1106,24 @@
             </div>
         </main>
 
+        
+        <!-- SCREEN 11: Smart Starters Worksheet -->
+        <main id="screen-worksheet-smartStarters" class="screen worksheet-container">
+            <!-- Content rendered dynamically by renderSmartStartersWorksheet() -->
+
+            <!-- Floating Story FAB -->
+            <button id="btn-floating-story" class="story-fab btn btn-gold rounded-full px-5 py-3 shadow-xl flex items-center gap-2 border-2 border-navy text-base" style="display: none;">
+                📖 Read the story again
+            </button>
+
+            <!-- Submit Smart Starters -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
         <!-- SCREEN 7: Results -->
 
         <main id="screen-results" class="screen">
@@ -1024,7 +1194,7 @@
     </div>
 
     <script>
-        // STUDENT ROSTER — update this list when students are added/removed
+        // STUDENT ROSTER, update when students are added/removed
         const studentRoster = [
             { id: 1019, name: "Muhammad Zayan" },
             { id: 1020, name: "Eshal Faraz" },
@@ -1049,6 +1219,11 @@
             { id: 1049, name: "Fatima" },
             { id: 1050, name: "Dua" },
             { id: 1051, name: "Syed Asad-ur-Rahman" },
+            { id: 1052, name: "Amna" },
+            { id: 1054, name: "Sunaina" },
+            { id: 1055, name: "Azaan" },
+            { id: 1056, name: "Minahil" },
+            { id: 1057, name: "Marwa" },
         ];
 
         // --- GRADING LOGIC EXPLANATION ---
@@ -1060,17 +1235,25 @@
             totalPossible: 0 
         };
 
+        // FOLDERS CONFIG (Part B)
+        const worksheetFolders = [
+            { id: "earlier",  label: "Earlier Worksheets", sortKey: "0000-00" },
+            { id: "oct-2026", label: "OCT-2026",           sortKey: "2026-10" },
+        ];
+
+        let currentOpenedFolderId = null;
+
         const worksheetsConfig = {
             table2: {
                 title: "Table of 2",
                 exportPrefix: "KCI_Table2_Result",
                 totalPossible: 39,
                 render: null, // Already in HTML
-                // --- Metadata for Screen 2 filter / sort system ---
-                subject: "Maths",
+                subjects: ["Maths"],
                 classLevel: "KG",
                 difficulty: "Easy",
                 dateAdded: "2026-10-02",
+                folderId: "earlier",
                 cardIcon: "&#x1F9EE;",
                 cardDesc: "Multiplication practice for KG learners"
             },
@@ -1079,10 +1262,11 @@
                 exportPrefix: "KCI_ClassI_Result",
                 totalPossible: 74,
                 render: renderClass1Worksheet,
-                subject: "English",
+                subjects: ["English", "EVS"],
                 classLevel: "Class I",
                 difficulty: "Easy",
                 dateAdded: "2026-10-02",
+                folderId: "earlier",
                 cardIcon: "&#x1F4D6;",
                 cardDesc: "Living things, naming words, sounds, grammar &amp; more!"
             },
@@ -1091,10 +1275,11 @@
                 exportPrefix: "KCI_NatureExplorers_Result",
                 totalPossible: 33,
                 render: renderNatureWorksheet,
-                subject: "EVS",
+                subjects: ["EVS"],
                 classLevel: "KG",
                 difficulty: "Easy",
                 dateAdded: "2026-10-02",
+                folderId: "earlier",
                 cardIcon: "&#x1F33F;",
                 cardDesc: "Basic classification fun for KG learners"
             },
@@ -1104,10 +1289,11 @@
                 totalPossible: 21,
                 render: renderIslamiatWorksheet,
                 onShown: registerIslamiatScrollAnimations,
-                subject: "Islamiat",
+                subjects: ["Islamiat"],
                 classLevel: "KG",
                 difficulty: "Easy",
                 dateAdded: "2026-10-02",
+                folderId: "earlier",
                 cardIcon: "&#x262A;&#xFE0F;",
                 cardDesc: "Five Pillars, Prophets, Angels &amp; Holy Books"
             },
@@ -1117,10 +1303,11 @@
                 totalPossible: 41,
                 render: renderNumberNinjasWorksheet,
                 onShown: registerNumberNinjasInputs,
-                subject: "Maths",
+                subjects: ["Maths", "English"],
                 classLevel: "Class II",
                 difficulty: "Medium",
                 dateAdded: "2026-10-02",
+                folderId: "earlier",
                 cardIcon: "&#x1F4D0;",
                 cardDesc: "3-digit addition/subtraction + nouns &amp; verbs"
             },
@@ -1130,10 +1317,11 @@
                 totalPossible: 41,
                 render: renderGrammarChampsWorksheet,
                 onShown: registerGrammarChampsInputs,
-                subject: "English",
+                subjects: ["English"],
                 classLevel: "Class III",
                 difficulty: "Medium",
                 dateAdded: "2026-10-02",
+                folderId: "earlier",
                 cardIcon: "&#x270D;&#xFE0F;",
                 cardDesc: "Types of nouns, -ing verbs, and a/an articles"
             },
@@ -1142,12 +1330,27 @@
                 exportPrefix: "KCI_UrduDost_Result",
                 totalPossible: 35,
                 render: renderUrduDostWorksheet,
-                subject: "Urdu",
+                subjects: ["Urdu"],
                 classLevel: "Class I",
                 difficulty: "Easy",
                 dateAdded: "2026-10-05",
+                folderId: "earlier",
                 cardIcon: "&#x1F4D7;",
                 cardDesc: "<span class='font-nastaliq' lang='ur' dir='rtl' style='display:block; font-size:1.05rem; line-height:2;'>مذکر مؤنث اور مصوتے</span><span style='font-size:0.85em;'>Masculine/Feminine &amp; Vowels</span>"
+            },
+            smartStarters: {
+                title: "🌟 Smart Starters — Class I Maths & Reading",
+                exportPrefix: "KCI_SmartStarters_Result",
+                totalPossible: 47,
+                render: renderSmartStartersWorksheet,
+                onShown: registerSmartStartersInputs,
+                subjects: ["Maths", "English"],
+                classLevel: "Class I",
+                difficulty: "Medium",
+                dateAdded: "2026-10-17",
+                folderId: "oct-2026",
+                cardIcon: "🌟",
+                cardDesc: "Carry &amp; borrow sums plus a story with questions"
             }
         };
 
@@ -1984,8 +2187,11 @@
                     document.getElementById('selection-greeting').innerText = `Hi ${state.student.name.split(' ')[0]}! Which worksheet would you like to try today?`;
                     
                     gsap.to('#screen-selection', { opacity: 1, duration: 0.1 });
-                    renderSelectionGrid();
-                    buildFilterSheet();
+                    document.getElementById('folders-view').style.display = 'block';
+                    document.getElementById('folders-view').style.opacity = '1';
+                    document.getElementById('folder-detail-view').style.display = 'none';
+                    currentOpenedFolderId = null;
+                    renderFoldersView();
                 }
             });
         });
@@ -2091,7 +2297,7 @@
                 const textInputs = document.querySelectorAll(`${activeContainer} input[type="text"]`);
                 textInputs.forEach(input => {
                     // Skip validation for ungraded inputs (Class 1 Part B, Number Ninjas carry boxes)
-                    if (!input.dataset.ans && (state.currentWorksheetId === 'class1' || state.currentWorksheetId === 'numberNinjas')) return;
+                    if (!input.dataset.ans && (state.currentWorksheetId === 'class1' || state.currentWorksheetId === 'numberNinjas' || state.currentWorksheetId === 'smartStarters')) return;
                     
                     if(input.value.trim() === '') {
                         isValid = false;
@@ -2164,6 +2370,30 @@
                         }
                     });
                 }
+
+                // Validate Smart Starters:
+                // 1) Digit groups: each answer column group needs all digit boxes filled
+                if (state.currentWorksheetId === 'smartStarters') {
+                    document.querySelectorAll(`${activeContainer} .ss-col-group`).forEach(group => {
+                        const digits = group.querySelectorAll('.ss-digit');
+                        digits.forEach(d => {
+                            if (d.value.trim() === '') {
+                                isValid = false;
+                                d.classList.add('input-error');
+                                if (!firstInvalid) firstInvalid = group;
+                            }
+                        });
+                    });
+
+                    // 2) Word bank slots: all 5 slots must be filled
+                    document.querySelectorAll(`${activeContainer} .wb-slot`).forEach(slot => {
+                        if (!slot.dataset.chipId || slot.dataset.chipId.trim() === '') {
+                            isValid = false;
+                            slot.classList.add('input-error');
+                            if (!firstInvalid) firstInvalid = slot;
+                        }
+                    });
+                }
                 
                 if(!isValid) {
                     // Smooth scroll to the first missing answer
@@ -2181,6 +2411,7 @@
                 else if (state.currentWorksheetId === 'numberNinjas') gradeWorksheetNumberNinjas();
                 else if (state.currentWorksheetId === 'grammarChamps') gradeWorksheetGrammarChamps();
                 else if (state.currentWorksheetId === 'urduDost') gradeWorksheetUrduDost();
+                else if (state.currentWorksheetId === 'smartStarters') gradeWorksheetSmartStarters();
                 
                 showResults();
 
@@ -3038,6 +3269,754 @@ function gradeWorksheetUrduDost() {
         // ----------------------------------------------------
         // SCREEN 3: Results Display & Animations
         // ----------------------------------------------------
+        
+// ============================================================
+// SMART STARTERS — CLASS I MATHS & READING (Part D)
+// ============================================================
+
+// Reusable digit-column generator for 2-digit (T/O) or 3-digit (H/T/O)
+function createDigitColumnHTML(item, index, mode, digits, op, topic, qNum) {
+    const is3 = digits === 3;
+    const colCount = is3 ? 4 : 3;
+    const width = is3 ? '140px' : '110px';
+    const colsClass = is3 ? 'grid-cols-4' : 'grid-cols-3';
+
+    let headerLabels = is3 
+        ? '<div></div><div class="text-gray-400">H</div><div class="text-gray-400">T</div><div class="text-gray-400">O</div>'
+        : '<div></div><div class="text-gray-400">T</div><div class="text-gray-400">O</div>';
+
+    let scaffoldInputs = '';
+    if (mode === 'add') {
+        if (is3) {
+            scaffoldInputs = `<div></div><div></div>
+                <div><input type="text" inputmode="numeric" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="1"></div>
+                <div><input type="text" inputmode="numeric" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="1"></div>`;
+        } else {
+            scaffoldInputs = `<div></div>
+                <div><input type="text" inputmode="numeric" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="1"></div>
+                <div></div>`;
+        }
+    } else { // sub
+        if (is3) {
+            scaffoldInputs = `<div></div>
+                <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="2"></div>
+                <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="2"></div>
+                <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="2"></div>`;
+        } else {
+            scaffoldInputs = `<div></div>
+                <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="2"></div>
+                <div><input type="text" class="w-8 h-8 text-center text-sm border-2 border-dashed border-gray-300 rounded focus:border-gold outline-none ss-scaffold" maxlength="2"></div>`;
+        }
+    }
+
+    const n1Digits = String(item.n1).split('').map(d => `<div>${d}</div>`).join('');
+    const n2Digits = String(item.n2).split('').map(d => `<div>${d}</div>`).join('');
+
+    let answerInputs = '';
+    for (let d = 0; d < digits; d++) {
+        answerInputs += `<input type="text" inputmode="numeric" class="input-box w-10 h-10 text-xl mx-auto ss-digit" maxlength="1">`;
+    }
+
+    return `
+        <div class="bg-white p-4 rounded-2xl flex flex-col items-center shadow-sm border border-gray-100">
+            <div class="font-bold text-gray-400 mb-2">${qNum}.</div>
+            <div class="grid ${colsClass} gap-1 text-2xl font-bold font-baloo text-center" style="width:${width};">
+                ${headerLabels}
+                ${scaffoldInputs}
+                <div></div>${n1Digits}
+                <div>${op}</div>${n2Digits}
+            </div>
+            <div class="w-full h-1 bg-navy my-2" style="max-width:${width};"></div>
+            <div class="grid ${colsClass} gap-1 w-full justify-center ss-col-group" style="max-width:${width};" data-ans="${item.a}" data-topic="${topic}" data-q="Question ${qNum}">
+                <div></div>
+                ${answerInputs}
+            </div>
+        </div>
+    `;
+}
+
+function renderSmartStartersWorksheet() {
+    const container = document.getElementById('screen-worksheet-smartStarters');
+    if (container.children.length > 3) return; // Already rendered
+
+    let html = '';
+    let sectionCount = 1;
+
+    const secHeader = (title, subtitle) => `
+        <div class="flex items-center gap-4 mb-2">
+            <div class="badge">${sectionCount++}</div>
+            <h3 class="text-2xl font-baloo font-bold">${title}</h3>
+        </div>
+        ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+    `;
+
+    // SECTION 1: Addition with Carrying (GRADED, 8, topic "Addition")
+    const s1PartA = [
+        {n1: "27", n2: "15", a: "42"},
+        {n1: "38", n2: "26", a: "64"},
+        {n1: "49", n2: "34", a: "83"},
+        {n1: "56", n2: "28", a: "84"}
+    ];
+    const s1PartB = [
+        {q: "45 + 37 =", a: "82"},
+        {q: "29 + 46 =", a: "75"},
+        {q: "67 + 18 =", a: "85"},
+        {q: "39 + 48 =", a: "87"}
+    ];
+
+    html += `<div class="section-card gs-reveal">${secHeader("Addition with Carrying", "Part A: Show your working in T/O columns. Part B: Horizontal sums.")}`;
+    html += `<div class="font-bold text-xl mb-4 mt-2">Part A</div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">`;
+    s1PartA.forEach((item, i) => {
+        html += createDigitColumnHTML(item, i, 'add', 2, '+', 'Addition', i + 1);
+    });
+    html += `</div>`;
+    html += `<div class="font-bold text-xl mb-4">Part B</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+    s1PartB.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4">
+                <div class="text-2xl font-bold font-baloo">${i+5}. <span class="ml-2">${item.q}</span></div>
+                <input type="text" inputmode="numeric" class="input-box w-20 ss-num-input" data-ans="${item.a}" data-topic="Addition" data-q="Question ${i+5}" maxlength="3">
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 2: Subtraction with Borrowing (GRADED, 8, topic "Subtraction")
+    const s2PartA = [
+        {n1: "42", n2: "17", a: "25"},
+        {n1: "53", n2: "26", a: "27"},
+        {n1: "61", n2: "35", a: "26"},
+        {n1: "72", n2: "48", a: "24"}
+    ];
+    const s2PartB = [
+        {q: "83 − 37 =", a: "46"},
+        {q: "95 − 58 =", a: "37"},
+        {q: "64 − 29 =", a: "35"},
+        {q: "71 − 24 =", a: "47"}
+    ];
+
+    html += `<div class="section-card gs-reveal">${secHeader("Subtraction with Borrowing", "Part A: Show your working with borrow boxes. Part B: Horizontal sums.")}`;
+    html += `<div class="font-bold text-xl mb-4 mt-2">Part A</div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">`;
+    s2PartA.forEach((item, i) => {
+        html += createDigitColumnHTML(item, i, 'sub', 2, '−', 'Subtraction', i + 1);
+    });
+    html += `</div>`;
+    html += `<div class="font-bold text-xl mb-4">Part B</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+    s2PartB.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex items-center justify-between gap-4">
+                <div class="text-2xl font-bold font-baloo">${i+5}. <span class="ml-2">${item.q}</span></div>
+                <input type="text" inputmode="numeric" class="input-box w-20 ss-num-input" data-ans="${item.a}" data-topic="Subtraction" data-q="Question ${i+5}" maxlength="3">
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 3: ⭐ 3-Digit Challenge (GRADED, 6, topic "3-Digit Challenge")
+    const s3Items = [
+        {n1: "246", n2: "187", a: "433", op: "+", mode: "add"},
+        {n1: "358", n2: "276", a: "634", op: "+", mode: "add"},
+        {n1: "467", n2: "285", a: "752", op: "+", mode: "add"},
+        {n1: "432", n2: "187", a: "245", op: "−", mode: "sub"},
+        {n1: "615", n2: "238", a: "377", op: "−", mode: "sub"},
+        {n1: "524", n2: "267", a: "257", op: "−", mode: "sub"}
+    ];
+
+    html += `<div class="section-card gs-reveal">${secHeader("⭐ 3-Digit Challenge", "Ready for a bigger challenge? Try these!")}`;
+    html += `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">`;
+    s3Items.forEach((item, i) => {
+        html += createDigitColumnHTML(item, i, item.mode, 3, item.op, '3-Digit Challenge', i + 1);
+    });
+    html += `</div></div>`;
+
+    // SECTION 4: 📖 Read the Story (NOT graded)
+    html += `<div class="section-card gs-reveal" id="ss-story-section">
+        ${secHeader("📖 Read the Story", "Read the story carefully before answering the questions.")}
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100 text-navy" style="font-size: 1.15rem; line-height: 1.85;">
+            <h4 class="text-2xl font-baloo font-bold text-navy mb-4 border-b-2 border-gold pb-2 inline-block">Zara and the Little Bird</h4>
+            <p class="mb-4">Zara lived in a small house with a green gate. Behind the house was a big mango tree.</p>
+            <p class="mb-4">One sunny morning, Zara went out to play. She heard a soft sound. <strong>"Chirp, chirp!"</strong> She looked down and saw a little bird on the ground. It had a hurt wing.</p>
+            <p class="mb-4">"Don't be afraid, little bird," said Zara. She picked it up gently and ran to her mother. Her mother gave her a soft cloth and a small box. Zara put the bird in the box. She gave it some water and rice.</p>
+            <p class="mb-4">For three days, Zara took care of the bird. On the fourth day, the bird flapped its wings and flew up, up, up! It sat on the mango tree and sang a happy song. "Goodbye, my friend!" said Zara. She waved and smiled.</p>
+            <p>After that, the little bird came to the mango tree every morning to sing for Zara.</p>
+        </div>
+    </div>`;
+
+    // SECTION 5: Multiple Choice (GRADED, 6, topic "Story Comprehension")
+    const s5MCQ = [
+        {
+            q: "What was wrong with the little bird?",
+            cAnsId: "b",
+            opts: [
+                { id: "a", text: "It was hungry" },
+                { id: "b", text: "It had a hurt wing" },
+                { id: "c", text: "It was lost" }
+            ]
+        },
+        {
+            q: "For how many days did Zara take care of the bird?",
+            cAnsId: "b",
+            opts: [
+                { id: "a", text: "One day" },
+                { id: "b", text: "Three days" },
+                { id: "c", text: "Ten days" }
+            ]
+        },
+        {
+            q: "What happened on the fourth day?",
+            cAnsId: "a",
+            opts: [
+                { id: "a", text: "The bird flew away" },
+                { id: "b", text: "The bird got hurt" },
+                { id: "c", text: "The bird went to sleep" }
+            ]
+        },
+        {
+            q: "How did the bird say thank you to Zara?",
+            cAnsId: "a",
+            opts: [
+                { id: "a", text: "By singing for her" },
+                { id: "b", text: "By giving her a mango" },
+                { id: "c", text: "By dancing" }
+            ]
+        },
+        {
+            q: "What is the best name for this story?",
+            cAnsId: "b",
+            opts: [
+                { id: "a", text: "Zara and the Big Tree" },
+                { id: "b", text: "Zara and the Little Bird" },
+                { id: "c", text: "The Rainy Day" }
+            ]
+        },
+        {
+            q: "What does this story teach us?",
+            cAnsId: "a",
+            opts: [
+                { id: "a", text: "Be kind to animals" },
+                { id: "b", text: "Eat all your rice" },
+                { id: "c", text: "Never go outside" }
+            ]
+        }
+    ];
+
+    html += `<div class="section-card gs-reveal ss-after-story">${secHeader("Multiple Choice Questions", "Tap the best answer for each question.")}<div class="space-y-4">`;
+    s5MCQ.forEach((item, i) => {
+        // Shuffle options per attempt
+        const shuffled = [...item.opts].sort(() => Math.random() - 0.5);
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 s4-question ss-mcq" data-topic="Story Comprehension" data-ans="${item.cAnsId}" data-q="${item.q}">
+                <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
+                <div class="flex flex-wrap gap-2">
+                    ${shuffled.map(o => `<div class="pill s4-opt" data-opt-id="${o.id}" style="padding: 0.5rem 1rem; font-size: 1rem;">${o.text}</div>`).join('')}
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 6: Word Power (GRADED, 3, topic "Vocabulary")
+    const s6Words = [
+        {
+            q: '"She picked it up gently." Gently means',
+            cAnsId: "a",
+            opts: [
+                { id: "a", text: "softly" },
+                { id: "b", text: "loudly" },
+                { id: "c", text: "quickly" }
+            ]
+        },
+        {
+            q: 'The story says "a big mango tree". Which word is the OPPOSITE of big?',
+            cAnsId: "a",
+            opts: [
+                { id: "a", text: "small" },
+                { id: "b", text: "tall" },
+                { id: "c", text: "green" }
+            ]
+        },
+        {
+            q: 'Which word means the same as "happy"?',
+            cAnsId: "a",
+            opts: [
+                { id: "a", text: "glad" },
+                { id: "b", text: "sad" },
+                { id: "c", text: "angry" }
+            ]
+        }
+    ];
+
+    html += `<div class="section-card gs-reveal ss-after-story">${secHeader("Word Power", "Vocabulary practice from the story.")}<div class="space-y-4">`;
+    s6Words.forEach((item, i) => {
+        const shuffled = [...item.opts].sort(() => Math.random() - 0.5);
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 s4-question ss-vocab" data-topic="Vocabulary" data-ans="${item.cAnsId}" data-q="${item.q}">
+                <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
+                <div class="flex flex-wrap gap-2">
+                    ${shuffled.map(o => `<div class="pill s4-opt" data-opt-id="${o.id}" style="padding: 0.5rem 1rem; font-size: 1rem;">${o.text}</div>`).join('')}
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 7: True or False (GRADED, 6, topic "Story Comprehension")
+    const s7TF = [
+        { q: "The little bird was sitting on a branch.", a: "False" },
+        { q: "Zara gave the bird some water.", a: "True" },
+        { q: "Zara's mother gave her a soft cloth.", a: "True" },
+        { q: "The bird flew away on the first day.", a: "False" },
+        { q: "Zara waved goodbye to the bird.", a: "True" },
+        { q: "The bird never came back.", a: "False" }
+    ];
+
+    html += `<div class="section-card gs-reveal ss-after-story">${secHeader("True or False?", "Tap True or False for each sentence.")}<div class="space-y-4">`;
+    s7TF.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 s4-question ss-tf" data-topic="Story Comprehension" data-ans="${item.a}" data-q="${item.q}">
+                <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
+                <div class="flex gap-3">
+                    <div class="pill s4-opt" data-val="True" style="padding: 0.5rem 1.25rem;">✅ True</div>
+                    <div class="pill s4-opt" data-val="False" style="padding: 0.5rem 1.25rem;">❌ False</div>
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 8: Fill in the Blanks (GRADED, 5, topic "Story Comprehension")
+    const s8FIB = [
+        {
+            before: "Zara lived in a small house with a",
+            after: "gate.",
+            ans: "green",
+            opts: ["green", "red", "blue"]
+        },
+        {
+            before: "Zara put the bird in a small",
+            after: ".",
+            ans: "box",
+            opts: ["box", "bag", "bowl"]
+        },
+        {
+            before: "Zara gave the bird water and",
+            after: ".",
+            ans: "rice",
+            opts: ["rice", "bread", "cake"]
+        },
+        {
+            before: "The bird sat on the mango tree and",
+            after: "a happy song.",
+            ans: "sang",
+            opts: ["sang", "ate", "drew"]
+        },
+        {
+            before: '"Goodbye, my',
+            after: '!" said Zara.',
+            ans: "friend",
+            opts: ["friend", "teacher", "mother"]
+        }
+    ];
+
+    html += `<div class="section-card gs-reveal ss-after-story">${secHeader("Fill in the Blanks", "Tap an option pill to fill in the blank.")}<div class="space-y-6">`;
+    s8FIB.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm ss-fib-card" data-topic="Story Comprehension" data-ans="${item.ans}" data-q="Blank ${i+1}">
+                <div class="text-xl font-baloo font-bold text-navy mb-3 leading-relaxed">
+                    ${i+1}. ${item.before} <span class="fib-blank" id="fib-slot-${i}">___</span> ${item.after}
+                </div>
+                <div class="flex flex-wrap gap-2 ss-fib-options">
+                    ${item.opts.map(opt => `<button type="button" class="pill ss-fib-pill" data-slot="fib-slot-${i}" data-val="${opt}" style="padding: 0.4rem 1.1rem; font-size: 1rem;">${opt}</button>`).join('')}
+                </div>
+                <input type="hidden" class="ss-fib-input" data-ans="${item.ans}" data-topic="Story Comprehension" data-q="Blank ${i+1}" value="">
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // SECTION 9: Short Questions with Shared Word Bank (GRADED, 5, topic "Story Comprehension")
+    const s9Bank = [
+        { id: "Zara", text: "Zara" },
+        { id: "Chirp", text: "Chirp" },
+        { id: "Mango", text: "Mango" },
+        { id: "Morning", text: "Morning" },
+        { id: "Happy", text: "Happy" },
+        { id: "Evening", text: "Evening" }, // distractor
+        { id: "Sad", text: "Sad" }          // distractor
+    ];
+    const shuffledBank = [...s9Bank].sort(() => Math.random() - 0.5);
+
+    const s9Questions = [
+        { q: "What is the girl's name?", ans: "Zara" },
+        { q: "What sound did the bird make?", ans: "Chirp" },
+        { q: "Which tree did the bird sit on?", ans: "Mango" },
+        { q: "When did Zara go out to play?", ans: "Morning" },
+        { q: "How did the bird feel at the end?", ans: "Happy" }
+    ];
+
+    html += `<div class="section-card gs-reveal ss-after-story">${secHeader("Short Questions — Word Bank", "Tap a slot to select it, then tap a word from the bank. Tap a filled slot to send it back.")}`;
+    
+    // Shared Word Bank UI
+    html += `
+        <div class="bg-lightBlue p-4 rounded-2xl mb-6 border-2 border-navy">
+            <div class="font-baloo font-bold text-lg text-navy mb-2">Word Bank:</div>
+            <div class="flex flex-wrap gap-3" id="ss-word-bank">
+                ${shuffledBank.map(chip => `
+                    <div class="wb-chip" data-chip-id="${chip.id}">${chip.text}</div>
+                `).join('')}
+            </div>
+        </div>
+        <div class="space-y-4">
+    `;
+
+    s9Questions.forEach((item, i) => {
+        html += `
+            <div class="bg-white p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-100">
+                <div class="text-xl font-bold font-baloo">${i+1}. ${item.q}</div>
+                <div class="wb-slot" data-slot-index="${i}" data-ans="${item.ans}" data-topic="Story Comprehension" data-q="${item.q}" data-chip-id="">
+                    Tap to fill
+                </div>
+            </div>`;
+    });
+    html += `</div></div>`;
+
+    // Insert HTML into screen container before the submit button
+    container.insertAdjacentHTML('afterbegin', html);
+}
+
+// Interactivity for Smart Starters
+function registerSmartStartersInputs() {
+    const container = document.getElementById('screen-worksheet-smartStarters');
+    if (container.dataset.eventsBound === 'true') return;
+    container.dataset.eventsBound = 'true';
+
+    // 1. PIN-code auto-advance for digit columns
+    const groups = container.querySelectorAll('.ss-col-group');
+    groups.forEach(group => {
+        const inputs = Array.from(group.querySelectorAll('.ss-digit'));
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+                input.classList.remove('input-error');
+                if (input.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+    });
+
+    // 2. Numeric inputs
+    container.querySelectorAll('.ss-num-input, .ss-scaffold').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            this.classList.remove('input-error');
+        });
+    });
+
+    // 3. Section 8 Fill in the Blanks pills
+    container.querySelectorAll('.ss-fib-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            const card = pill.closest('.ss-fib-card');
+            const slotId = pill.dataset.slot;
+            const slotEl = document.getElementById(slotId);
+            const hiddenInp = card.querySelector('.ss-fib-input');
+            const val = pill.dataset.val;
+
+            card.querySelectorAll('.ss-fib-pill').forEach(p => p.classList.remove('selected'));
+            pill.classList.add('selected');
+            card.classList.remove('pill-error');
+
+            if (slotEl) {
+                slotEl.textContent = val;
+                gsap.fromTo(slotEl, { scale: 0.8 }, { scale: 1.15, duration: 0.25, yoyo: true, repeat: 1, ease: "back.out(2)" });
+            }
+            if (hiddenInp) {
+                hiddenInp.value = val;
+                hiddenInp.classList.remove('input-error');
+            }
+        });
+    });
+
+    // 4. Section 9 Word Bank logic
+    let activeSlotIndex = null;
+    const slots = Array.from(container.querySelectorAll('.wb-slot'));
+    const bankChips = Array.from(container.querySelectorAll('.wb-chip'));
+
+    function selectSlot(index) {
+        slots.forEach((s, i) => {
+            if (i === index) {
+                s.classList.add('active-slot');
+                activeSlotIndex = index;
+            } else {
+                s.classList.remove('active-slot');
+            }
+        });
+    }
+
+    slots.forEach((slot, idx) => {
+        slot.addEventListener('click', () => {
+            slot.classList.remove('input-error');
+            // If already filled, clicking sends chip back to bank
+            if (slot.dataset.chipId) {
+                const chipId = slot.dataset.chipId;
+                const chip = bankChips.find(c => c.dataset.chipId === chipId);
+                if (chip) chip.classList.remove('used');
+                slot.dataset.chipId = '';
+                slot.textContent = 'Tap to fill';
+                slot.classList.remove('filled');
+                selectSlot(idx);
+            } else {
+                // Select this slot
+                if (activeSlotIndex === idx) {
+                    slot.classList.remove('active-slot');
+                    activeSlotIndex = null;
+                } else {
+                    selectSlot(idx);
+                }
+            }
+        });
+    });
+
+    bankChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            if (chip.classList.contains('used')) return;
+            const chipId = chip.dataset.chipId;
+
+            // Find target slot: active slot if empty, or first empty slot
+            let targetSlot = null;
+            if (activeSlotIndex !== null && !slots[activeSlotIndex].dataset.chipId) {
+                targetSlot = slots[activeSlotIndex];
+            } else {
+                targetSlot = slots.find(s => !s.dataset.chipId);
+            }
+
+            if (!targetSlot) return; // all filled
+
+            // Place chip in target slot
+            targetSlot.dataset.chipId = chipId;
+            targetSlot.textContent = chipId;
+            targetSlot.classList.add('filled');
+            targetSlot.classList.remove('active-slot', 'input-error');
+            chip.classList.add('used');
+
+            gsap.fromTo(targetSlot, { scale: 0.8 }, { scale: 1.1, duration: 0.25, yoyo: true, repeat: 1, ease: "back.out(2)" });
+
+            // Auto-advance active slot to next empty slot if any
+            const nextEmptyIdx = slots.findIndex(s => !s.dataset.chipId);
+            if (nextEmptyIdx !== -1) {
+                selectSlot(nextEmptyIdx);
+            } else {
+                activeSlotIndex = null;
+                slots.forEach(s => s.classList.remove('active-slot'));
+            }
+        });
+    });
+
+    // 5. Floating Story FAB and Bottom Sheet Modal
+    const storyFab = document.getElementById('btn-floating-story');
+    const storySheet = document.getElementById('story-sheet');
+    const storyOverlay = document.getElementById('story-overlay');
+    const btnCloseStory = document.getElementById('btn-close-story');
+
+    function openStoryModal() {
+        storyOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        gsap.to(storySheet, { y: '0%', duration: 0.4, ease: 'power3.out' });
+    }
+
+    function closeStoryModal() {
+        gsap.to(storySheet, {
+            y: '100%', duration: 0.35, ease: 'power3.in',
+            onComplete: () => {
+                storyOverlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
+    if (storyFab) storyFab.addEventListener('click', openStoryModal);
+    if (btnCloseStory) btnCloseStory.addEventListener('click', closeStoryModal);
+    if (storyOverlay) storyOverlay.addEventListener('click', closeStoryModal);
+
+    // Scroll listener to toggle floating FAB visibility in Sections 5 to 9
+    window.addEventListener('scroll', () => {
+        if (state.currentWorksheetId !== 'smartStarters') {
+            if (storyFab) storyFab.style.display = 'none';
+            return;
+        }
+        const storySec = document.getElementById('ss-story-section');
+        if (!storySec || !storyFab) return;
+        const rect = storySec.getBoundingClientRect();
+        // Visible when story section has scrolled past the top
+        if (rect.bottom < 150) {
+            storyFab.style.display = 'flex';
+        } else {
+            storyFab.style.display = 'none';
+        }
+    });
+}
+
+// Grading Function for Smart Starters
+function gradeWorksheetSmartStarters() {
+    state.results = [];
+    state.totalCorrect = 0;
+
+    const container = document.getElementById('screen-worksheet-smartStarters');
+
+    // Section 1A, 2A, 3: Digit-group components
+    container.querySelectorAll('.ss-col-group').forEach((group, index) => {
+        const inputs = group.querySelectorAll('.ss-digit');
+        let uAns = '';
+        inputs.forEach(inp => uAns += inp.value.trim());
+        const cAns = group.dataset.ans;
+        const topic = group.dataset.topic;
+        const qText = group.dataset.q || `Question ${index+1}`;
+
+        const isCorrect = uAns === cAns;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAns || 'None',
+            correctAns: cAns,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+
+    // Section 1B, 2B: Horizontal plain inputs
+    container.querySelectorAll('.ss-num-input').forEach(input => {
+        const uAns = input.value.trim();
+        const cAns = input.dataset.ans;
+        const topic = input.dataset.topic;
+        const qText = input.dataset.q;
+
+        const isCorrect = uAns === cAns;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAns || 'None',
+            correctAns: cAns,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+
+    // Section 5: MCQ (grade by optId)
+    container.querySelectorAll('.ss-mcq').forEach(q => {
+        const cAnsId = q.dataset.ans;
+        const selected = q.querySelector('.s4-opt.selected');
+        const uAnsId = selected ? selected.dataset.optId : null;
+        const uAnsText = selected ? selected.textContent.trim() : 'None';
+        const topic = q.dataset.topic;
+        const qText = q.dataset.q;
+
+        // Find correct text for report display
+        const correctOpt = q.querySelector(`.s4-opt[data-opt-id="${cAnsId}"]`);
+        const cAnsText = correctOpt ? correctOpt.textContent.trim() : cAnsId;
+
+        const isCorrect = uAnsId === cAnsId;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAnsText,
+            correctAns: cAnsText,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+
+    // Section 6: Word Power (Vocabulary)
+    container.querySelectorAll('.ss-vocab').forEach(q => {
+        const cAnsId = q.dataset.ans;
+        const selected = q.querySelector('.s4-opt.selected');
+        const uAnsId = selected ? selected.dataset.optId : null;
+        const uAnsText = selected ? selected.textContent.trim() : 'None';
+        const topic = q.dataset.topic;
+        const qText = q.dataset.q;
+
+        const correctOpt = q.querySelector(`.s4-opt[data-opt-id="${cAnsId}"]`);
+        const cAnsText = correctOpt ? correctOpt.textContent.trim() : cAnsId;
+
+        const isCorrect = uAnsId === cAnsId;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAnsText,
+            correctAns: cAnsText,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+
+    // Section 7: True/False
+    container.querySelectorAll('.ss-tf').forEach(q => {
+        const cAns = q.dataset.ans;
+        const selected = q.querySelector('.s4-opt.selected');
+        const uAns = selected ? selected.dataset.val : 'None';
+        const topic = q.dataset.topic;
+        const qText = q.dataset.q;
+
+        const isCorrect = uAns === cAns;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAns,
+            correctAns: cAns,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+
+    // Section 8: Fill in the Blanks
+    container.querySelectorAll('.ss-fib-input').forEach(inp => {
+        const uAns = inp.value.trim();
+        const cAns = inp.dataset.ans;
+        const topic = inp.dataset.topic;
+        const qText = inp.dataset.q;
+
+        const isCorrect = uAns.toLowerCase() === cAns.toLowerCase();
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAns || 'None',
+            correctAns: cAns,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+
+    // Section 9: Word Bank slots
+    container.querySelectorAll('.wb-slot').forEach(slot => {
+        const uAns = slot.dataset.chipId || '';
+        const cAns = slot.dataset.ans;
+        const topic = slot.dataset.topic;
+        const qText = slot.dataset.q;
+
+        const isCorrect = uAns === cAns;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAns || 'None',
+            correctAns: cAns,
+            isCorrect: isCorrect,
+            section: topic,
+            topic: topic
+        });
+    });
+}
+
         function getPerformanceTier(percentage) {
             if (percentage >= 90) return { label: 'Awesome', tagText: 'Perfect ⭐', colorHex: '#2e7d32' };
             if (percentage >= 70) return { label: 'Good', tagText: 'Good 👍', colorHex: '#1e88e5' };
@@ -3112,7 +4091,9 @@ function gradeWorksheetUrduDost() {
 
             // Summary Line
             const summaryEl = document.getElementById('res-summary-line');
-            if (weakTopics.length > 0) {
+            if (weakTopics.length === 1 && weakTopics[0] === '3-Digit Challenge') {
+                summaryEl.innerText = `The 3-digit challenge is a bonus, keep practising!`;
+            } else if (weakTopics.length > 0) {
                 summaryEl.innerText = `Let's practice a bit more: ${weakTopics.join(', ')}`;
             } else {
                 summaryEl.innerText = `Great work across every topic!`;
@@ -3346,7 +4327,18 @@ function gradeWorksheetUrduDost() {
                     document.getElementById('screen-selection').classList.add('active');
                     gsap.to('#screen-selection', { opacity: 1, y: 0, duration: 0.4 });
                     window.scrollTo(0, 0);
-                    renderSelectionGrid();
+                    if (currentOpenedFolderId) {
+                        document.getElementById('folders-view').style.display = 'none';
+                        document.getElementById('folder-detail-view').style.display = 'block';
+                        document.getElementById('folder-detail-view').style.opacity = '1';
+                        buildFilterSheet();
+                        renderSelectionGrid();
+                    } else {
+                        document.getElementById('folders-view').style.display = 'block';
+                        document.getElementById('folders-view').style.opacity = '1';
+                        document.getElementById('folder-detail-view').style.display = 'none';
+                        renderFoldersView();
+                    }
                     
                     // Reset visuals
                     document.getElementById('score-ring').style.strokeDasharray = "0, 100";
@@ -3448,10 +4440,129 @@ function gradeWorksheetUrduDost() {
         
     
         // ============================================================
-        // SCREEN 2 ââ‚¬â€ FILTER SYSTEM
+        // SCREEN 2 — FOLDERS & FILTER SYSTEM (Parts B & C)
         // ============================================================
 
-        // Active filter state ââ‚¬â€ OR within group, AND across groups
+        // B2: Automatic Tag Logic (one shared function)
+        function getFolderTag(folderId) {
+            // Find all folders that contain at least one worksheet
+            const foldersWithWs = worksheetFolders.filter(f => {
+                return Object.values(worksheetsConfig).some(cfg => cfg.folderId === f.id);
+            });
+            if (foldersWithWs.length === 0) return 'OLD';
+
+            // Folder with highest sortKey is LATEST
+            const latestFolder = foldersWithWs.reduce((max, f) => {
+                return (f.sortKey > max.sortKey) ? f : max;
+            }, foldersWithWs[0]);
+
+            return (folderId === latestFolder.id) ? 'LATEST' : 'OLD';
+        }
+
+        // Render Folders Cards View
+        function renderFoldersView() {
+            const foldersGrid = document.getElementById('folders-grid');
+            if (!foldersGrid) return;
+            foldersGrid.innerHTML = '';
+
+            // Sorted by sortKey descending, so Latest comes first
+            const sortedFolders = [...worksheetFolders]
+                .filter(f => Object.values(worksheetsConfig).some(cfg => cfg.folderId === f.id))
+                .sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+            sortedFolders.forEach(folder => {
+                const count = Object.values(worksheetsConfig).filter(cfg => cfg.folderId === folder.id).length;
+                const tag = getFolderTag(folder.id);
+                const tagClass = tag === 'LATEST' ? 'folder-tag-latest' : 'folder-tag-old';
+                const countText = count === 1 ? '1 worksheet' : `${count} worksheets`;
+
+                const card = document.createElement('div');
+                card.className = 'folder-card';
+                card.dataset.folderId = folder.id;
+                card.innerHTML = `
+                    <div class="folder-icon">📁</div>
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-2xl font-baloo font-bold text-navy">${folder.label}</span>
+                            <span class="folder-tag ${tagClass}">${tag}</span>
+                        </div>
+                        <div class="text-gray-500 font-medium text-sm">${countText}</div>
+                    </div>
+                    <div class="text-navy text-2xl font-bold">→</div>
+                `;
+
+                card.addEventListener('click', () => {
+                    openFolder(folder.id);
+                });
+
+                foldersGrid.appendChild(card);
+            });
+
+            // Animate folder cards in
+            gsap.fromTo('#folders-grid .folder-card',
+                { opacity: 0, y: 15 },
+                { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out" }
+            );
+        }
+
+        // Open Folder with GSAP animation
+        function openFolder(folderId) {
+            currentOpenedFolderId = folderId;
+            const folder = worksheetFolders.find(f => f.id === folderId);
+            const tag = getFolderTag(folderId);
+            const tagLabel = tag === 'LATEST' ? 'Latest' : 'Old';
+
+            // Clear any active filters from previous folder
+            ['subject', 'classLevel', 'difficulty'].forEach(g => {
+                filterState[g].clear();
+                pendingFilter[g].clear();
+            });
+
+            const headerEl = document.getElementById('folder-detail-header');
+            if (headerEl) {
+                headerEl.textContent = `${folder ? folder.label : ''} · ${tagLabel}`;
+            }
+
+            const foldersView = document.getElementById('folders-view');
+            const detailView  = document.getElementById('folder-detail-view');
+
+            // GSAP card scales and fades out, detail grid slides in
+            gsap.to(foldersView, {
+                opacity: 0, scale: 0.96, duration: 0.25, ease: "power2.in",
+                onComplete: () => {
+                    foldersView.style.display = 'none';
+                    detailView.style.display = 'block';
+                    buildFilterSheet();
+                    renderSelectionGrid();
+                    gsap.fromTo(detailView, 
+                        { opacity: 0, y: 25 },
+                        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
+                    );
+                }
+            });
+        }
+
+        // Back to Folders View
+        function backToFoldersView() {
+            const foldersView = document.getElementById('folders-view');
+            const detailView  = document.getElementById('folder-detail-view');
+
+            gsap.to(detailView, {
+                opacity: 0, y: 20, duration: 0.25, ease: "power2.in",
+                onComplete: () => {
+                    detailView.style.display = 'none';
+                    foldersView.style.display = 'block';
+                    currentOpenedFolderId = null;
+                    renderFoldersView();
+                    gsap.fromTo(foldersView,
+                        { opacity: 0, scale: 0.96 },
+                        { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }
+                    );
+                }
+            });
+        }
+
+        // Active filter state — OR within group, AND across groups
         const filterState = {
             subject:    new Set(),
             classLevel: new Set(),
@@ -3478,9 +4589,17 @@ function gradeWorksheetUrduDost() {
         function getFilteredWorksheets() {
             return Object.entries(worksheetsConfig)
                 .filter(([, cfg]) => {
-                    const subjectOk    = filterState.subject.size    === 0 || filterState.subject.has(cfg.subject);
-                    const classOk      = filterState.classLevel.size === 0 || filterState.classLevel.has(cfg.classLevel);
-                    const difficultyOk = filterState.difficulty.size === 0 || filterState.difficulty.has(cfg.difficulty);
+                    // Restrict to currently opened folder
+                    if (currentOpenedFolderId && cfg.folderId !== currentOpenedFolderId) return false;
+
+                    // Match if ANY of worksheet's subjects is in filterState.subject
+                    const subjectOk = filterState.subject.size === 0 || 
+                        cfg.subjects.some(s => filterState.subject.has(s));
+                    const classOk = filterState.classLevel.size === 0 || 
+                        filterState.classLevel.has(cfg.classLevel);
+                    const difficultyOk = filterState.difficulty.size === 0 || 
+                        filterState.difficulty.has(cfg.difficulty);
+
                     return subjectOk && classOk && difficultyOk;
                 })
                 .sort((a, b) => {
@@ -3495,9 +4614,15 @@ function gradeWorksheetUrduDost() {
         function countPendingMatches() {
             return Object.entries(worksheetsConfig)
                 .filter(([, cfg]) => {
-                    const subjectOk    = pendingFilter.subject.size    === 0 || pendingFilter.subject.has(cfg.subject);
-                    const classOk      = pendingFilter.classLevel.size === 0 || pendingFilter.classLevel.has(cfg.classLevel);
-                    const difficultyOk = pendingFilter.difficulty.size === 0 || pendingFilter.difficulty.has(cfg.difficulty);
+                    if (currentOpenedFolderId && cfg.folderId !== currentOpenedFolderId) return false;
+
+                    const subjectOk = pendingFilter.subject.size === 0 || 
+                        cfg.subjects.some(s => pendingFilter.subject.has(s));
+                    const classOk = pendingFilter.classLevel.size === 0 || 
+                        pendingFilter.classLevel.has(cfg.classLevel);
+                    const difficultyOk = pendingFilter.difficulty.size === 0 || 
+                        pendingFilter.difficulty.has(cfg.difficulty);
+
                     return subjectOk && classOk && difficultyOk;
                 }).length;
         }
@@ -3507,7 +4632,7 @@ function gradeWorksheetUrduDost() {
         }
 
         // ------------------------------------------------------------------
-        // renderSelectionGrid ââ‚¬â€ builds card HTML from config, sorted + filtered
+        // renderSelectionGrid — builds card HTML from config, sorted + filtered
         // ------------------------------------------------------------------
         function renderSelectionGrid() {
             const grid        = document.getElementById('ws-grid');
@@ -3526,6 +4651,12 @@ function gradeWorksheetUrduDost() {
                     const badge  = isNew
                         ? `<span class="ws-badge ws-badge-new">&#x2728; NEW</span>`
                         : `<span class="ws-badge ws-badge-current">Current</span>`;
+                    
+                    // Render a chip per subject
+                    const subjectChips = cfg.subjects.map(s => 
+                        `<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${s}</span>`
+                    ).join(' ');
+
                     const card   = document.createElement('div');
                     card.className = 'ws-card flex flex-col h-full bg-white rounded-2xl shadow-xl border-4 border-lightBlue hover:border-gold transition-colors cursor-pointer p-6 text-center';
                     card.dataset.worksheet = wsId;
@@ -3537,7 +4668,7 @@ function gradeWorksheetUrduDost() {
                         <p class="text-sm text-gray-500 font-medium mb-4">${cfg.cardDesc}</p>
                         <div class="flex-grow"></div>
                         <div class="flex flex-wrap gap-1 justify-center mb-3">
-                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${cfg.subject}</span>
+                            ${subjectChips}
                             <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${cfg.classLevel}</span>
                             <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-lightBlue text-navy border border-blue-200">${cfg.difficulty}</span>
                         </div>
@@ -3567,7 +4698,7 @@ function gradeWorksheetUrduDost() {
         }
 
         // ------------------------------------------------------------------
-        // updateActiveChipRow ââ‚¬â€ shows removable tags for applied filters
+        // updateActiveChipRow — shows removable tags for applied filters
         // ------------------------------------------------------------------
         function updateActiveChipRow() {
             const row = document.getElementById('active-chip-row');
@@ -3592,7 +4723,6 @@ function gradeWorksheetUrduDost() {
                 chip.innerHTML = `${value} <span class="active-chip-x">&#x2715;</span>`;
                 chip.addEventListener('click', () => {
                     filterState[group].delete(value);
-                    // Sync pending state too
                     pendingFilter[group].delete(value);
                     renderSelectionGrid();
                     syncSheetChips();
@@ -3617,16 +4747,25 @@ function gradeWorksheetUrduDost() {
         }
 
         // ------------------------------------------------------------------
-        // buildFilterSheet ââ‚¬â€ populates chip groups dynamically from config
+        // buildFilterSheet — populates chip groups dynamically ONLY from opened folder
         // ------------------------------------------------------------------
         function buildFilterSheet() {
             const body = document.getElementById('filter-sheet-body');
             body.innerHTML = '';
 
-            // Derive unique values for each facet (preserving insertion order)
-            const subjects    = [...new Set(Object.values(worksheetsConfig).map(c => c.subject))];
-            const classLevels = [...new Set(Object.values(worksheetsConfig).map(c => c.classLevel))];
-            const difficulties= [...new Set(Object.values(worksheetsConfig).map(c => c.difficulty))];
+            // Get worksheets in currently opened folder
+            const folderWorksheets = Object.values(worksheetsConfig).filter(c => {
+                return !currentOpenedFolderId || c.folderId === currentOpenedFolderId;
+            });
+
+            // Derive unique values for each facet ONLY from this folder's worksheets
+            const subjectsSet = new Set();
+            folderWorksheets.forEach(c => {
+                c.subjects.forEach(s => subjectsSet.add(s));
+            });
+            const subjects    = [...subjectsSet];
+            const classLevels = [...new Set(folderWorksheets.map(c => c.classLevel))];
+            const difficulties= [...new Set(folderWorksheets.map(c => c.difficulty))];
 
             const groups = [
                 { key: 'subject',    label: 'Subject',     values: subjects },
@@ -3757,11 +4896,16 @@ function gradeWorksheetUrduDost() {
         })();
 
         // ------------------------------------------------------------------
-        // Wire filter UI buttons
+        // Wire filter UI buttons & navigation
         // ------------------------------------------------------------------
         document.getElementById('btn-open-filters').addEventListener('click', openFilterSheet);
         document.getElementById('btn-close-sheet').addEventListener('click', closeFilterSheet);
         document.getElementById('filter-overlay').addEventListener('click', closeFilterSheet);
+
+        const btnBackToFolders = document.getElementById('btn-back-to-folders');
+        if (btnBackToFolders) {
+            btnBackToFolders.addEventListener('click', backToFoldersView);
+        }
 
         document.getElementById('btn-clear-all-sheet').addEventListener('click', () => {
             ['subject', 'classLevel', 'difficulty'].forEach(g => pendingFilter[g].clear());
