@@ -1124,6 +1124,18 @@
             </div>
         </main>
 
+        <!-- SCREEN 12: Green Thumbs Worksheet -->
+        <main id="screen-worksheet-greenThumbs" class="screen worksheet-container">
+            <!-- Content rendered dynamically by renderGreenThumbsWorksheet() -->
+
+            <!-- Submit Green Thumbs -->
+            <div class="text-center mt-12 mb-8 gs-reveal">
+                <button class="btn-verify btn btn-gold text-2xl py-4 px-12 w-full sm:w-auto shadow-xl border-4 border-white">
+                    ✅ Verify My Answers
+                </button>
+            </div>
+        </main>
+
         <!-- SCREEN 7: Results -->
 
         <main id="screen-results" class="screen">
@@ -1146,20 +1158,17 @@
                 
                 <!-- Score Block -->
                 <div class="text-center mb-10 py-6">
-                    <div class="inline-block relative">
-                        <svg class="w-48 h-48 mx-auto transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-gray-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="score-ring" class="text-gold transition-all duration-1000 ease-out" stroke-width="3" stroke-dasharray="0, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <div class="relative w-48 h-48 mx-auto">
+                        <canvas id="score-chart" width="192" height="192" class="w-full h-full block"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <div class="text-5xl font-baloo font-bold text-navy"><span id="score-num">0</span></div>
-                            <div class="text-lg text-gray-500 font-bold">out of <span id="score-total">39</span></div>
+                            <div class="text-lg text-gray-500 font-bold">out of <span id="score-total">0</span></div>
                         </div>
                     </div>
                     
                     <div class="mt-6">
                         <div id="res-percent" class="text-2xl font-bold text-navy mb-2">0%</div>
-                        <div id="res-message" class="text-xl font-medium px-4 py-2 bg-yellow-50 text-yellow-800 rounded-lg inline-block border border-yellow-200"></div>
+                        <div id="res-message" class="inline-flex max-w-full px-4 py-2 rounded-full text-center whitespace-normal leading-snug font-bold text-lg items-center justify-center"></div>
                     </div>
                 </div>
                 
@@ -1234,6 +1243,7 @@
             totalCorrect: 0,
             totalPossible: 0 
         };
+        window.state = state;
 
         // FOLDERS CONFIG (Part B)
         const worksheetFolders = [
@@ -1351,6 +1361,20 @@
                 folderId: "oct-2026",
                 cardIcon: "🌟",
                 cardDesc: "Carry &amp; borrow sums plus a story with questions"
+            },
+            greenThumbs: {
+                title: "🌱 Green Thumbs — Plants & Photosynthesis",
+                exportPrefix: "KCI_GreenThumbs_Result",
+                totalPossible: 19,
+                render: renderGreenThumbsWorksheet,
+                onShown: registerGreenThumbsInteractivity,
+                subjects: ["EVS"],
+                classLevel: "Class I",
+                difficulty: "Easy",
+                dateAdded: "2026-10-20",
+                folderId: "oct-2026",
+                cardIcon: "🌱",
+                cardDesc: "Parts of a plant, what they do, and how plants make food"
             }
         };
 
@@ -2102,6 +2126,7 @@
             gestureDirection: 'vertical',
             smooth: true
         });
+        window.lenis = lenis;
         function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
         requestAnimationFrame(raf);
 
@@ -2283,8 +2308,11 @@
         // ----------------------------------------------------
         // VALIDATION & SUBMISSION
         // ----------------------------------------------------
+        let isSubmittingWorksheet = false;
         document.querySelectorAll('.btn-verify').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (isSubmittingWorksheet) return;
+                isSubmittingWorksheet = true;
                 // Pulse animation for button
                 gsap.to(btn, {scale: 0.95, duration: 0.1, yoyo: true, repeat: 1});
                 
@@ -2394,8 +2422,38 @@
                         }
                     });
                 }
+
+                // Validate Green Thumbs:
+                // 1) All 4 diagram slots must be filled
+                // 2) All Section 3 and 5 questions must have an option selected
+                if (state.currentWorksheetId === 'greenThumbs') {
+                    const placements = window.greenThumbsPlacements || {};
+                    const slots = ['slot-flower', 'slot-leaf', 'slot-stem', 'slot-root'];
+                    slots.forEach(sId => {
+                        const slotEl = document.getElementById(sId);
+                        if (!placements[sId]) {
+                            isValid = false;
+                            if (slotEl) slotEl.classList.add('slot-error');
+                            if (!firstInvalid) firstInvalid = slotEl || document.getElementById('gt-sec2');
+                        } else {
+                            if (slotEl) slotEl.classList.remove('slot-error');
+                        }
+                    });
+
+                    document.querySelectorAll(`${activeContainer} .gt-question`).forEach(q => {
+                        const selected = q.querySelector('.s4-opt.selected');
+                        if (!selected) {
+                            isValid = false;
+                            q.classList.add('pill-error');
+                            if (!firstInvalid) firstInvalid = q;
+                        } else {
+                            q.classList.remove('pill-error');
+                        }
+                    });
+                }
                 
                 if(!isValid) {
+                    isSubmittingWorksheet = false;
                     // Smooth scroll to the first missing answer
                     lenis.scrollTo(firstInvalid, { offset: -100, duration: 1 });
                     // Shake it visually to draw attention
@@ -2412,6 +2470,7 @@
                 else if (state.currentWorksheetId === 'grammarChamps') gradeWorksheetGrammarChamps();
                 else if (state.currentWorksheetId === 'urduDost') gradeWorksheetUrduDost();
                 else if (state.currentWorksheetId === 'smartStarters') gradeWorksheetSmartStarters();
+                else if (state.currentWorksheetId === 'greenThumbs') gradeWorksheetGreenThumbs();
                 
                 showResults();
 
@@ -2435,7 +2494,8 @@
                     userAns: uAns,
                     correctAns: cAns,
                     isCorrect: isCorrect,
-                    section: sectionName
+                    section: sectionName,
+                    topic: input.dataset.topic || sectionName
                 });
             });
         };
@@ -2510,7 +2570,8 @@
                 userAns: selectedVals.length ? selectedVals.join(', ') : 'None',
                 correctAns: correctSet.join(', '),
                 isCorrect: s6IsCorrect,
-                section: 'Section 6: Multiples of 2'
+                section: 'Section 6: Multiples of 2',
+                topic: 'Section 6: Multiples of 2'
             });
             
             // Section 7
@@ -3855,6 +3916,1220 @@ function registerSmartStartersInputs() {
     });
 }
 
+
+// ============================================================
+// GREEN THUMBS — PLANTS & PHOTOSYNTHESIS (Class I EVS)
+// ============================================================
+
+function getPlantSvgHtml(prefix = 'gt', options = {}) {
+    const isDiagram = Boolean(options.isDiagram);
+    const isExplainer = Boolean(options.isExplainer);
+
+    // Leader lines for Section 2 diagram
+    const leaderLinesHtml = isDiagram ? `
+        <!-- Section 2 Leader Lines & Dots -->
+        <g id="${prefix}-leaders" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4">
+            <!-- Flower Leader (top right) -->
+            <line x1="200" y1="140" x2="340" y2="100" />
+            <circle cx="200" cy="140" r="5" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            <circle cx="340" cy="100" r="4" fill="#94a3b8" />
+
+            <!-- Leaf Leader (middle right) -->
+            <line x1="275" y1="205" x2="340" y2="230" />
+            <circle cx="275" cy="205" r="5" fill="#4caf50" stroke="#2e7d32" stroke-width="1.5" />
+            <circle cx="340" cy="230" r="4" fill="#94a3b8" />
+
+            <!-- Stem Leader (middle left) -->
+            <line x1="197" y1="310" x2="60" y2="300" />
+            <circle cx="197" cy="310" r="5" fill="#5a8a3a" stroke="#2e7d32" stroke-width="1.5" />
+            <circle cx="60" cy="300" r="4" fill="#94a3b8" />
+
+            <!-- Root Leader (bottom left) -->
+            <line x1="165" y1="425" x2="60" y2="425" />
+            <circle cx="165" cy="425" r="5" fill="#8d6e63" stroke="#5a4033" stroke-width="1.5" />
+            <circle cx="60" cy="425" r="4" fill="#94a3b8" />
+        </g>
+    ` : '';
+
+    // Explainer overlays for Section 4
+    const explainerOverlaysHtml = isExplainer ? `
+        <!-- Section 4 Explainer Overlays -->
+        <!-- Step 1: Glowing Sunbeams -->
+        <g id="${prefix}-sunbeams" class="explainer-overlay" opacity="0" pointer-events="none">
+            <line x1="75" y1="75" x2="160" y2="245" stroke="#f0b429" stroke-width="4" stroke-dasharray="6 4" opacity="0.8" />
+            <line x1="85" y1="65" x2="240" y2="210" stroke="#f0b429" stroke-width="5" stroke-dasharray="6 4" opacity="0.85" />
+            <circle cx="160" cy="245" r="8" fill="#ffe082" opacity="0.8" />
+            <circle cx="240" cy="210" r="8" fill="#ffe082" opacity="0.8" />
+        </g>
+
+        <!-- Step 2: Rising Water Droplets -->
+        <g id="${prefix}-water-drops" class="explainer-overlay" opacity="0" pointer-events="none">
+            <g id="${prefix}-drop-1">
+                <circle cx="170" cy="430" r="6" fill="#3f8fd1" stroke="#ffffff" stroke-width="1" />
+                <path d="M 170 422 L 166 428 A 4 4 0 0 0 174 428 Z" fill="#3f8fd1" />
+            </g>
+            <g id="${prefix}-drop-2">
+                <circle cx="198" cy="390" r="7" fill="#3f8fd1" stroke="#ffffff" stroke-width="1" />
+                <path d="M 198 381 L 193 388 A 5 5 0 0 0 203 388 Z" fill="#3f8fd1" />
+            </g>
+            <g id="${prefix}-drop-3">
+                <circle cx="200" cy="330" r="7" fill="#3f8fd1" stroke="#ffffff" stroke-width="1" />
+                <path d="M 200 321 L 195 328 A 5 5 0 0 0 205 328 Z" fill="#3f8fd1" />
+            </g>
+            <g id="${prefix}-drop-4">
+                <circle cx="200" cy="270" r="6" fill="#3f8fd1" stroke="#ffffff" stroke-width="1" />
+                <path d="M 200 262 L 196 268 A 4 4 0 0 0 204 268 Z" fill="#3f8fd1" />
+            </g>
+        </g>
+
+        <!-- Step 3: Soft Air Inflow Arrows -->
+        <g id="${prefix}-air-arrows" class="explainer-overlay" opacity="0" pointer-events="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" fill="none">
+            <!-- Left breeze into left leaf -->
+            <path d="M 40 220 Q 70 230 110 240" stroke-dasharray="4 4" />
+            <path d="M 103 235 L 110 240 L 105 247" />
+            <!-- Right breeze into right leaf -->
+            <path d="M 360 170 Q 330 180 290 190" stroke-dasharray="4 4" />
+            <path d="M 297 185 L 290 190 L 295 197" />
+        </g>
+
+        <!-- Step 4: Food Apple & Fresh Air Oxygen Bubbles -->
+        <g id="${prefix}-food-oxygen" class="explainer-overlay" opacity="0" pointer-events="none">
+            <g id="${prefix}-food-pop" transform="translate(190, 205)">
+                <circle cx="10" cy="10" r="18" fill="#fef08a" opacity="0.9" filter="url(#${prefix}-glow)" />
+                <text x="10" y="17" font-size="20" text-anchor="middle">🍎</text>
+            </g>
+            <g id="${prefix}-oxygen-puffs">
+                <text x="110" y="210" font-size="20" opacity="0.9">🌬️</text>
+                <text x="280" y="150" font-size="20" opacity="0.9">🌬️</text>
+                <circle cx="120" cy="190" r="6" fill="#e0f2fe" opacity="0.7" />
+                <circle cx="270" cy="135" r="7" fill="#e0f2fe" opacity="0.7" />
+            </g>
+        </g>
+    ` : '';
+
+    return `
+<svg id="${prefix}-plant-svg" class="w-full h-auto max-w-[320px] sm:max-w-[360px] mx-auto filter drop-shadow-sm select-none" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="${prefix}-leaf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4caf50" />
+            <stop offset="100%" stop-color="#2e7d32" />
+        </linearGradient>
+        <linearGradient id="${prefix}-stem-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#5a8a3a" />
+            <stop offset="100%" stop-color="#466f2c" />
+        </linearGradient>
+        <linearGradient id="${prefix}-soil-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#a1887f" />
+            <stop offset="100%" stop-color="#8d6e63" />
+        </linearGradient>
+        <radialGradient id="${prefix}-sun-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffe082" />
+            <stop offset="100%" stop-color="#f0b429" />
+        </radialGradient>
+        <radialGradient id="${prefix}-flower-center" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff9c4" />
+            <stop offset="100%" stop-color="#f0b429" />
+        </radialGradient>
+        <filter id="${prefix}-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+    </defs>
+
+    <!-- 1. SUN -->
+    <g id="${prefix}-sun" class="gt-part cursor-pointer" role="img" aria-label="Sun - provides bright warm sunlight">
+        <title>Sun</title>
+        <g id="${prefix}-sun-rays" stroke="#f0b429" stroke-width="4" stroke-linecap="round">
+            <line x1="60" y1="20" x2="60" y2="10" />
+            <line x1="60" y1="100" x2="60" y2="110" />
+            <line x1="20" y1="60" x2="10" y2="60" />
+            <line x1="100" y1="60" x2="110" y2="60" />
+            <line x1="32" y1="32" x2="24" y2="24" />
+            <line x1="88" y1="88" x2="96" y2="96" />
+            <line x1="32" y1="88" x2="24" y2="96" />
+            <line x1="88" y1="32" x2="96" y2="24" />
+        </g>
+        <circle cx="60" cy="60" r="24" fill="url(#${prefix}-sun-grad)" stroke="#d97706" stroke-width="2" />
+        <circle cx="53" cy="56" r="2.5" fill="#78350f" />
+        <circle cx="67" cy="56" r="2.5" fill="#78350f" />
+        <path d="M 52 64 Q 60 71 68 64" stroke="#78350f" stroke-width="2" fill="none" stroke-linecap="round" />
+    </g>
+
+    <!-- 2. CLOUD -->
+    <g id="${prefix}-cloud" class="gt-part" role="img" aria-label="Cloud in the sky">
+        <title>Cloud</title>
+        <path d="M 310 65 A 16 16 0 0 1 338 52 A 22 22 0 0 1 372 62 A 16 16 0 0 1 364 82 L 310 82 A 14 14 0 0 1 310 65 Z" fill="#e0f2fe" stroke="#bae6fd" stroke-width="2" />
+    </g>
+
+    <!-- 3. SOIL -->
+    <g id="${prefix}-soil" class="gt-part" role="img" aria-label="Soil - rich brown earth">
+        <title>Soil</title>
+        <path d="M 20 375 Q 200 365 380 375 L 380 490 L 20 490 Z" fill="url(#${prefix}-soil-grad)" />
+        <path d="M 20 375 Q 200 365 380 375" stroke="#6d4c41" stroke-width="4" fill="none" />
+        <circle cx="80" cy="410" r="3" fill="#6d4c41" opacity="0.6" />
+        <circle cx="130" cy="450" r="4" fill="#6d4c41" opacity="0.6" />
+        <circle cx="280" cy="415" r="3.5" fill="#6d4c41" opacity="0.6" />
+        <circle cx="320" cy="460" r="3" fill="#6d4c41" opacity="0.6" />
+        <circle cx="240" cy="470" r="2.5" fill="#6d4c41" opacity="0.6" />
+    </g>
+
+    <!-- 4. ROOTS (below soil line) -->
+    <g id="${prefix}-roots" class="gt-part cursor-pointer" role="img" aria-label="Roots - anchor the plant and drink water" style="transform-origin: 200px 375px;">
+        <title>Roots</title>
+        <path d="M 200 375 Q 202 420 200 475" stroke="#d7ccc8" stroke-width="6" stroke-linecap="round" fill="none" />
+        <path d="M 200 375 Q 202 420 200 475" stroke="#bcaaa4" stroke-width="3" stroke-linecap="round" fill="none" />
+        <path d="M 200 395 Q 165 410 135 425" stroke="#d7ccc8" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M 201 405 Q 235 415 265 425" stroke="#d7ccc8" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M 200 425 Q 170 445 150 465" stroke="#d7ccc8" stroke-width="3.5" stroke-linecap="round" fill="none" />
+        <path d="M 200 435 Q 230 450 250 465" stroke="#d7ccc8" stroke-width="3.5" stroke-linecap="round" fill="none" />
+        <path d="M 165 410 Q 150 425 138 445" stroke="#d7ccc8" stroke-width="2.5" stroke-linecap="round" fill="none" />
+        <path d="M 235 415 Q 255 430 270 445" stroke="#d7ccc8" stroke-width="2.5" stroke-linecap="round" fill="none" />
+        <circle cx="200" cy="475" r="3" fill="#8d6e63" />
+    </g>
+
+    <!-- SWAY GROUP FOR STEM, LEAVES, FLOWER -->
+    <g id="${prefix}-sway" style="transform-origin: 200px 375px;">
+        
+        <!-- 5. STEM -->
+        <g id="${prefix}-stem" class="gt-part cursor-pointer" role="img" aria-label="Stem - holds up the plant and carries water" style="transform-origin: 200px 375px;">
+            <title>Stem</title>
+            <path d="M 200 375 C 198 310, 202 240, 200 160" stroke="url(#${prefix}-stem-grad)" stroke-width="12" stroke-linecap="round" fill="none" />
+            <path d="M 200 375 C 198 310, 202 240, 200 160" stroke="#81c784" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4" />
+        </g>
+
+        <!-- 6. LEFT LEAF -->
+        <g id="${prefix}-leaf-left" class="gt-part cursor-pointer" role="img" aria-label="Leaf - makes food using sunlight" style="transform-origin: 198px 290px;">
+            <title>Leaf</title>
+            <path d="M 198 290 C 150 295, 105 260, 95 235 C 125 220, 175 240, 198 275 Z" fill="url(#${prefix}-leaf-grad)" stroke="#2e7d32" stroke-width="2.5" stroke-linejoin="round" />
+            <path d="M 198 285 C 165 275, 130 250, 100 237" stroke="#81c784" stroke-width="2" stroke-linecap="round" fill="none" />
+            <path d="M 165 277 Q 155 265 145 260" stroke="#81c784" stroke-width="1.5" stroke-linecap="round" fill="none" />
+            <path d="M 140 262 Q 135 250 125 245" stroke="#81c784" stroke-width="1.5" stroke-linecap="round" fill="none" />
+        </g>
+
+        <!-- 7. RIGHT LEAF -->
+        <g id="${prefix}-leaf-right" class="gt-part cursor-pointer" role="img" aria-label="Leaf - makes food using sunlight" style="transform-origin: 202px 240px;">
+            <title>Leaf</title>
+            <path d="M 202 240 C 250 245, 295 210, 305 185 C 275 170, 225 190, 202 225 Z" fill="url(#${prefix}-leaf-grad)" stroke="#2e7d32" stroke-width="2.5" stroke-linejoin="round" />
+            <path d="M 202 235 C 235 225, 270 200, 300 187" stroke="#81c784" stroke-width="2" stroke-linecap="round" fill="none" />
+            <path d="M 235 227 Q 245 215 255 210" stroke="#81c784" stroke-width="1.5" stroke-linecap="round" fill="none" />
+            <path d="M 260 212 Q 265 200 275 195" stroke="#81c784" stroke-width="1.5" stroke-linecap="round" fill="none" />
+        </g>
+
+        <!-- 8. FLOWER -->
+        <g id="${prefix}-flower" class="gt-part cursor-pointer" role="img" aria-label="Flower - colorful petals that make seeds" style="transform-origin: 200px 150px;">
+            <title>Flower</title>
+            <path d="M 190 162 Q 200 172 210 162 Z" fill="#2e7d32" />
+            <ellipse cx="200" cy="115" rx="16" ry="24" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            <ellipse cx="230" cy="130" rx="16" ry="24" transform="rotate(60 230 130)" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            <ellipse cx="230" cy="170" rx="16" ry="24" transform="rotate(120 230 170)" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            <ellipse cx="200" cy="185" rx="16" ry="24" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            <ellipse cx="170" cy="170" rx="16" ry="24" transform="rotate(240 170 170)" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            <ellipse cx="170" cy="130" rx="16" ry="24" transform="rotate(300 170 130)" fill="#e07bb0" stroke="#c2185b" stroke-width="1.5" />
+            
+            <circle cx="200" cy="150" r="22" fill="url(#${prefix}-flower-center)" stroke="#d97706" stroke-width="2" />
+            <circle cx="193" cy="146" r="2.5" fill="#78350f" />
+            <circle cx="207" cy="146" r="2.5" fill="#78350f" />
+            <path d="M 193 154 Q 200 161 207 154" stroke="#78350f" stroke-width="2" fill="none" stroke-linecap="round" />
+            <circle cx="188" cy="153" r="3" fill="#f48fb1" opacity="0.6" />
+            <circle cx="212" cy="153" r="3" fill="#f48fb1" opacity="0.6" />
+        </g>
+    </g>
+
+    ${leaderLinesHtml}
+    ${explainerOverlaysHtml}
+</svg>
+    `;
+}
+
+function initPlantSvgAnimations(prefix) {
+    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isReduced) return;
+
+    // Grow-in on first view
+    const roots = document.getElementById(`${prefix}-roots`);
+    const stem = document.getElementById(`${prefix}-stem`);
+    const leafL = document.getElementById(`${prefix}-leaf-left`);
+    const leafR = document.getElementById(`${prefix}-leaf-right`);
+    const flower = document.getElementById(`${prefix}-flower`);
+    const sway = document.getElementById(`${prefix}-sway`);
+
+    if (roots) gsap.from(roots, { scaleY: 0, transformOrigin: '200px 375px', duration: 0.8, ease: 'power2.out' });
+    if (stem) gsap.from(stem, { scaleY: 0, transformOrigin: '200px 375px', duration: 1.0, ease: 'power2.out' });
+    if (leafL) gsap.from(leafL, { scale: 0, transformOrigin: '198px 290px', duration: 0.9, ease: 'elastic.out(1, 0.5)', delay: 0.35 });
+    if (leafR) gsap.from(leafR, { scale: 0, transformOrigin: '202px 240px', duration: 0.9, ease: 'elastic.out(1, 0.5)', delay: 0.5 });
+    if (flower) gsap.from(flower, { scale: 0, rotation: -30, transformOrigin: '200px 150px', duration: 1.0, ease: 'back.out(2)', delay: 0.65 });
+
+    // Idle gentle sway around the base
+    if (sway) {
+        gsap.to(sway, {
+            rotation: 1.5,
+            transformOrigin: '200px 375px',
+            duration: 2.8,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1
+        });
+    }
+}
+
+function pulsePlantPart(el) {
+    if (!el) return;
+    gsap.fromTo(el,
+        { scale: 1 },
+        { scale: 1.15, transformOrigin: 'center center', duration: 0.22, yoyo: true, repeat: 1, ease: 'power2.inOut' }
+    );
+}
+
+const plantFacts = {
+    flower: {
+        name: "🌸 Flower",
+        tag: "Makes Seeds",
+        text: "Flowers are pretty and they make seeds."
+    },
+    leaf: {
+        name: "🍃 Leaves",
+        tag: "Food Factory",
+        text: "Leaves make food for the plant using sunlight."
+    },
+    stem: {
+        name: "🌿 Stem",
+        tag: "Water Highway",
+        text: "The stem carries water up to the leaves and holds the plant up."
+    },
+    root: {
+        name: "🥕 Roots",
+        tag: "Anchor & Drinker",
+        text: "Roots hold the plant in the soil and drink water."
+    }
+};
+
+function selectPlantPart(partKey) {
+    const fact = plantFacts[partKey];
+    if (!fact) return;
+
+    // Hide pulsing hand hint
+    const hint = document.getElementById('gt-sec1-hint');
+    if (hint && hint.style.display !== 'none') {
+        gsap.to(hint, { opacity: 0, duration: 0.3, onComplete: () => { hint.style.display = 'none'; } });
+    }
+
+    // Pulse corresponding SVG group
+    let svgId = `gt1-${partKey}`;
+    if (partKey === 'leaf') svgId = 'gt1-leaf-left';
+    pulsePlantPart(document.getElementById(svgId));
+    if (partKey === 'leaf') pulsePlantPart(document.getElementById('gt1-leaf-right'));
+
+    // Highlight button
+    document.querySelectorAll('.gt-fact-btn').forEach(b => {
+        if (b.dataset.part === partKey) {
+            b.classList.add('btn-gold', 'scale-105');
+            b.classList.remove('bg-white');
+        } else {
+            b.classList.remove('btn-gold', 'scale-105');
+            b.classList.add('bg-white');
+        }
+    });
+
+    // Update speech card
+    const card = document.getElementById('gt-speech-card');
+    if (card) {
+        gsap.to(card, {
+            scale: 0.96, opacity: 0.5, duration: 0.15, onComplete: () => {
+                document.getElementById('gt-speech-title').innerText = fact.name;
+                document.getElementById('gt-speech-tag').innerText = fact.tag;
+                document.getElementById('gt-speech-text').innerText = fact.text;
+                gsap.to(card, { scale: 1, opacity: 1, duration: 0.25, ease: 'back.out(1.5)' });
+            }
+        });
+    }
+}
+
+// Section 2: Diagram Drag & Drop + Tap Fallback
+window.greenThumbsPlacements = {
+    'slot-flower': null,
+    'slot-leaf': null,
+    'slot-stem': null,
+    'slot-root': null
+};
+window.greenThumbsSelectedChip = null;
+
+function initGreenThumbsDragDrop() {
+    if (!window.Draggable) {
+        console.warn('GSAP Draggable not loaded');
+        return;
+    }
+
+    const container = document.getElementById('screen-worksheet-greenThumbs');
+    if (!container) return;
+
+    const chips = container.querySelectorAll('.gt-chip');
+    const slots = container.querySelectorAll('.gt-slot');
+
+    chips.forEach(chip => {
+        // Kill previous draggable if any
+        const existing = Draggable.get(chip);
+        if (existing) existing.kill();
+
+        Draggable.create(chip, {
+            type: 'x,y',
+            zIndexBoost: true,
+            onDragStart: function() {
+                if (window.lenis) window.lenis.stop();
+                gsap.to(chip, { scale: 1.1, boxShadow: '0 12px 24px rgba(0,0,0,0.25)', duration: 0.15 });
+            },
+            onDragEnd: function() {
+                if (window.lenis) window.lenis.start();
+                gsap.to(chip, { scale: 1, boxShadow: '0 4px 6px rgba(0,0,0,0.1)', duration: 0.15 });
+
+                const self = this;
+                const chipId = chip.dataset.chipId;
+                const chipRect = chip.getBoundingClientRect();
+                const chipCX = chipRect.left + chipRect.width / 2;
+                const chipCY = chipRect.top + chipRect.height / 2;
+
+                // Find closest slot within 60px
+                let closestSlot = null;
+                let closestDist = 60;
+
+                slots.forEach(slot => {
+                    const sr = slot.getBoundingClientRect();
+                    const dist = Math.hypot(chipCX - (sr.left + sr.width / 2), chipCY - (sr.top + sr.height / 2));
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closestSlot = slot;
+                    }
+                });
+
+                if (closestSlot) {
+                    const slotId = closestSlot.dataset.slotId;
+
+                    // Free previously occupied slot by this chip
+                    Object.entries(window.greenThumbsPlacements).forEach(([sId, cId]) => {
+                        if (cId === chipId && sId !== slotId) {
+                            window.greenThumbsPlacements[sId] = null;
+                            const prevSlot = document.getElementById(sId);
+                            if (prevSlot) {
+                                prevSlot.classList.remove('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                                prevSlot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${prevSlot.dataset.label || 'Drop Here'}</span>`;
+                            }
+                        }
+                    });
+
+                    // Evict existing occupant in target slot back to tray
+                    const occupantChipId = window.greenThumbsPlacements[slotId];
+                    if (occupantChipId && occupantChipId !== chipId) {
+                        const evictEl = container.querySelector(`.gt-chip[data-chip-id="${occupantChipId}"]`);
+                        if (evictEl) {
+                            gsap.to(evictEl, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.5)' });
+                        }
+                    }
+
+                    // Record placement
+                    window.greenThumbsPlacements[slotId] = chipId;
+
+                    // Snap chip into slot center
+                    const sr = closestSlot.getBoundingClientRect();
+                    const snapX = (sr.left + sr.width / 2) - (chipRect.left + chipRect.width / 2) + self.x;
+                    const snapY = (sr.top + sr.height / 2) - (chipRect.top + chipRect.height / 2) + self.y;
+
+                    gsap.to(chip, {
+                        x: snapX,
+                        y: snapY,
+                        duration: 0.35,
+                        ease: 'back.out(1.5)',
+                        onComplete: () => {
+                            closestSlot.classList.add('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                            closestSlot.classList.remove('slot-error');
+                            closestSlot.innerHTML = `<span class="text-sm sm:text-base font-bold text-navy">${chip.innerText}</span>`;
+                            gsap.fromTo(closestSlot, { scale: 0.95 }, { scale: 1, duration: 0.2 });
+                        }
+                    });
+                } else {
+                    // Released far from slot (>60px): elastic return to tray
+                    Object.entries(window.greenThumbsPlacements).forEach(([sId, cId]) => {
+                        if (cId === chipId) {
+                            window.greenThumbsPlacements[sId] = null;
+                            const prevSlot = document.getElementById(sId);
+                            if (prevSlot) {
+                                prevSlot.classList.remove('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                                prevSlot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${prevSlot.dataset.label || 'Drop Here'}</span>`;
+                            }
+                        }
+                    });
+                    gsap.to(chip, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.5)' });
+                }
+            }
+        });
+
+        // Tap fallback on chip
+        chip.addEventListener('click', () => {
+            const drg = Draggable.get(chip);
+            if (drg && drg.isDragging) return;
+
+            const chipId = chip.dataset.chipId;
+            let currentSlotId = null;
+            Object.entries(window.greenThumbsPlacements).forEach(([sId, cId]) => {
+                if (cId === chipId) currentSlotId = sId;
+            });
+
+            if (currentSlotId) {
+                // Return chip to tray
+                window.greenThumbsPlacements[currentSlotId] = null;
+                const slot = document.getElementById(currentSlotId);
+                if (slot) {
+                    slot.classList.remove('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                    slot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${slot.dataset.label || 'Drop Here'}</span>`;
+                }
+                gsap.to(chip, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+                chip.classList.remove('ring-4', 'ring-yellow-400');
+                if (window.greenThumbsSelectedChip === chip) window.greenThumbsSelectedChip = null;
+                return;
+            }
+
+            // In tray: toggle selection
+            if (window.greenThumbsSelectedChip === chip) {
+                chip.classList.remove('ring-4', 'ring-yellow-400');
+                window.greenThumbsSelectedChip = null;
+            } else {
+                chips.forEach(c => c.classList.remove('ring-4', 'ring-yellow-400'));
+                chip.classList.add('ring-4', 'ring-yellow-400');
+                window.greenThumbsSelectedChip = chip;
+            }
+        });
+    });
+
+    // Tap fallback on slot
+    slots.forEach(slot => {
+        slot.addEventListener('click', () => {
+            const slotId = slot.dataset.slotId;
+            const selectedChip = window.greenThumbsSelectedChip;
+
+            if (selectedChip) {
+                const chipId = selectedChip.dataset.chipId;
+
+                // Evict occupant in this slot if any
+                const occupantChipId = window.greenThumbsPlacements[slotId];
+                if (occupantChipId && occupantChipId !== chipId) {
+                    const evictEl = container.querySelector(`.gt-chip[data-chip-id="${occupantChipId}"]`);
+                    if (evictEl) gsap.to(evictEl, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+                }
+
+                // If selected chip was placed elsewhere, clear that slot
+                Object.entries(window.greenThumbsPlacements).forEach(([sId, cId]) => {
+                    if (cId === chipId && sId !== slotId) {
+                        window.greenThumbsPlacements[sId] = null;
+                        const prevSlot = document.getElementById(sId);
+                        if (prevSlot) {
+                            prevSlot.classList.remove('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                            prevSlot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${prevSlot.dataset.label || 'Drop Here'}</span>`;
+                        }
+                    }
+                });
+
+                window.greenThumbsPlacements[slotId] = chipId;
+
+                const sr = slot.getBoundingClientRect();
+                const cr = selectedChip.getBoundingClientRect();
+                const drg = Draggable.get(selectedChip);
+                const curX = drg ? drg.x : 0;
+                const curY = drg ? drg.y : 0;
+                const snapX = (sr.left + sr.width / 2) - (cr.left + cr.width / 2) + curX;
+                const snapY = (sr.top + sr.height / 2) - (cr.top + cr.height / 2) + curY;
+
+                gsap.to(selectedChip, {
+                    x: snapX,
+                    y: snapY,
+                    duration: 0.35,
+                    ease: 'back.out(1.5)',
+                    onComplete: () => {
+                        slot.classList.add('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                        slot.classList.remove('slot-error');
+                        slot.innerHTML = `<span class="text-sm sm:text-base font-bold text-navy">${selectedChip.innerText}</span>`;
+                    }
+                });
+
+                selectedChip.classList.remove('ring-4', 'ring-yellow-400');
+                window.greenThumbsSelectedChip = null;
+            } else {
+                // If slot occupied and no chip selected: tapping slot evicts occupant back to tray
+                const occupantChipId = window.greenThumbsPlacements[slotId];
+                if (occupantChipId) {
+                    const evictEl = container.querySelector(`.gt-chip[data-chip-id="${occupantChipId}"]`);
+                    if (evictEl) gsap.to(evictEl, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+                    window.greenThumbsPlacements[slotId] = null;
+                    slot.classList.remove('slot-occupied', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                    slot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${slot.dataset.label || 'Drop Here'}</span>`;
+                }
+            }
+        });
+    });
+}
+
+// Section 4: Explainer Interactive 4-step logic
+let currentExplainerStep = 1;
+
+function setExplainerStep(step) {
+    currentExplainerStep = Math.max(1, Math.min(4, step));
+
+    for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById(`gt-step-dot-${i}`);
+        if (dot) {
+            if (i === currentExplainerStep) {
+                dot.className = 'w-8 h-3 rounded-full bg-gold transition-all duration-300';
+            } else if (i < currentExplainerStep) {
+                dot.className = 'w-3 h-3 rounded-full bg-green-500 transition-all duration-300';
+            } else {
+                dot.className = 'w-3 h-3 rounded-full bg-gray-300 transition-all duration-300';
+            }
+        }
+    }
+
+    const captions = [
+        "☀️ <strong>Step 1:</strong> The sun shines on the leaves.",
+        "💧 <strong>Step 2:</strong> The roots drink water from the soil.",
+        "💨 <strong>Step 3:</strong> The leaves take in air.",
+        "🍃 <strong>Step 4:</strong> The plant makes its own food! It gives out fresh air (oxygen) for us to breathe."
+    ];
+
+    const captionEl = document.getElementById('gt-explainer-caption');
+    if (captionEl) {
+        gsap.to(captionEl, {
+            opacity: 0, y: -6, duration: 0.15, onComplete: () => {
+                captionEl.innerHTML = captions[currentExplainerStep - 1];
+                gsap.to(captionEl, { opacity: 1, y: 0, duration: 0.25 });
+            }
+        });
+    }
+
+    const prevBtn = document.getElementById('gt-exp-btn-prev');
+    const nextBtn = document.getElementById('gt-exp-btn-next');
+    if (prevBtn) prevBtn.disabled = currentExplainerStep === 1;
+    if (nextBtn) {
+        if (currentExplainerStep === 4) {
+            nextBtn.innerHTML = '↻ Replay Story';
+            nextBtn.className = 'btn btn-gold text-lg px-6 py-3 rounded-xl shadow-md hover:scale-105 transition-transform flex items-center gap-2';
+        } else {
+            nextBtn.innerHTML = 'Next ▶';
+            nextBtn.className = 'btn bg-green-500 hover:bg-green-600 border-green-600 text-white text-lg px-6 py-3 rounded-xl shadow-md hover:scale-105 transition-transform flex items-center gap-2';
+        }
+    }
+
+    const eqCard = document.getElementById('gt-equation-card');
+    if (eqCard) {
+        if (currentExplainerStep === 4) {
+            eqCard.style.display = 'block';
+            gsap.fromTo(eqCard, { opacity: 0, y: 20, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'back.out(1.5)' });
+        } else {
+            eqCard.style.display = 'none';
+        }
+    }
+
+    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sunbeams = document.getElementById('gt4-sunbeams');
+    const waterDrops = document.getElementById('gt4-water-drops');
+    const airArrows = document.getElementById('gt4-air-arrows');
+    const foodOxygen = document.getElementById('gt4-food-oxygen');
+
+    [sunbeams, waterDrops, airArrows, foodOxygen].forEach(el => {
+        if (el) {
+            gsap.killTweensOf(el);
+            el.setAttribute('opacity', '0');
+        }
+    });
+
+    if (currentExplainerStep === 1) {
+        pulsePlantPart(document.getElementById('gt4-sun'));
+        if (sunbeams) {
+            if (isReduced) { sunbeams.setAttribute('opacity', '1'); }
+            else {
+                gsap.fromTo(sunbeams, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' });
+            }
+        }
+    } else if (currentExplainerStep === 2) {
+        pulsePlantPart(document.getElementById('gt4-roots'));
+        if (waterDrops) {
+            if (isReduced) { waterDrops.setAttribute('opacity', '1'); }
+            else {
+                waterDrops.setAttribute('opacity', '1');
+                gsap.fromTo('#gt4-water-drops circle, #gt4-water-drops path',
+                    { y: 30, opacity: 0 },
+                    { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power2.out' }
+                );
+            }
+        }
+    } else if (currentExplainerStep === 3) {
+        pulsePlantPart(document.getElementById('gt4-leaf-left'));
+        pulsePlantPart(document.getElementById('gt4-leaf-right'));
+        if (airArrows) {
+            if (isReduced) { airArrows.setAttribute('opacity', '1'); }
+            else {
+                gsap.fromTo(airArrows, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.7, ease: 'power2.out' });
+            }
+        }
+    } else if (currentExplainerStep === 4) {
+        pulsePlantPart(document.getElementById('gt4-flower'));
+        if (foodOxygen) {
+            if (isReduced) { foodOxygen.setAttribute('opacity', '1'); }
+            else {
+                foodOxygen.setAttribute('opacity', '1');
+                gsap.fromTo('#gt4-food-pop', { scale: 0 }, { scale: 1, duration: 0.5, ease: 'back.out(2)' });
+                gsap.fromTo('#gt4-oxygen-puffs', { opacity: 0, y: 15 }, { opacity: 1, y: -10, duration: 0.8, delay: 0.2, ease: 'power1.out' });
+            }
+        }
+    }
+}
+window.setExplainerStep = setExplainerStep;
+
+// Section 3 & 5 Questions Data
+const gtSec3Data = [
+    {
+        q: "Which part drinks water from the soil?",
+        cAns: "root",
+        opts: [
+            { id: "root", text: "🥕 Root" },
+            { id: "leaf", text: "🍃 Leaf" },
+            { id: "flower", text: "🌸 Flower" }
+        ]
+    },
+    {
+        q: "Which part holds the plant up?",
+        cAns: "stem",
+        opts: [
+            { id: "stem", text: "🌿 Stem" },
+            { id: "flower", text: "🌸 Flower" },
+            { id: "root", text: "🥕 Root" }
+        ]
+    },
+    {
+        q: "Which part makes food for the plant?",
+        cAns: "leaf",
+        opts: [
+            { id: "leaf", text: "🍃 Leaf" },
+            { id: "root", text: "🥕 Root" },
+            { id: "stem", text: "🌿 Stem" }
+        ]
+    },
+    {
+        q: "Which part is pretty and makes seeds?",
+        cAns: "flower",
+        opts: [
+            { id: "flower", text: "🌸 Flower" },
+            { id: "stem", text: "🌿 Stem" },
+            { id: "leaf", text: "🍃 Leaf" }
+        ]
+    },
+    {
+        q: "The ___ carries water up to the leaves.",
+        cAns: "stem",
+        opts: [
+            { id: "stem", text: "🌿 stem" },
+            { id: "flower", text: "🌸 flower" },
+            { id: "seed", text: "🌰 seed" }
+        ]
+    },
+    {
+        q: "Roots grow under the ___.",
+        cAns: "soil",
+        opts: [
+            { id: "soil", text: "🤎 soil" },
+            { id: "sky", text: "☁️ sky" },
+            { id: "tree", text: "🌳 tree" }
+        ]
+    }
+];
+
+const gtSec5Data = [
+    {
+        q: "What do plants need to make food?",
+        cAns: "sun-water-air",
+        opts: [
+            { id: "sun-water-air", text: "☀️ Sunlight, water and air" },
+            { id: "milk-sugar", text: "🥛 Milk, sugar and salt" },
+            { id: "toys-books", text: "🧸 Toys, books and bags" }
+        ]
+    },
+    {
+        q: "What do plants give us to breathe?",
+        cAns: "fresh-air",
+        opts: [
+            { id: "fresh-air", text: "🌬️ Fresh air (oxygen)" },
+            { id: "smoke", text: "💨 Smoke" },
+            { id: "sand", text: "🏖️ Sand" }
+        ]
+    },
+    {
+        q: "Where does the plant get light from?",
+        cAns: "sun",
+        opts: [
+            { id: "sun", text: "☀️ The sun" },
+            { id: "moon", text: "🌙 The moon" },
+            { id: "cloud", text: "☁️ A cloud" }
+        ]
+    },
+    {
+        q: "How do plants get water?",
+        cAns: "roots-drink",
+        opts: [
+            { id: "roots-drink", text: "🥕 Roots drink it from the soil" },
+            { id: "shop", text: "🛒 They buy it from a shop" },
+            { id: "no-water", text: "🚫 They do not need water" }
+        ]
+    },
+    {
+        q: "A plant is kept in a dark cupboard for many days. What happens?",
+        cAns: "weak",
+        opts: [
+            { id: "weak", text: "🥀 It becomes weak" },
+            { id: "strong", text: "💪 It grows big and strong" },
+            { id: "flowers", text: "🌸 It makes more flowers" }
+        ]
+    },
+    {
+        q: "Plants make their food in a special way called ___",
+        cAns: "photosynthesis",
+        opts: [
+            { id: "photosynthesis", text: "🌱 photosynthesis" },
+            { id: "jumping", text: "🦘 jumping" },
+            { id: "sleeping", text: "😴 sleeping" }
+        ]
+    },
+    {
+        q: "Plants make their own food.",
+        cAns: "true",
+        opts: [
+            { id: "true", text: "✅ True" },
+            { id: "false", text: "❌ False" }
+        ]
+    },
+    {
+        q: "Plants can make food in the dark.",
+        cAns: "false",
+        opts: [
+            { id: "true", text: "✅ True" },
+            { id: "false", text: "❌ False" }
+        ]
+    },
+    {
+        q: "Plants eat food from a shop.",
+        cAns: "false",
+        opts: [
+            { id: "true", text: "✅ True" },
+            { id: "false", text: "❌ False" }
+        ]
+    }
+];
+
+function renderGreenThumbsWorksheet() {
+    const container = document.getElementById('screen-worksheet-greenThumbs');
+    if (!container || container.children.length > 2) return; // Already rendered
+
+    let html = '';
+    let sectionCount = 1;
+
+    const secHeader = (title, subtitle) => `
+        <div class="flex items-center gap-4 mb-2">
+            <div class="badge">${sectionCount++}</div>
+            <h3 class="text-2xl font-baloo font-bold text-navy">${title}</h3>
+        </div>
+        ${subtitle ? `<p class="text-lg mb-6 font-medium text-navy bg-white/50 inline-block px-4 py-2 rounded-lg">${subtitle}</p>` : ''}
+    `;
+
+    // ----------------------------------------------------
+    // SECTION 1: Meet the Plant (Learning, Not graded)
+    // ----------------------------------------------------
+    html += `
+    <div id="gt-sec1" class="section-card bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden mb-8 gs-reveal">
+        ${secHeader("Meet the Plant 🌱", "Tap any part of the plant or a button below to learn about it!")}
+        
+        <div class="text-center mb-6">
+            <div id="gt-sec1-hint" class="inline-flex items-center gap-2 text-navy font-bold text-base bg-yellow-100 border-2 border-yellow-300 px-5 py-2.5 rounded-full shadow-sm animate-bounce cursor-pointer">
+                <span>👆</span> Tap a part of the plant to learn about it!
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row items-center justify-center gap-8 max-w-4xl mx-auto">
+            <!-- Plant SVG -->
+            <div class="w-full max-w-[320px] sm:max-w-[360px] bg-sky-50/60 p-4 rounded-3xl border-2 border-sky-100 flex items-center justify-center">
+                ${getPlantSvgHtml('gt1')}
+            </div>
+
+            <!-- Speech Card & Buttons -->
+            <div class="flex flex-col gap-6 w-full max-w-md">
+                <!-- Speech Card -->
+                <div id="gt-speech-card" class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200 shadow-md">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <h4 id="gt-speech-title" class="text-2xl font-baloo font-bold text-navy">🌸 Flower</h4>
+                        <span id="gt-speech-tag" class="px-3 py-1 rounded-full text-xs font-bold bg-green-200 text-green-900">Makes Seeds</span>
+                    </div>
+                    <p id="gt-speech-text" class="text-lg text-gray-700 font-medium leading-relaxed">
+                        Flowers are pretty and they make seeds.
+                    </p>
+                </div>
+
+                <!-- Part Buttons (44px+ min touch targets) -->
+                <div>
+                    <div class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Tap a Part:</div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" class="gt-fact-btn btn btn-gold min-h-[48px] py-3 px-4 rounded-xl font-bold text-base shadow-sm border-2 border-gold flex items-center justify-center gap-2" data-part="flower">
+                            🌸 Flower
+                        </button>
+                        <button type="button" class="gt-fact-btn btn bg-white hover:bg-green-50 min-h-[48px] py-3 px-4 rounded-xl font-bold text-base shadow-sm border-2 border-green-300 text-navy flex items-center justify-center gap-2" data-part="leaf">
+                            🍃 Leaf
+                        </button>
+                        <button type="button" class="gt-fact-btn btn bg-white hover:bg-green-50 min-h-[48px] py-3 px-4 rounded-xl font-bold text-base shadow-sm border-2 border-green-300 text-navy flex items-center justify-center gap-2" data-part="stem">
+                            🌿 Stem
+                        </button>
+                        <button type="button" class="gt-fact-btn btn bg-white hover:bg-green-50 min-h-[48px] py-3 px-4 rounded-xl font-bold text-base shadow-sm border-2 border-green-300 text-navy flex items-center justify-center gap-2" data-part="root">
+                            🥕 Root
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+
+    // ----------------------------------------------------
+    // SECTION 2: Label the Diagram (GRADED, 4, topic "Parts of a Plant")
+    // ----------------------------------------------------
+    const shuffledChips = [
+        { id: "Flower", text: "🌸 Flower" },
+        { id: "Leaf",   text: "🍃 Leaf" },
+        { id: "Stem",   text: "🌿 Stem" },
+        { id: "Root",   text: "🥕 Root" }
+    ].sort(() => Math.random() - 0.5);
+
+    html += `
+    <div id="gt-sec2" class="section-card bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden mb-8 gs-reveal">
+        ${secHeader("Label the Plant 🏷️", "Drag the labels from the tray into the matching boxes, or tap a label then tap a box!")}
+        
+        <div class="max-w-4xl mx-auto">
+            <!-- Diagram & Slots Area -->
+            <div class="relative flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-8 bg-emerald-50/40 p-4 sm:p-6 rounded-3xl border-2 border-emerald-100 mb-6">
+                
+                <!-- Left Slots (Stem & Root) -->
+                <div class="flex md:flex-col justify-around gap-4 w-full md:w-44 order-2 md:order-1">
+                    <!-- Stem Slot (middle left) -->
+                    <div class="flex flex-col items-center gap-1 w-full">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Stem Box:</span>
+                        <div id="slot-stem" class="gt-slot w-full min-h-[52px] px-3 py-2 rounded-2xl border-2 border-dashed border-gray-400 bg-white/90 text-center flex items-center justify-center font-bold text-gray-500 shadow-sm transition-all cursor-pointer select-none" data-slot-id="slot-stem" data-label="Stem">
+                            <span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">Drop Here</span>
+                        </div>
+                    </div>
+                    <!-- Root Slot (bottom left) -->
+                    <div class="flex flex-col items-center gap-1 w-full">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Root Box:</span>
+                        <div id="slot-root" class="gt-slot w-full min-h-[52px] px-3 py-2 rounded-2xl border-2 border-dashed border-gray-400 bg-white/90 text-center flex items-center justify-center font-bold text-gray-500 shadow-sm transition-all cursor-pointer select-none" data-slot-id="slot-root" data-label="Root">
+                            <span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">Drop Here</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Plant SVG with Leader lines -->
+                <div class="w-full max-w-[280px] sm:max-w-[320px] order-1 md:order-2 flex items-center justify-center">
+                    ${getPlantSvgHtml('gt2', { isDiagram: true })}
+                </div>
+
+                <!-- Right Slots (Flower & Leaf) -->
+                <div class="flex md:flex-col justify-around gap-4 w-full md:w-44 order-3">
+                    <!-- Flower Slot (top right) -->
+                    <div class="flex flex-col items-center gap-1 w-full">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Flower Box:</span>
+                        <div id="slot-flower" class="gt-slot w-full min-h-[52px] px-3 py-2 rounded-2xl border-2 border-dashed border-gray-400 bg-white/90 text-center flex items-center justify-center font-bold text-gray-500 shadow-sm transition-all cursor-pointer select-none" data-slot-id="slot-flower" data-label="Flower">
+                            <span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">Drop Here</span>
+                        </div>
+                    </div>
+                    <!-- Leaf Slot (middle right) -->
+                    <div class="flex flex-col items-center gap-1 w-full">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Leaf Box:</span>
+                        <div id="slot-leaf" class="gt-slot w-full min-h-[52px] px-3 py-2 rounded-2xl border-2 border-dashed border-gray-400 bg-white/90 text-center flex items-center justify-center font-bold text-gray-500 shadow-sm transition-all cursor-pointer select-none" data-slot-id="slot-leaf" data-label="Leaf">
+                            <span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">Drop Here</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chips Tray -->
+            <div class="bg-lightBlue p-4 sm:p-5 rounded-2xl border-2 border-navy/20">
+                <div class="text-sm font-bold text-navy uppercase tracking-wider mb-3 text-center">Labels Tray (Drag or Tap):</div>
+                <div id="gt-chips-tray" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                    ${shuffledChips.map(c => `
+                        <div class="gt-chip min-w-[96px] min-h-[48px] px-4 py-2.5 rounded-2xl font-bold shadow-md cursor-grab active:cursor-grabbing text-navy bg-white border-2 border-navy/30 select-none touch-none hover:scale-105 transition-transform flex items-center justify-center text-base" data-chip-id="${c.id}">
+                            ${c.text}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+
+    // ----------------------------------------------------
+    // SECTION 3: What Does Each Part Do? (GRADED, 6, topic "What Each Part Does")
+    // ----------------------------------------------------
+    html += `
+    <div id="gt-sec3" class="section-card bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden mb-8 gs-reveal">
+        ${secHeader("What Does Each Part Do? 🤔", "Tap the correct answer for each question!")}
+        
+        <div class="space-y-6 max-w-3xl mx-auto">
+            ${gtSec3Data.map((item, index) => {
+                const shuffledOpts = [...item.opts].sort(() => Math.random() - 0.5);
+                return `
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 s4-question gt-question gt-s3-q" data-q="s3-${index+1}" data-q-text="${item.q}" data-ans="${item.cAns}" data-topic="What Each Part Does">
+                    <div class="text-xl font-bold font-baloo text-navy mb-4 flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-full bg-lightBlue text-navy text-sm flex items-center justify-center font-bold">${index + 1}</span>
+                        <span>${item.q}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        ${shuffledOpts.map(opt => `
+                            <div class="pill s4-opt min-h-[48px] py-3 px-4 rounded-xl border-2 border-gray-200 bg-white font-bold text-navy text-base flex items-center justify-center cursor-pointer hover:border-gold transition-colors text-center" data-opt-id="${opt.id}">
+                                ${opt.text}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }).join('')}
+        </div>
+    </div>
+    `;
+
+    // ----------------------------------------------------
+    // SECTION 4: How Plants Make Food (NOT graded, animated explainer, "Photosynthesis")
+    // ----------------------------------------------------
+    html += `
+    <div id="gt-sec4" class="section-card bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden mb-8 gs-reveal">
+        ${secHeader("How Plants Make Food ☀️💧🍃", "Watch how the plant uses sunlight, water, and air to make sweet food!")}
+        
+        <div class="max-w-4xl mx-auto">
+            <!-- Step Indicators -->
+            <div class="flex items-center justify-center gap-2 mb-6">
+                <div id="gt-step-dot-1" class="w-8 h-3 rounded-full bg-gold transition-all duration-300"></div>
+                <div id="gt-step-dot-2" class="w-3 h-3 rounded-full bg-gray-300 transition-all duration-300"></div>
+                <div id="gt-step-dot-3" class="w-3 h-3 rounded-full bg-gray-300 transition-all duration-300"></div>
+                <div id="gt-step-dot-4" class="w-3 h-3 rounded-full bg-gray-300 transition-all duration-300"></div>
+            </div>
+
+            <!-- Animated Stage -->
+            <div class="bg-gradient-to-b from-sky-50 to-emerald-50/60 p-6 rounded-3xl border-2 border-sky-100 flex flex-col items-center justify-center mb-6">
+                <!-- SVG Plant with Explainer Overlays -->
+                <div class="w-full max-w-[320px] sm:max-w-[360px] flex items-center justify-center">
+                    ${getPlantSvgHtml('gt4', { isExplainer: true })}
+                </div>
+
+                <!-- Step Caption Card -->
+                <div class="w-full max-w-xl bg-white p-5 rounded-2xl border-2 border-green-200 shadow-sm mt-6 text-center">
+                    <p id="gt-explainer-caption" class="text-xl font-medium text-navy leading-relaxed">
+                        ☀️ <strong>Step 1:</strong> The sun shines on the leaves.
+                    </p>
+                </div>
+
+                <!-- Equation Card (Appears at Step 4) -->
+                <div id="gt-equation-card" class="w-full max-w-xl bg-yellow-50 p-5 rounded-2xl border-2 border-yellow-300 shadow-md mt-4 text-center" style="display: none;">
+                    <div class="text-2xl font-baloo font-bold text-navy mb-2">
+                        ☀️ Sunlight + 💧 Water + 💨 Air ➔ 🍎 Plant Food + 🌬️ Fresh Air
+                    </div>
+                    <p class="text-base font-bold text-green-800">
+                        ✨ This is called <span class="text-xl text-navy underline decoration-wavy decoration-gold">photosynthesis</span> (foh-toh-SIN-thuh-sis)!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Controls (Next, Prev, Replay) -->
+            <div class="flex items-center justify-center gap-4">
+                <button id="gt-exp-btn-prev" type="button" class="btn bg-gray-200 hover:bg-gray-300 text-gray-700 text-lg px-6 py-3 rounded-xl shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    ◀ Back
+                </button>
+                <button id="gt-exp-btn-next" type="button" class="btn bg-green-500 hover:bg-green-600 border-green-600 text-white text-lg px-6 py-3 rounded-xl shadow-md hover:scale-105 transition-transform flex items-center gap-2">
+                    Next ▶
+                </button>
+            </div>
+        </div>
+    </div>
+    `;
+
+    // ----------------------------------------------------
+    // SECTION 5: Photosynthesis Quiz (GRADED, 9, topic "Photosynthesis")
+    // ----------------------------------------------------
+    html += `
+    <div id="gt-sec5" class="section-card bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-lightBlue relative overflow-hidden mb-8 gs-reveal">
+        ${secHeader("Photosynthesis Quiz 🌟", "Show what you learned! Tap the best answer for each question.")}
+        
+        <div class="space-y-6 max-w-3xl mx-auto">
+            ${gtSec5Data.map((item, index) => {
+                const isTF = Boolean(item.cAns === 'true' || item.cAns === 'false');
+                const shuffledOpts = isTF ? item.opts : [...item.opts].sort(() => Math.random() - 0.5);
+                const gridClass = isTF ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-3';
+
+                return `
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 s4-question gt-question gt-s5-q" data-q="s5-${index+1}" data-q-text="${item.q}" data-ans="${item.cAns}" data-topic="Photosynthesis">
+                    <div class="text-xl font-bold font-baloo text-navy mb-4 flex items-center gap-3">
+                        <span class="w-7 h-7 rounded-full bg-lightBlue text-navy text-sm flex items-center justify-center font-bold">${index + 1}</span>
+                        <span>${item.q}</span>
+                    </div>
+                    <div class="grid ${gridClass} gap-3">
+                        ${shuffledOpts.map(opt => `
+                            <div class="pill s4-opt min-h-[48px] py-3 px-4 rounded-xl border-2 border-gray-200 bg-white font-bold text-navy text-base flex items-center justify-center cursor-pointer hover:border-gold transition-colors text-center" data-opt-id="${opt.id}">
+                                ${opt.text}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }).join('')}
+        </div>
+    </div>
+    `;
+
+    // Prepend HTML before submit button
+    const submitBtn = container.lastElementChild;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    while (tempDiv.firstChild) {
+        container.insertBefore(tempDiv.firstChild, submitBtn);
+    }
+}
+
+function registerGreenThumbsInteractivity() {
+    // 1. Plant Animations on SVGs
+    initPlantSvgAnimations('gt1');
+    initPlantSvgAnimations('gt2');
+    initPlantSvgAnimations('gt4');
+
+    // 2. Section 1 Interactivity: tap SVG part or buttons
+    document.querySelectorAll('#screen-worksheet-greenThumbs .gt-fact-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectPlantPart(btn.dataset.part);
+        });
+    });
+
+    const sec1Svg = document.getElementById('gt1-plant-svg');
+    if (sec1Svg) {
+        const partMap = {
+            'gt1-flower': 'flower',
+            'gt1-leaf-left': 'leaf',
+            'gt1-leaf-right': 'leaf',
+            'gt1-stem': 'stem',
+            'gt1-roots': 'root'
+        };
+        Object.entries(partMap).forEach(([id, key]) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.cursor = 'pointer';
+                el.addEventListener('click', () => {
+                    selectPlantPart(key);
+                });
+            }
+        });
+    }
+
+    // 3. Section 2 Drag & Drop + Tap Fallback
+    initGreenThumbsDragDrop();
+
+    // 4. Section 4 Explainer Step navigation
+    const prevBtn = document.getElementById('gt-exp-btn-prev');
+    const nextBtn = document.getElementById('gt-exp-btn-next');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            setExplainerStep(currentExplainerStep - 1);
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            if (currentExplainerStep === 4) {
+                setExplainerStep(1);
+            } else {
+                setExplainerStep(currentExplainerStep + 1);
+            }
+        });
+    }
+
+    // Initialize Explainer to Step 1
+    setExplainerStep(1);
+}
+
+function gradeWorksheetGreenThumbs() {
+    state.results = [];
+    state.totalCorrect = 0;
+
+    // Section 2: 4 Diagram Label items (topic: "Parts of a Plant")
+    const placements = window.greenThumbsPlacements || {};
+    const diagramItems = [
+        { slotId: 'slot-flower', label: 'Flower', correctAns: 'Flower' },
+        { slotId: 'slot-leaf',   label: 'Leaf',   correctAns: 'Leaf' },
+        { slotId: 'slot-stem',   label: 'Stem',   correctAns: 'Stem' },
+        { slotId: 'slot-root',   label: 'Root',   correctAns: 'Root' }
+    ];
+
+    diagramItems.forEach(item => {
+        const userAns = placements[item.slotId] || 'None';
+        const isCorrect = userAns.toLowerCase() === item.correctAns.toLowerCase();
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: `Label the Plant: ${item.label}`,
+            userAns: userAns,
+            correctAns: item.correctAns,
+            isCorrect: isCorrect,
+            section: 'Section 2: Label the Plant',
+            topic: 'Parts of a Plant'
+        });
+    });
+
+    // Section 3: 6 items (topic: "What Each Part Does")
+    const container = document.getElementById('screen-worksheet-greenThumbs');
+    if (!container) return;
+
+    container.querySelectorAll('.gt-s3-q').forEach(q => {
+        const qText = q.dataset.qText || 'Question';
+        const cAnsId = q.dataset.ans;
+        const selected = q.querySelector('.s4-opt.selected');
+        const uAnsId = selected ? selected.dataset.optId : null;
+        const uAnsText = selected ? selected.innerText.trim() : 'None';
+
+        const correctOpt = q.querySelector(`.s4-opt[data-opt-id="${cAnsId}"]`);
+        const cAnsText = correctOpt ? correctOpt.innerText.trim() : cAnsId;
+
+        const isCorrect = uAnsId === cAnsId;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAnsText,
+            correctAns: cAnsText,
+            isCorrect: isCorrect,
+            section: 'Section 3: What Does Each Part Do?',
+            topic: 'What Each Part Does'
+        });
+    });
+
+    // Section 5: 9 items (topic: "Photosynthesis")
+    container.querySelectorAll('.gt-s5-q').forEach(q => {
+        const qText = q.dataset.qText || 'Question';
+        const cAnsId = q.dataset.ans;
+        const selected = q.querySelector('.s4-opt.selected');
+        const uAnsId = selected ? selected.dataset.optId : null;
+        const uAnsText = selected ? selected.innerText.trim() : 'None';
+
+        const correctOpt = q.querySelector(`.s4-opt[data-opt-id="${cAnsId}"]`);
+        const cAnsText = correctOpt ? correctOpt.innerText.trim() : cAnsId;
+
+        const isCorrect = uAnsId === cAnsId;
+        if (isCorrect) state.totalCorrect++;
+
+        state.results.push({
+            q: qText,
+            userAns: uAnsText,
+            correctAns: cAnsText,
+            isCorrect: isCorrect,
+            section: 'Section 5: Photosynthesis Quiz',
+            topic: 'Photosynthesis'
+        });
+    });
+}
+
+
 // Grading Function for Smart Starters
 function gradeWorksheetSmartStarters() {
     state.results = [];
@@ -4018,76 +5293,209 @@ function gradeWorksheetSmartStarters() {
 }
 
         function getPerformanceTier(percentage) {
-            if (percentage >= 90) return { label: 'Awesome', tagText: 'Perfect ⭐', colorHex: '#2e7d32' };
-            if (percentage >= 70) return { label: 'Good', tagText: 'Good 👍', colorHex: '#1e88e5' };
-            if (percentage >= 50) return { label: 'Average', tagText: 'Average 😐', colorHex: '#f0b429' };
-            return { label: 'Needs More Work', tagText: 'Needs More Work 📚', colorHex: '#d1453a' };
+            if (percentage >= 90) {
+                return {
+                    label: 'Awesome',
+                    emoji: '🌟',
+                    colorHex: '#2e7d32',
+                    bgRgba: 'rgba(46, 125, 50, 0.15)'
+                };
+            }
+            if (percentage >= 70) {
+                return {
+                    label: 'Good',
+                    emoji: '👍',
+                    colorHex: '#1e88e5',
+                    bgRgba: 'rgba(30, 136, 229, 0.15)'
+                };
+            }
+            if (percentage >= 50) {
+                return {
+                    label: 'Average',
+                    emoji: '💪',
+                    colorHex: '#f0b429',
+                    bgRgba: 'rgba(240, 180, 41, 0.18)'
+                };
+            }
+            return {
+                label: 'Needs More Work',
+                emoji: '📚',
+                colorHex: '#d1453a',
+                bgRgba: 'rgba(209, 69, 58, 0.15)'
+            };
+        }
+
+        // FIX 1: Pure single source of truth report function
+        function computeReport(results) {
+            const list = Array.isArray(results) ? results : [];
+            let correct = 0;
+            const topicsMap = {};
+
+            list.forEach(r => {
+                const isCorr = Boolean(r && r.isCorrect);
+                if (isCorr) {
+                    correct++;
+                }
+                const topicName = (r && (r.topic || r.section)) ? (r.topic || r.section) : "General";
+                if (!topicsMap[topicName]) {
+                    topicsMap[topicName] = { name: topicName, correct: 0, total: 0 };
+                }
+                topicsMap[topicName].total++;
+                if (isCorr) {
+                    topicsMap[topicName].correct++;
+                }
+            });
+
+            const total = list.length;
+            const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+            const tier = getPerformanceTier(percent);
+
+            const topics = Object.values(topicsMap).map(t => {
+                const topicPct = t.total > 0 ? Math.round((t.correct / t.total) * 100) : 0;
+                return {
+                    name: t.name,
+                    correct: t.correct,
+                    total: t.total,
+                    percent: topicPct,
+                    tier: getPerformanceTier(topicPct)
+                };
+            });
+
+            return {
+                correct,
+                total,
+                percent,
+                tier,
+                pillText: `${percent}% — ${tier.label} ${tier.emoji}`,
+                topics
+            };
+        }
+        window.computeReport = computeReport;
+
+        // FIX 4: Dev Guard assertion
+        function assertResultsMatchDOM(report) {
+            const scoreNumEl = document.getElementById('score-num');
+            const scoreTotalEl = document.getElementById('score-total');
+            const resPercentEl = document.getElementById('res-percent');
+            const resMessageEl = document.getElementById('res-message');
+
+            const displayedCorrect = parseInt(scoreNumEl ? scoreNumEl.innerText : '0', 10);
+            const displayedTotal = parseInt(scoreTotalEl ? scoreTotalEl.innerText : '0', 10);
+            const displayedPct = parseInt((resPercentEl ? resPercentEl.innerText : '0').replace('%', ''), 10);
+            const displayedPill = resMessageEl ? resMessageEl.innerText.trim() : '';
+
+            const mismatch = (
+                displayedCorrect !== report.correct ||
+                displayedTotal !== report.total ||
+                displayedPct !== report.percent ||
+                displayedPill !== report.pillText
+            );
+
+            if (mismatch) {
+                console.error("[DEV GUARD MISMATCH DETECTED]", {
+                    expected: { correct: report.correct, total: report.total, percent: report.percent, pillText: report.pillText },
+                    actual: { correct: displayedCorrect, total: displayedTotal, percent: displayedPct, pillText: displayedPill }
+                });
+                if (scoreNumEl) scoreNumEl.innerText = report.correct;
+                if (scoreTotalEl) scoreTotalEl.innerText = report.total;
+                if (resPercentEl) resPercentEl.innerText = `${report.percent}%`;
+                if (resMessageEl) resMessageEl.innerText = report.pillText;
+            } else {
+                console.log("[DEV GUARD CHECK PASSED]", {
+                    correct: displayedCorrect,
+                    total: displayedTotal,
+                    percent: displayedPct,
+                    pillText: displayedPill
+                });
+            }
         }
 
         function showResults() {
+            // FIX 2 Step 5: Kill previous tweens, safety timeouts, and destroy old Chart instance
+            if (window.resultsAnimProxy) {
+                gsap.killTweensOf(window.resultsAnimProxy);
+                window.resultsAnimProxy = null;
+            }
+            if (window.resultsSafetyTimer) {
+                clearTimeout(window.resultsSafetyTimer);
+                window.resultsSafetyTimer = null;
+            }
+            gsap.killTweensOf('#score-num');
+            gsap.killTweensOf('#res-percent');
+            gsap.killTweensOf('.topic-bar-fill');
+            if (window.scoreChartInstance) {
+                window.scoreChartInstance.destroy();
+                window.scoreChartInstance = null;
+            }
+
+            // Step 0 & FIX 1: Compute report as the single source of truth
+            console.log("[showResults] Evaluating state.results (count: " + state.results.length + "):", state.results);
+            const report = computeReport(state.results);
+            console.log("[showResults] computeReport result:", report);
+            window.lastComputedReport = report;
+            state.totalCorrect = report.correct;
+            state.totalPossible = report.total;
+
             // Update Subtitle dynamically
-            // For Urdu worksheet: show RTL subtitle header
             if (state.currentWorksheetId === 'urduDost') {
                 document.getElementById('res-subtitle').innerHTML =
                     `<span class="font-nastaliq" dir="rtl" lang="ur" style="font-size:1rem; line-height:2;">اردو دوست</span> — Results Summary`;
             } else {
-                document.getElementById('res-subtitle').innerText = `${worksheetsConfig[state.currentWorksheetId].title} — Results Summary`;
+                const wsCfg = worksheetsConfig[state.currentWorksheetId] || {};
+                document.getElementById('res-subtitle').innerText = `${wsCfg.title || 'Worksheet'} — Results Summary`;
             }
             
             // Populate Student Data
-            document.getElementById('res-name').innerText = state.student.name;
-            document.getElementById('res-id').innerText = state.student.id;
-            
-            const d = new Date(state.student.date);
+            document.getElementById('res-name').innerText = state.student.name || 'Student';
+            document.getElementById('res-id').innerText = state.student.id || '';
+            const d = state.student.date ? new Date(state.student.date) : new Date();
             document.getElementById('res-date').innerText = d.toLocaleDateString();
             
-            const overallPct = Math.round((state.totalCorrect / state.totalPossible) * 100);
-            const overallTier = getPerformanceTier(overallPct);
+            // FIX 2 Step 2: Write FINAL numbers into DOM immediately
+            const scoreNumEl = document.getElementById('score-num');
+            const scoreTotalEl = document.getElementById('score-total');
+            const resPercentEl = document.getElementById('res-percent');
+            const resMessageEl = document.getElementById('res-message');
 
-            document.getElementById('res-message').innerText = `${overallPct}% — ${overallTier.label}! ${overallTier.tagText.split(' ')[1]}`;
-            document.getElementById('res-message').style.backgroundColor = overallTier.colorHex;
+            scoreNumEl.innerText = report.correct;
+            scoreTotalEl.innerText = report.total;
+            resPercentEl.innerText = `${report.percent}%`;
 
-            // Group results by topic
-            const topics = {};
-            state.results.forEach(r => {
-                const topic = r.topic || "General";
-                if (!topics[topic]) topics[topic] = { correct: 0, total: 0 };
-                topics[topic].total++;
-                if (r.isCorrect) topics[topic].correct++;
-            });
+            // FIX 3: Tier Pill format and styling
+            resMessageEl.innerText = report.pillText;
+            resMessageEl.className = 'inline-flex max-w-full px-4 py-2 rounded-full text-center whitespace-normal leading-snug font-bold text-lg items-center justify-center';
+            resMessageEl.style.backgroundColor = report.tier.bgRgba;
+            resMessageEl.style.border = `2px solid ${report.tier.colorHex}`;
+            resMessageEl.style.color = '#1e3a5f';
 
-            // Populate Topic Breakdown
+            // Populate Topic Breakdown with FINAL state immediately
             const reviewList = document.getElementById('topic-breakdown-list');
             reviewList.innerHTML = '';
-
             const weakTopics = [];
-            let index = 0;
 
-            for (const [topicName, data] of Object.entries(topics)) {
-                const topicPct = Math.round((data.correct / data.total) * 100);
-                const tier = getPerformanceTier(topicPct);
-                if (topicPct < 70) weakTopics.push(topicName);
-
+            report.topics.forEach(t => {
+                if (t.percent < 70) weakTopics.push(t.name);
                 const row = document.createElement('div');
                 row.className = 'topic-row flex flex-col gap-2 p-3 bg-white rounded-lg border border-gray-100 shadow-sm';
                 
-                // For Urdu worksheet topics: apply Nastaliq font + RTL direction on the label span
                 const isUrduTopic = state.currentWorksheetId === 'urduDost';
                 const topicLabelHtml = isUrduTopic
-                    ? `<span class="font-nastaliq" dir="rtl" lang="ur" style="font-size:1.1rem; line-height:2;">${topicName}</span>`
-                    : `<span>${topicName}</span>`;
+                    ? `<span class="font-nastaliq" dir="rtl" lang="ur" style="font-size:1.1rem; line-height:2;">${t.name}</span>`
+                    : `<span>${t.name}</span>`;
+                
+                const tagHtml = `<span class="inline-flex max-w-full px-3 py-1 rounded-full text-center whitespace-normal leading-snug text-sm font-bold items-center justify-center" style="background-color: ${t.tier.bgRgba}; border: 2px solid ${t.tier.colorHex}; color: #1e3a5f;">${t.percent}% — ${t.tier.label} ${t.tier.emoji}</span>`;
+
                 row.innerHTML = `
-                    <div class="flex justify-between items-center text-navy font-bold text-lg font-baloo">
+                    <div class="flex flex-wrap justify-between items-center text-navy font-bold text-lg font-baloo gap-2">
                         ${topicLabelHtml}
-                        <span>${topicPct}% — ${tier.tagText}</span>
+                        ${tagHtml}
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div class="topic-bar-fill h-3 rounded-full" style="width: 0%; background-color: ${tier.colorHex};" data-target-width="${topicPct}%"></div>
+                        <div class="topic-bar-fill h-3 rounded-full" style="width: ${t.percent}%; background-color: ${t.tier.colorHex};" data-target-width="${t.percent}%"></div>
                     </div>
                 `;
                 reviewList.appendChild(row);
-                index++;
-            }
+            });
 
             // Summary Line
             const summaryEl = document.getElementById('res-summary-line');
@@ -4098,90 +5506,163 @@ function gradeWorksheetSmartStarters() {
             } else {
                 summaryEl.innerText = `Great work across every topic!`;
             }
-            
+
+            // Build Chart.js ring with FINAL data (animation: false)
+            const chartCanvas = document.getElementById('score-chart');
+            if (chartCanvas) {
+                const ctx = chartCanvas.getContext('2d');
+                window.scoreChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Score', 'Remaining'],
+                        datasets: [{
+                            data: [report.percent, Math.max(0, 100 - report.percent)],
+                            backgroundColor: [report.tier.colorHex, '#e5e7eb'],
+                            borderWidth: 0,
+                            cutout: '75%',
+                            borderRadius: (report.percent > 0 && report.percent < 100) ? 5 : 0
+                        }]
+                    },
+                    options: {
+                        animation: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Disable Export buttons initially
+            const btnPdf = document.getElementById('btn-pdf');
+            const btnImg = document.getElementById('btn-img');
+            if (btnPdf) {
+                btnPdf.disabled = true;
+                btnPdf.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (btnImg) {
+                btnImg.disabled = true;
+                btnImg.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            let finalized = false;
+            const finalizeDisplay = () => {
+                if (finalized) return;
+                finalized = true;
+                if (window.resultsSafetyTimer) {
+                    clearTimeout(window.resultsSafetyTimer);
+                    window.resultsSafetyTimer = null;
+                }
+                scoreNumEl.innerText = report.correct;
+                scoreTotalEl.innerText = report.total;
+                resPercentEl.innerText = `${report.percent}%`;
+                resMessageEl.innerText = report.pillText;
+
+                if (window.scoreChartInstance) {
+                    window.scoreChartInstance.data.datasets[0].data = [report.percent, Math.max(0, 100 - report.percent)];
+                    window.scoreChartInstance.update('none');
+                }
+
+                document.querySelectorAll('.topic-bar-fill').forEach(bar => {
+                    bar.style.width = bar.dataset.targetWidth;
+                });
+
+                if (btnPdf) {
+                    btnPdf.disabled = false;
+                    btnPdf.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (btnImg) {
+                    btnImg.disabled = false;
+                    btnImg.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
+                isSubmittingWorksheet = false;
+                assertResultsMatchDOM(report);
+            };
+
             // Transition Active Worksheet -> Results
             const targetScreen = `#screen-worksheet-${state.currentWorksheetId}`;
-            
-            // Disable Export buttons initially
-            document.getElementById('btn-pdf').disabled = true;
-            document.getElementById('btn-img').disabled = true;
-            document.getElementById('btn-pdf').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('btn-img').classList.add('opacity-50', 'cursor-not-allowed');
-
             gsap.to(targetScreen, {
                 opacity: 0, y: -20, duration: 0.4, onComplete: () => {
-                    document.querySelector(targetScreen).classList.remove('active');
-                    document.getElementById('screen-results').classList.add('active');
+                    const wsEl = document.querySelector(targetScreen);
+                    if (wsEl) wsEl.classList.remove('active');
+                    const resultsEl = document.getElementById('screen-results');
+                    resultsEl.classList.add('active');
                     window.scrollTo(0, 0);
                     
                     // Reveal results card
                     gsap.to('#screen-results', { opacity: 1, duration: 0.1 });
-                    gsap.from('#results-card', { y: 50, opacity: 0, duration: 0.6, ease: "back.out(1.2)" });
+                    gsap.from('#results-card', { y: 50, opacity: 0, duration: 0.5, ease: "back.out(1.2)" });
 
-                    // Render Chart.js Doughnut
-                    const ctx = document.getElementById('score-chart').getContext('2d');
-                    if (window.scoreChartInstance) window.scoreChartInstance.destroy();
+                    // Step 6: Reduced motion check
+                    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    if (prefersReducedMotion) {
+                        finalizeDisplay();
+                        fireConfetti();
+                        return;
+                    }
 
-                    window.scoreChartInstance = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Score', 'Remaining'],
-                            datasets: [{
-                                data: [overallPct, 100 - overallPct],
-                                backgroundColor: [overallTier.colorHex, '#e5e7eb'],
-                                borderWidth: 0,
-                                cutout: '75%',
-                                borderRadius: 5
-                            }]
-                        },
-                        options: {
-                            animation: {
-                                duration: 1000,
-                                easing: 'easeOutQuart'
-                            },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { enabled: false }
-                            },
-                            responsive: true,
-                            maintainAspectRatio: false
+                    // Only after screen is visible: wait 1 requestAnimationFrame
+                    requestAnimationFrame(() => {
+                        scoreNumEl.innerText = "0";
+                        resPercentEl.innerText = "0%";
+                        if (window.scoreChartInstance) {
+                            window.scoreChartInstance.data.datasets[0].data = [0, 100];
+                            window.scoreChartInstance.update('none');
                         }
-                    });
-
-                    // Animate Topic Bars
-                    document.querySelectorAll('.topic-bar-fill').forEach((bar, i) => {
-                        gsap.to(bar, {
-                            width: bar.dataset.targetWidth,
-                            duration: 1,
-                            ease: "power2.out",
-                            delay: 0.2 + (i * 0.1)
+                        document.querySelectorAll('.topic-bar-fill').forEach(bar => {
+                            bar.style.width = '0%';
                         });
-                    });
 
-                    // Animate Score Number
-                    const scoreObj = { val: 0 };
-                    gsap.to(scoreObj, {
-                        val: overallPct,
-                        duration: 1,
-                        ease: "power2.out",
-                        onUpdate: () => {
-                            document.getElementById('score-num').innerText = Math.round(scoreObj.val);
-                        },
-                        onComplete: () => {
-                            fireConfetti();
-                            
-                            // Re-enable export buttons after ALL animations finish
-                            setTimeout(() => {
-                                document.getElementById('btn-pdf').disabled = false;
-                                document.getElementById('btn-img').disabled = false;
-                                document.getElementById('btn-pdf').classList.remove('opacity-50', 'cursor-not-allowed');
-                                document.getElementById('btn-img').classList.remove('opacity-50', 'cursor-not-allowed');
-                            }, 500); // give it a little extra buffer
-                        }
+                        // Animate Topic Bars
+                        document.querySelectorAll('.topic-bar-fill').forEach((bar, i) => {
+                            gsap.to(bar, {
+                                width: bar.dataset.targetWidth,
+                                duration: 1.0,
+                                ease: "power2.out",
+                                delay: 0.1 + (i * 0.05)
+                            });
+                        });
+
+                        const animDuration = 1.0;
+                        const animProxy = { val: 0 };
+                        window.resultsAnimProxy = animProxy;
+
+                        // Step 4: Safety timeout (duration + 500ms)
+                        window.resultsSafetyTimer = setTimeout(() => {
+                            finalizeDisplay();
+                        }, (animDuration * 1000) + 500);
+
+                        // Cosmetic count-up from 0 to 1
+                        gsap.fromTo(animProxy,
+                            { val: 0 },
+                            {
+                                val: 1,
+                                duration: animDuration,
+                                ease: "power2.out",
+                                onUpdate: () => {
+                                    const curScore = Math.round(animProxy.val * report.correct);
+                                    const curPct = Math.round(animProxy.val * report.percent);
+                                    scoreNumEl.innerText = curScore;
+                                    resPercentEl.innerText = `${curPct}%`;
+                                    if (window.scoreChartInstance) {
+                                        window.scoreChartInstance.data.datasets[0].data = [curPct, Math.max(0, 100 - curPct)];
+                                        window.scoreChartInstance.update('none');
+                                    }
+                                },
+                                onComplete: () => {
+                                    finalizeDisplay();
+                                    fireConfetti();
+                                }
+                            }
+                        );
                     });
                 }
             });
         }
+        window.showResults = showResults;
         // ----------------------------------------------------
         // CONFETTI ANIMATION
         // ----------------------------------------------------
@@ -4233,6 +5714,21 @@ function gradeWorksheetSmartStarters() {
         // TRY AGAIN & CHOOSE ANOTHER
         // ----------------------------------------------------
         document.getElementById('btn-retry').addEventListener('click', () => {
+            // Kill any active results animations
+            if (window.resultsAnimProxy) {
+                gsap.killTweensOf(window.resultsAnimProxy);
+                window.resultsAnimProxy = null;
+            }
+            if (window.resultsSafetyTimer) {
+                clearTimeout(window.resultsSafetyTimer);
+                window.resultsSafetyTimer = null;
+            }
+            if (window.scoreChartInstance) {
+                window.scoreChartInstance.destroy();
+                window.scoreChartInstance = null;
+            }
+            isSubmittingWorksheet = false;
+
             gsap.to('#screen-results', {
                 opacity: 0, duration: 0.3, onComplete: () => {
                     document.getElementById('screen-results').classList.remove('active');
@@ -4271,6 +5767,22 @@ function gradeWorksheetSmartStarters() {
                             initIslamiatDragDrop();
                         }
                     }
+
+                    // Green Thumbs-specific reset
+                    if (state.currentWorksheetId === 'greenThumbs') {
+                        document.querySelectorAll('#screen-worksheet-greenThumbs .gt-chip').forEach(chip => {
+                            gsap.set(chip, { x: 0, y: 0 });
+                            chip.classList.remove('ring-4', 'ring-yellow-400');
+                        });
+                        document.querySelectorAll('#screen-worksheet-greenThumbs .gt-slot').forEach(slot => {
+                            slot.classList.remove('slot-occupied', 'slot-error', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                            const label = slot.dataset.label || 'Drop Here';
+                            slot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${label}</span>`;
+                        });
+                        window.greenThumbsPlacements = { 'slot-flower': null, 'slot-leaf': null, 'slot-stem': null, 'slot-root': null };
+                        window.greenThumbsSelectedChip = null;
+                        if (window.setExplainerStep) window.setExplainerStep(1);
+                    }
                     
                     // Go back to the same worksheet
                     document.querySelector(targetScreen).classList.add('active');
@@ -4278,17 +5790,46 @@ function gradeWorksheetSmartStarters() {
                     window.scrollTo(0, 0);
                     
                     // Reset visuals
-                    document.getElementById('score-ring').style.strokeDasharray = "0, 100";
+                    const ringEl = document.getElementById('score-ring');
+                    if (ringEl) ringEl.style.strokeDasharray = "0, 100";
                     document.getElementById('score-num').innerText = "0";
+                    document.getElementById('score-total').innerText = "0";
                     document.getElementById('res-percent').innerText = "0%";
                     document.getElementById('res-message').innerText = "";
                     document.getElementById('topic-breakdown-list').innerHTML = "";
                     document.getElementById('res-summary-line').innerText = "";
+
+                    // Reset export buttons
+                    const btnPdf = document.getElementById('btn-pdf');
+                    const btnImg = document.getElementById('btn-img');
+                    if (btnPdf) {
+                        btnPdf.disabled = true;
+                        btnPdf.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    if (btnImg) {
+                        btnImg.disabled = true;
+                        btnImg.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
                 }
             });
         });
 
         document.getElementById('btn-choose-another').addEventListener('click', () => {
+            // Kill any active results animations
+            if (window.resultsAnimProxy) {
+                gsap.killTweensOf(window.resultsAnimProxy);
+                window.resultsAnimProxy = null;
+            }
+            if (window.resultsSafetyTimer) {
+                clearTimeout(window.resultsSafetyTimer);
+                window.resultsSafetyTimer = null;
+            }
+            if (window.scoreChartInstance) {
+                window.scoreChartInstance.destroy();
+                window.scoreChartInstance = null;
+            }
+            isSubmittingWorksheet = false;
+
             gsap.to('#screen-results', {
                 opacity: 0, duration: 0.3, onComplete: () => {
                     document.getElementById('screen-results').classList.remove('active');
@@ -4322,6 +5863,22 @@ function gradeWorksheetSmartStarters() {
                             initIslamiatDragDrop();
                         }
                     }
+
+                    // Green Thumbs-specific reset
+                    if (state.currentWorksheetId === 'greenThumbs') {
+                        document.querySelectorAll('#screen-worksheet-greenThumbs .gt-chip').forEach(chip => {
+                            gsap.set(chip, { x: 0, y: 0 });
+                            chip.classList.remove('ring-4', 'ring-yellow-400');
+                        });
+                        document.querySelectorAll('#screen-worksheet-greenThumbs .gt-slot').forEach(slot => {
+                            slot.classList.remove('slot-occupied', 'slot-error', 'border-blue-500', 'bg-blue-50/90', 'shadow-md');
+                            const label = slot.dataset.label || 'Drop Here';
+                            slot.innerHTML = `<span class="slot-placeholder text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider">${label}</span>`;
+                        });
+                        window.greenThumbsPlacements = { 'slot-flower': null, 'slot-leaf': null, 'slot-stem': null, 'slot-root': null };
+                        window.greenThumbsSelectedChip = null;
+                        if (window.setExplainerStep) window.setExplainerStep(1);
+                    }
                     
                     // Go to Selection Screen
                     document.getElementById('screen-selection').classList.add('active');
@@ -4341,12 +5898,26 @@ function gradeWorksheetSmartStarters() {
                     }
                     
                     // Reset visuals
-                    document.getElementById('score-ring').style.strokeDasharray = "0, 100";
+                    const ringEl = document.getElementById('score-ring');
+                    if (ringEl) ringEl.style.strokeDasharray = "0, 100";
                     document.getElementById('score-num').innerText = "0";
+                    document.getElementById('score-total').innerText = "0";
                     document.getElementById('res-percent').innerText = "0%";
                     document.getElementById('res-message').innerText = "";
                     document.getElementById('topic-breakdown-list').innerHTML = "";
                     document.getElementById('res-summary-line').innerText = "";
+
+                    // Reset export buttons
+                    const btnPdf = document.getElementById('btn-pdf');
+                    const btnImg = document.getElementById('btn-img');
+                    if (btnPdf) {
+                        btnPdf.disabled = true;
+                        btnPdf.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    if (btnImg) {
+                        btnImg.disabled = true;
+                        btnImg.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
                 }
             });
         });
