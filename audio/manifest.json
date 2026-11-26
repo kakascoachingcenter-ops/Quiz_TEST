@@ -1,0 +1,618 @@
+{
+  "letter-a": {
+    "text": "A, for apple",
+    "file": "audio/en/letter-a.mp3"
+  },
+  "letter-b": {
+    "text": "B, for banana",
+    "file": "audio/en/letter-b.mp3"
+  },
+  "letter-c": {
+    "text": "C, for cake",
+    "file": "audio/en/letter-c.mp3"
+  },
+  "letter-d": {
+    "text": "D, for dog",
+    "file": "audio/en/letter-d.mp3"
+  },
+  "letter-e": {
+    "text": "E, for elephant",
+    "file": "audio/en/letter-e.mp3"
+  },
+  "letter-f": {
+    "text": "F, for fish",
+    "file": "audio/en/letter-f.mp3"
+  },
+  "letter-g": {
+    "text": "G, for grapes",
+    "file": "audio/en/letter-g.mp3"
+  },
+  "letter-h": {
+    "text": "H, for heart",
+    "file": "audio/en/letter-h.mp3"
+  },
+  "letter-i": {
+    "text": "I, for igloo",
+    "file": "audio/en/letter-i.mp3"
+  },
+  "letter-j": {
+    "text": "J, for jump",
+    "file": "audio/en/letter-j.mp3"
+  },
+  "letter-k": {
+    "text": "K, for kite",
+    "file": "audio/en/letter-k.mp3"
+  },
+  "letter-l": {
+    "text": "L, for lion",
+    "file": "audio/en/letter-l.mp3"
+  },
+  "letter-m": {
+    "text": "M, for moon",
+    "file": "audio/en/letter-m.mp3"
+  },
+  "letter-n": {
+    "text": "N, for nest",
+    "file": "audio/en/letter-n.mp3"
+  },
+  "letter-o": {
+    "text": "O, for orange",
+    "file": "audio/en/letter-o.mp3"
+  },
+  "letter-p": {
+    "text": "P, for pen",
+    "file": "audio/en/letter-p.mp3"
+  },
+  "letter-q": {
+    "text": "Q, for queen",
+    "file": "audio/en/letter-q.mp3"
+  },
+  "letter-r": {
+    "text": "R, for rat",
+    "file": "audio/en/letter-r.mp3"
+  },
+  "letter-s": {
+    "text": "S, for sun",
+    "file": "audio/en/letter-s.mp3"
+  },
+  "letter-t": {
+    "text": "T, for tree",
+    "file": "audio/en/letter-t.mp3"
+  },
+  "letter-u": {
+    "text": "U, for umbrella",
+    "file": "audio/en/letter-u.mp3"
+  },
+  "letter-v": {
+    "text": "V, for van",
+    "file": "audio/en/letter-v.mp3"
+  },
+  "letter-w": {
+    "text": "W, for water",
+    "file": "audio/en/letter-w.mp3"
+  },
+  "letter-x": {
+    "text": "X, for box",
+    "file": "audio/en/letter-x.mp3"
+  },
+  "letter-y": {
+    "text": "Y, for yellow",
+    "file": "audio/en/letter-y.mp3"
+  },
+  "letter-z": {
+    "text": "Z, for zebra",
+    "file": "audio/en/letter-z.mp3"
+  },
+  "name-a": {
+    "text": "Ay",
+    "file": "audio/en/name-a.mp3"
+  },
+  "name-b": {
+    "text": "Bee",
+    "file": "audio/en/name-b.mp3"
+  },
+  "name-c": {
+    "text": "Cee",
+    "file": "audio/en/name-c.mp3"
+  },
+  "name-d": {
+    "text": "Dee",
+    "file": "audio/en/name-d.mp3"
+  },
+  "name-e": {
+    "text": "Ee",
+    "file": "audio/en/name-e.mp3"
+  },
+  "name-f": {
+    "text": "Eff",
+    "file": "audio/en/name-f.mp3"
+  },
+  "name-g": {
+    "text": "Gee",
+    "file": "audio/en/name-g.mp3"
+  },
+  "name-h": {
+    "text": "Aitch",
+    "file": "audio/en/name-h.mp3"
+  },
+  "name-i": {
+    "text": "Eye",
+    "file": "audio/en/name-i.mp3"
+  },
+  "name-j": {
+    "text": "Jay",
+    "file": "audio/en/name-j.mp3"
+  },
+  "name-k": {
+    "text": "Kay",
+    "file": "audio/en/name-k.mp3"
+  },
+  "name-l": {
+    "text": "El",
+    "file": "audio/en/name-l.mp3"
+  },
+  "name-m": {
+    "text": "Em",
+    "file": "audio/en/name-m.mp3"
+  },
+  "name-n": {
+    "text": "En",
+    "file": "audio/en/name-n.mp3"
+  },
+  "name-o": {
+    "text": "Oh",
+    "file": "audio/en/name-o.mp3"
+  },
+  "name-p": {
+    "text": "Pee",
+    "file": "audio/en/name-p.mp3"
+  },
+  "name-q": {
+    "text": "Cue",
+    "file": "audio/en/name-q.mp3"
+  },
+  "name-r": {
+    "text": "Ar",
+    "file": "audio/en/name-r.mp3"
+  },
+  "name-s": {
+    "text": "Ess",
+    "file": "audio/en/name-s.mp3"
+  },
+  "name-t": {
+    "text": "Tee",
+    "file": "audio/en/name-t.mp3"
+  },
+  "name-u": {
+    "text": "You",
+    "file": "audio/en/name-u.mp3"
+  },
+  "name-v": {
+    "text": "Vee",
+    "file": "audio/en/name-v.mp3"
+  },
+  "name-w": {
+    "text": "Double you",
+    "file": "audio/en/name-w.mp3"
+  },
+  "name-x": {
+    "text": "Ex",
+    "file": "audio/en/name-x.mp3"
+  },
+  "name-y": {
+    "text": "Why",
+    "file": "audio/en/name-y.mp3"
+  },
+  "name-z": {
+    "text": "Zed",
+    "file": "audio/en/name-z.mp3"
+  },
+  "num-1": {
+    "text": "One",
+    "file": "audio/en/num-1.mp3"
+  },
+  "num-2": {
+    "text": "Two",
+    "file": "audio/en/num-2.mp3"
+  },
+  "num-3": {
+    "text": "Three",
+    "file": "audio/en/num-3.mp3"
+  },
+  "num-4": {
+    "text": "Four",
+    "file": "audio/en/num-4.mp3"
+  },
+  "num-5": {
+    "text": "Five",
+    "file": "audio/en/num-5.mp3"
+  },
+  "num-6": {
+    "text": "Six",
+    "file": "audio/en/num-6.mp3"
+  },
+  "num-7": {
+    "text": "Seven",
+    "file": "audio/en/num-7.mp3"
+  },
+  "num-8": {
+    "text": "Eight",
+    "file": "audio/en/num-8.mp3"
+  },
+  "num-9": {
+    "text": "Nine",
+    "file": "audio/en/num-9.mp3"
+  },
+  "num-10": {
+    "text": "Ten",
+    "file": "audio/en/num-10.mp3"
+  },
+  "num-11": {
+    "text": "Eleven",
+    "file": "audio/en/num-11.mp3"
+  },
+  "num-12": {
+    "text": "Twelve",
+    "file": "audio/en/num-12.mp3"
+  },
+  "num-13": {
+    "text": "Thirteen",
+    "file": "audio/en/num-13.mp3"
+  },
+  "num-14": {
+    "text": "Fourteen",
+    "file": "audio/en/num-14.mp3"
+  },
+  "num-15": {
+    "text": "Fifteen",
+    "file": "audio/en/num-15.mp3"
+  },
+  "num-16": {
+    "text": "Sixteen",
+    "file": "audio/en/num-16.mp3"
+  },
+  "num-17": {
+    "text": "Seventeen",
+    "file": "audio/en/num-17.mp3"
+  },
+  "num-18": {
+    "text": "Eighteen",
+    "file": "audio/en/num-18.mp3"
+  },
+  "num-19": {
+    "text": "Nineteen",
+    "file": "audio/en/num-19.mp3"
+  },
+  "num-20": {
+    "text": "Twenty",
+    "file": "audio/en/num-20.mp3"
+  },
+  "num-21": {
+    "text": "Twenty-one",
+    "file": "audio/en/num-21.mp3"
+  },
+  "num-22": {
+    "text": "Twenty-two",
+    "file": "audio/en/num-22.mp3"
+  },
+  "num-23": {
+    "text": "Twenty-three",
+    "file": "audio/en/num-23.mp3"
+  },
+  "num-24": {
+    "text": "Twenty-four",
+    "file": "audio/en/num-24.mp3"
+  },
+  "num-25": {
+    "text": "Twenty-five",
+    "file": "audio/en/num-25.mp3"
+  },
+  "num-26": {
+    "text": "Twenty-six",
+    "file": "audio/en/num-26.mp3"
+  },
+  "num-27": {
+    "text": "Twenty-seven",
+    "file": "audio/en/num-27.mp3"
+  },
+  "num-28": {
+    "text": "Twenty-eight",
+    "file": "audio/en/num-28.mp3"
+  },
+  "num-29": {
+    "text": "Twenty-nine",
+    "file": "audio/en/num-29.mp3"
+  },
+  "num-30": {
+    "text": "Thirty",
+    "file": "audio/en/num-30.mp3"
+  },
+  "num-31": {
+    "text": "Thirty-one",
+    "file": "audio/en/num-31.mp3"
+  },
+  "num-32": {
+    "text": "Thirty-two",
+    "file": "audio/en/num-32.mp3"
+  },
+  "num-33": {
+    "text": "Thirty-three",
+    "file": "audio/en/num-33.mp3"
+  },
+  "num-34": {
+    "text": "Thirty-four",
+    "file": "audio/en/num-34.mp3"
+  },
+  "num-35": {
+    "text": "Thirty-five",
+    "file": "audio/en/num-35.mp3"
+  },
+  "num-36": {
+    "text": "Thirty-six",
+    "file": "audio/en/num-36.mp3"
+  },
+  "num-37": {
+    "text": "Thirty-seven",
+    "file": "audio/en/num-37.mp3"
+  },
+  "num-38": {
+    "text": "Thirty-eight",
+    "file": "audio/en/num-38.mp3"
+  },
+  "num-39": {
+    "text": "Thirty-nine",
+    "file": "audio/en/num-39.mp3"
+  },
+  "num-40": {
+    "text": "Forty",
+    "file": "audio/en/num-40.mp3"
+  },
+  "num-41": {
+    "text": "Forty-one",
+    "file": "audio/en/num-41.mp3"
+  },
+  "num-42": {
+    "text": "Forty-two",
+    "file": "audio/en/num-42.mp3"
+  },
+  "num-43": {
+    "text": "Forty-three",
+    "file": "audio/en/num-43.mp3"
+  },
+  "num-44": {
+    "text": "Forty-four",
+    "file": "audio/en/num-44.mp3"
+  },
+  "num-45": {
+    "text": "Forty-five",
+    "file": "audio/en/num-45.mp3"
+  },
+  "num-46": {
+    "text": "Forty-six",
+    "file": "audio/en/num-46.mp3"
+  },
+  "num-47": {
+    "text": "Forty-seven",
+    "file": "audio/en/num-47.mp3"
+  },
+  "num-48": {
+    "text": "Forty-eight",
+    "file": "audio/en/num-48.mp3"
+  },
+  "num-49": {
+    "text": "Forty-nine",
+    "file": "audio/en/num-49.mp3"
+  },
+  "num-50": {
+    "text": "Fifty",
+    "file": "audio/en/num-50.mp3"
+  },
+  "cat": {
+    "text": "cat",
+    "file": "audio/en/cat.mp3"
+  },
+  "rat": {
+    "text": "rat",
+    "file": "audio/en/rat.mp3"
+  },
+  "man": {
+    "text": "man",
+    "file": "audio/en/man.mp3"
+  },
+  "cap": {
+    "text": "cap",
+    "file": "audio/en/cap.mp3"
+  },
+  "sat": {
+    "text": "sat",
+    "file": "audio/en/sat.mp3"
+  },
+  "ran": {
+    "text": "ran",
+    "file": "audio/en/ran.mp3"
+  },
+  "has": {
+    "text": "has",
+    "file": "audio/en/has.mp3"
+  },
+  "fat": {
+    "text": "fat",
+    "file": "audio/en/fat.mp3"
+  },
+  "am": {
+    "text": "am",
+    "file": "audio/en/am.mp3"
+  },
+  "the": {
+    "text": "the",
+    "file": "audio/en/the.mp3"
+  },
+  "a": {
+    "text": "a",
+    "file": "audio/en/a.mp3"
+  },
+  "I": {
+    "text": "I",
+    "file": "audio/en/I.mp3"
+  },
+  "apple": {
+    "text": "apple",
+    "file": "audio/en/apple.mp3"
+  },
+  "banana": {
+    "text": "banana",
+    "file": "audio/en/banana.mp3"
+  },
+  "cake": {
+    "text": "cake",
+    "file": "audio/en/cake.mp3"
+  },
+  "grapes": {
+    "text": "grapes",
+    "file": "audio/en/grapes.mp3"
+  },
+  "heart": {
+    "text": "heart",
+    "file": "audio/en/heart.mp3"
+  },
+  "book": {
+    "text": "book",
+    "file": "audio/en/book.mp3"
+  },
+  "pen": {
+    "text": "pen",
+    "file": "audio/en/pen.mp3"
+  },
+  "moon": {
+    "text": "moon",
+    "file": "audio/en/moon.mp3"
+  },
+  "triangle": {
+    "text": "triangle",
+    "file": "audio/en/triangle.mp3"
+  },
+  "square": {
+    "text": "square",
+    "file": "audio/en/square.mp3"
+  },
+  "circle": {
+    "text": "circle",
+    "file": "audio/en/circle.mp3"
+  },
+  "happy": {
+    "text": "happy",
+    "file": "audio/en/happy.mp3"
+  },
+  "sad": {
+    "text": "sad",
+    "file": "audio/en/sad.mp3"
+  },
+  "tired": {
+    "text": "tired",
+    "file": "audio/en/tired.mp3"
+  },
+  "angry": {
+    "text": "angry",
+    "file": "audio/en/angry.mp3"
+  },
+  "en-intro": {
+    "text": "Welcome Little Readers! Let us learn and play!",
+    "file": "audio/en/en-intro.mp3"
+  },
+  "en-alphabet": {
+    "text": "Listen to the alphabet sounds and names.",
+    "file": "audio/en/en-alphabet.mp3"
+  },
+  "en-s1": {
+    "text": "Tap the small partner for each letter.",
+    "file": "audio/en/en-s1.mp3"
+  },
+  "en-s2": {
+    "text": "Some letters live in grass. Tap them.",
+    "file": "audio/en/en-s2.mp3"
+  },
+  "en-s3": {
+    "text": "Tap the first letter of each picture.",
+    "file": "audio/en/en-s3.mp3"
+  },
+  "en-s4": {
+    "text": "Draw a line from picture to word.",
+    "file": "audio/en/en-s4.mp3"
+  },
+  "en-s5": {
+    "text": "Tap words in order to make sentences.",
+    "file": "audio/en/en-s5.mp3"
+  },
+  "en-s6": {
+    "text": "How do they feel? Tap the word.",
+    "file": "audio/en/en-s6.mp3"
+  },
+  "en-draw": {
+    "text": "Draw your favourite animal on the canvas.",
+    "file": "audio/en/en-draw.mp3"
+  },
+  "q-start": {
+    "text": "Let us begin our fun worksheet now!",
+    "file": "audio/en/q-start.mp3"
+  },
+  "ma-intro": {
+    "text": "Welcome Number Buddies! Let us count together!",
+    "file": "audio/en/ma-intro.mp3"
+  },
+  "ma-s1": {
+    "text": "Count the objects and choose the number.",
+    "file": "audio/en/ma-s1.mp3"
+  },
+  "ma-s2": {
+    "text": "What comes next? Tap the missing number.",
+    "file": "audio/en/ma-s2.mp3"
+  },
+  "ma-s3": {
+    "text": "Match each number word to its digit.",
+    "file": "audio/en/ma-s3.mp3"
+  },
+  "ma-s4": {
+    "text": "Fill the blank numbers in the grid.",
+    "file": "audio/en/ma-s4.mp3"
+  },
+  "ma-s5-shape": {
+    "text": "Look at the shape. Tap its name.",
+    "file": "audio/en/ma-s5-shape.mp3"
+  },
+  "ma-s5-small": {
+    "text": "Colour the small flower with any colour.",
+    "file": "audio/en/ma-s5-small.mp3"
+  },
+  "ma-s5-big": {
+    "text": "Colour the big house with any colour.",
+    "file": "audio/en/ma-s5-big.mp3"
+  },
+  "ma-draw": {
+    "text": "Draw anything with a shape in it.",
+    "file": "audio/en/ma-draw.mp3"
+  },
+  "ui-verify": {
+    "text": "Check my answers and show results.",
+    "file": "audio/en/ui-verify.mp3"
+  },
+  "ui-well-done": {
+    "text": "Well done! You finished the worksheet!",
+    "file": "audio/en/ui-well-done.mp3"
+  },
+  "tier-perfect": {
+    "text": "Awesome job! You got every answer right!",
+    "file": "audio/en/tier-perfect.mp3"
+  },
+  "tier-good": {
+    "text": "Good job! You did really great work!",
+    "file": "audio/en/tier-good.mp3"
+  },
+  "tier-average": {
+    "text": "Nice effort! Keep practicing every day!",
+    "file": "audio/en/tier-average.mp3"
+  },
+  "tier-needs": {
+    "text": "Keep trying! You will do even better!",
+    "file": "audio/en/tier-needs.mp3"
+  }
+}

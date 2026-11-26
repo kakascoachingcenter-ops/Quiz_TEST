@@ -1,0 +1,562 @@
+/* tokens.css - Design Tokens for Tactile Classroom Desk Style */
+:root {
+    /* COLOURS */
+    --kci-navy: #1e3a5f;       /* ink / primary */
+    --kci-gold: #f0b429;       /* accent */
+    --kci-paper: #fbf7ef;      /* page background */
+    --kci-paper-card: #ffffff; /* bright crisp paper card */
+    --kci-paper-warm: #f6efe1; /* warmer desk paper */
+    --kci-paper-edge: #efe6d3; /* paper border/edges */
+    --kci-graphite: #3a3f47;   /* body text */
+    --kci-ruled-blue: #cfe0f2; /* notebook ruled lines */
+    --kci-success: #3f9b6a;    /* success green */
+    --kci-coral: #e8765f;      /* needs-work coral (never harsh red) */
+    --kci-coral-light: #fdf2ef;
+    --kci-info: #3f8fd1;       /* info blue */
+    --kci-info-light: #f0f7fd;
+    --kci-gold-light: #fef8eb;
+    --kci-success-light: #f2f9f5;
+    
+    /* SHADOWS (Optimized for 60fps GPU rendering) */
+    --kci-shadow-paper: 0 1px 0 rgba(0, 0, 0, 0.04), 0 6px 16px rgba(30, 58, 95, 0.08);
+    --kci-shadow-card: 0 3px 8px rgba(30, 58, 95, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --kci-shadow-hover: 0 8px 20px rgba(30, 58, 95, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
+    --kci-shadow-pressed: 0 2px 4px rgba(30, 58, 95, 0.10);
+    --kci-shadow-stamp: inset 0 0 0 1px rgba(240, 180, 41, 0.35), 0 2px 5px rgba(30, 58, 95, 0.12);
+    
+    /* RADII */
+    --kci-radius-chip: 12px;
+    --kci-radius-input: 12px;
+    --kci-radius-card: 20px;
+    --kci-radius-pill: 9999px;
+    
+    /* SPACING */
+    --kci-space-4: 4px;
+    --kci-space-8: 8px;
+    --kci-space-12: 12px;
+    --kci-space-16: 16px;
+    --kci-space-24: 24px;
+    --kci-space-32: 32px;
+    --kci-space-48: 48px;
+    
+    /* TYPOGRAPHY */
+    --kci-font-heading: 'Fredoka', cursive, sans-serif;
+    --kci-font-body: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --kci-font-urdu: 'Noto Nastaliq Urdu', serif;
+    --font-letters: "Andika", sans-serif;
+    
+    /* MOTION */
+    --kci-transition-micro: 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --kci-transition-standard: 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --kci-transition-celebrate: 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Global Paper & Typography */
+body {
+    background-color: var(--kci-paper);
+    color: var(--kci-graphite);
+    font-family: var(--kci-font-body);
+    font-size: 18px;
+    line-height: 1.5;
+    /* Ultra-lightweight CSS-only paper grain pattern — no runtime SVG filter computation */
+    background-image: radial-gradient(#e5dcce 0.75px, transparent 0.75px);
+    background-size: 16px 16px;
+}
+
+h1, h2, h3, h4, .font-heading, .font-baloo {
+    font-family: var(--kci-font-heading) !important;
+}
+
+.font-letters {
+    font-family: var(--font-letters, "Andika", sans-serif) !important;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Notebook Ruled Line Patterns */
+.ruled-lines {
+    background-color: #ffffff;
+    background-image: repeating-linear-gradient(
+        transparent,
+        transparent 31px,
+        var(--kci-ruled-blue) 31px,
+        var(--kci-ruled-blue) 32px
+    );
+    line-height: 32px;
+}
+
+/* Tactile Ruled Notebook Input */
+.kci-input-ruled {
+    background: transparent;
+    border: none;
+    border-bottom: 2.5px solid var(--kci-ruled-blue);
+    border-radius: 0;
+    padding: 8px 12px;
+    font-family: var(--kci-font-body);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--kci-navy);
+    transition: border-color var(--kci-transition-micro);
+    outline: none;
+    width: 100%;
+}
+.kci-input-ruled:focus {
+    border-bottom-color: var(--kci-gold);
+    box-shadow: 0 2px 0 var(--kci-gold);
+}
+
+/* Tactile Paper Card */
+.kci-paper-card {
+    background-color: var(--kci-paper-card);
+    border: 2px solid var(--kci-paper-edge);
+    border-radius: var(--kci-radius-card);
+    box-shadow: var(--kci-shadow-paper);
+    transition: transform var(--kci-transition-micro), box-shadow var(--kci-transition-micro);
+    position: relative;
+    will-change: transform;
+}
+.kci-paper-card:hover {
+    box-shadow: var(--kci-shadow-hover);
+}
+
+/* Tactile Button Hierarchy */
+.kci-btn-primary {
+    background-color: var(--kci-gold);
+    color: var(--kci-navy);
+    font-family: var(--kci-font-heading);
+    font-weight: 700;
+    font-size: 1.15rem;
+    min-height: 48px;
+    padding: 0.65rem 1.75rem;
+    border-radius: var(--kci-radius-chip);
+    border: 2px solid #e09a10;
+    box-shadow: 0 3px 0 #c78308, var(--kci-shadow-paper);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform var(--kci-transition-micro), box-shadow var(--kci-transition-micro), background-color var(--kci-transition-micro);
+    user-select: none;
+    will-change: transform;
+}
+.kci-btn-primary:hover:not(:disabled) {
+    background-color: #f7be38;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #c78308, var(--kci-shadow-hover);
+}
+.kci-btn-primary:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #c78308, var(--kci-shadow-pressed);
+}
+.kci-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--kci-navy), 0 0 0 5px var(--kci-gold);
+}
+.kci-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.kci-btn-secondary {
+    background-color: #ffffff;
+    color: var(--kci-navy);
+    font-family: var(--kci-font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    min-height: 48px;
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--kci-radius-chip);
+    border: 2.5px solid var(--kci-navy);
+    box-shadow: var(--kci-shadow-paper);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform var(--kci-transition-micro), background-color var(--kci-transition-micro), box-shadow var(--kci-transition-micro);
+    will-change: transform;
+}
+.kci-btn-secondary:hover:not(:disabled) {
+    background-color: var(--kci-paper-warm);
+    transform: translateY(-1px);
+}
+.kci-btn-secondary:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: var(--kci-shadow-pressed);
+}
+.kci-btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--kci-gold), 0 0 0 5px var(--kci-navy);
+}
+
+.kci-btn-ghost {
+    background: transparent;
+    color: var(--kci-graphite);
+    font-family: var(--kci-font-heading);
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: var(--kci-radius-chip);
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--kci-transition-micro), color var(--kci-transition-micro);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.kci-btn-ghost:hover {
+    background-color: rgba(30, 58, 95, 0.06);
+    color: var(--kci-navy);
+}
+
+/* Tactile Chips */
+.kci-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--kci-radius-pill);
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    background-color: var(--kci-paper-warm);
+    color: var(--kci-navy);
+    border: 1.5px solid var(--kci-paper-edge);
+    transition: background-color var(--kci-transition-micro), color var(--kci-transition-micro);
+}
+.kci-chip.active {
+    background-color: var(--kci-navy);
+    color: var(--kci-gold);
+    border-color: var(--kci-navy);
+    box-shadow: 0 2px 6px rgba(30, 58, 95, 0.25);
+}
+
+/* Tactile Sticker (Circular Gold Stamp) */
+.kci-sticker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: radial-gradient(circle at 35% 35%, #ffd564 0%, var(--kci-gold) 70%, #d89613 100%);
+    color: var(--kci-navy);
+    font-family: var(--kci-font-heading);
+    font-size: 0.72rem;
+    font-weight: 800;
+    border-radius: 50%;
+    transform: rotate(-4deg);
+    box-shadow: 0 3px 6px rgba(240, 180, 41, 0.35);
+    border: 2px dashed rgba(30, 58, 95, 0.35);
+    letter-spacing: 0.05em;
+    user-select: none;
+}
+
+/* Tactile Ink Stamp (LATEST / OLD) */
+.kci-stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--kci-font-heading);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.2rem 0.65rem;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: rotate(-3deg);
+    user-select: none;
+}
+.kci-stamp-latest {
+    color: var(--kci-navy);
+    border: 2px solid var(--kci-gold);
+    background-color: rgba(240, 180, 41, 0.18);
+    box-shadow: var(--kci-shadow-stamp);
+}
+.kci-stamp-old {
+    color: #717782;
+    border: 2px solid #b2b8c2;
+    background-color: rgba(113, 119, 130, 0.08);
+}
+.stamp-thump {
+    animation: stampThump 250ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes stampThump {
+    0% { transform: scale(1.35) rotate(-6deg); opacity: 0.5; }
+    100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+}
+
+/* Gentle Notices (Success / Error / Info) */
+.kci-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--kci-radius-chip);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border: 1.5px solid transparent;
+}
+.kci-notice-error {
+    background-color: var(--kci-coral-light);
+    color: #9c3620;
+    border-color: #f5c4b8;
+}
+.kci-notice-success {
+    background-color: var(--kci-success-light);
+    color: #236340;
+    border-color: #bfe5cf;
+}
+.kci-notice-info {
+    background-color: var(--kci-info-light);
+    color: #1d5f94;
+    border-color: #c0deed;
+}
+
+/* Section Header Badge */
+.kci-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 2px dashed var(--kci-ruled-blue);
+}
+.kci-badge-number {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--kci-navy);
+    color: #ffffff;
+    font-family: var(--kci-font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(30, 58, 95, 0.25);
+    flex-shrink: 0;
+}
+
+/* Pencil Stroke Progress Bar */
+.kci-progress-track {
+    width: 100%;
+    height: 12px;
+    background-color: var(--kci-paper-warm);
+    border: 2px solid var(--kci-paper-edge);
+    border-radius: var(--kci-radius-pill);
+    overflow: hidden;
+    position: relative;
+}
+.kci-progress-fill {
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--kci-gold),
+        var(--kci-gold) 8px,
+        #e4a517 8px,
+        #e4a517 16px
+    );
+    border-radius: var(--kci-radius-pill);
+    transition: width 0.3s ease-out;
+}
+
+/* Manila Folder Card */
+.kci-folder-card {
+    background: #fbf2dc;
+    border: 2px solid #e5d1a8;
+    border-radius: 0 var(--kci-radius-card) var(--kci-radius-card) var(--kci-radius-card);
+    box-shadow: var(--kci-shadow-paper);
+    padding: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    transition: transform var(--kci-transition-standard), box-shadow var(--kci-transition-standard), border-color var(--kci-transition-standard);
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    perspective: 800px;
+    will-change: transform;
+}
+.kci-folder-card::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: -2px;
+    width: 110px;
+    height: 14px;
+    background: #fbf2dc;
+    border: 2px solid #e5d1a8;
+    border-bottom: none;
+    border-radius: 8px 12px 0 0;
+}
+.kci-folder-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--kci-shadow-hover);
+    border-color: #d6b882;
+}
+.kci-folder-card:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--kci-navy), var(--kci-shadow-hover);
+}
+
+/* Notebook Index Tabs */
+.kci-tab-bar {
+    display: inline-flex;
+    background: var(--kci-paper-edge);
+    padding: 4px;
+    border-radius: var(--kci-radius-pill);
+    gap: 4px;
+}
+.kci-tab-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.4rem;
+    border-radius: var(--kci-radius-pill);
+    font-family: var(--kci-font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--kci-navy);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color var(--kci-transition-micro), color var(--kci-transition-micro);
+    min-height: 44px;
+}
+.kci-tab-item.active {
+    background-color: var(--kci-navy);
+    color: var(--kci-gold);
+    box-shadow: 0 2px 6px rgba(30, 58, 95, 0.18);
+}
+.kci-tab-item:focus-visible {
+    outline: 2px solid var(--kci-gold);
+}
+
+/* Letterhead Footer */
+.kci-footer {
+    border-top: 2px dashed var(--kci-ruled-blue);
+    padding: 1.75rem 1rem;
+    text-align: center;
+    font-family: var(--kci-font-heading);
+    color: var(--kci-navy);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+}
+
+/* Pinned Sticky Note: Value of the Day */
+.kci-sticky-note {
+    background: linear-gradient(135deg, #fefbf0 0%, #fbf3d3 100%);
+    border: 1px solid #ebd9a2;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    transform: rotate(-1deg);
+    margin-bottom: 2rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    will-change: transform;
+}
+.kci-sticky-note:hover {
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow: 0 8px 18px rgba(30, 58, 95, 0.10);
+}
+.kci-pin {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Lanyard Student ID Card Metaphor */
+.kci-id-lanyard-wrap {
+    perspective: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.kci-lanyard-strap {
+    width: 32px;
+    height: 48px;
+    background: repeating-linear-gradient(
+        0deg,
+        var(--kci-navy),
+        var(--kci-navy) 6px,
+        #2a4e7e 6px,
+        #2a4e7e 12px
+    );
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 2;
+}
+.kci-lanyard-clip {
+    width: 44px;
+    height: 16px;
+    background: linear-gradient(180deg, #d8dee8 0%, #9ba6b8 100%);
+    border-radius: 4px;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 3;
+    margin-top: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kci-lanyard-clip::after {
+    content: '';
+    width: 24px;
+    height: 6px;
+    background: #627187;
+    border-radius: 2px;
+}
+.kci-id-card {
+    background: #ffffff;
+    border: 3px solid #e2e8f0;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(30, 58, 95, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 440px;
+    padding: 2rem 2rem 2.25rem;
+    position: relative;
+    transform-origin: top center;
+    margin-top: -6px;
+    will-change: transform;
+}
+.kci-id-hole {
+    width: 36px;
+    height: 10px;
+    background: var(--kci-paper);
+    border: 2px solid #cbd5e1;
+    border-radius: 999px;
+    margin: -1rem auto 1.25rem;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Washi tape effect for worksheet photo cover */
+.kci-washi-tape {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    width: 70px;
+    height: 18px;
+    background: rgba(240, 180, 41, 0.65);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+}
